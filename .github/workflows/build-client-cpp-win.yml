@@ -17,9 +17,11 @@ jobs:
 
     steps:
       - name: collect common information
+        shell: bash
         id: sys-info
         run: |
           echo "::set-output name=date::$(date +"%Y-%m-%d-%H-%M-%S")"
+
       - name: Create release java-8
         id: create-release-java8
         uses: actions/create-release@v1
