@@ -20,7 +20,6 @@ jobs:
         id: sys-info
         run: |
           echo "::set-output name=date::$(date +"%Y-%m-%d-%H-%M-%S")"
-
       - name: Create release java-8
         id: create-release-java8
         uses: actions/create-release@v1
@@ -29,8 +28,7 @@ jobs:
         with:
           tag_name: ${{ steps.sys-info.outputs.date }}-java8-apache-iotdb-client-cpp
           release_name: ${{ steps.sys-info.outputs.date }} java8 apache iotdb client cpp
-          body: |
-            java 8
+          body: java 8
           draft: false
           prerelease: false
 
@@ -42,8 +40,7 @@ jobs:
           with:
             tag_name: ${{ steps.sys-info.outputs.date }}-java11-apache-iotdb-client-cpp
             release_name: ${{ steps.sys-info.outputs.date }} java11 apache iotdb client cpp
-            body: |
-              java 11
+            body: java 11
             draft: false
             prerelease: false
 #--------
