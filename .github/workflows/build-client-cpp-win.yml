@@ -1,8 +1,8 @@
 name: client-cpp-win
 on:
-  push:
-    branches:
-      - master
+#  push:
+#    branches:
+#      - master
   schedule:
     - cron: "0 12 * * *"
   workflow_dispatch:
