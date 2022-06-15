@@ -131,7 +131,7 @@ jobs:
           mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl server,client-cpp,example/client-cpp-example -am -DskipTests -Dboost.include.dir="%boost-include-dir%" -Dboost.library.dir="%boost-library.dir%" -Dcmake.url="%cmake-url%" -Dcmake.root.dir="%cmake-root-dir%"
 
       - name: Upload apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
-        if : ${{ matrix.iotdb_version  == '8' }}
+        if : ${{ matrix.java_version  == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -142,7 +142,7 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
-        if : ${{ matrix.iotdb_version  == '11' }}
+        if : ${{ matrix.java_version  == '11' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -159,7 +159,7 @@ jobs:
           7z a  client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
 
       - name: Upload apache-iotdb-client-cpp-example-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
-        if: ${{ matrix.iotdb_version  == '8' }}
+        if: ${{ matrix.java_version  == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -170,7 +170,7 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload apache-iotdb-client-cpp-example-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
-        if: ${{ matrix.iotdb_version  == '11' }}
+        if: ${{ matrix.java_version  == '11' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
