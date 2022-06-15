@@ -95,6 +95,7 @@ jobs:
 
       - name: Collect IoTDB information
         id: iotdb-info
+        shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
