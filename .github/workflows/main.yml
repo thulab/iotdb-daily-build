@@ -87,24 +87,24 @@ jobs:
           fi
 #          mvn clean package -pl core,iotdb-0.12,iotdb-0.13 -Dmaven.test.skip=true
 
-      - name: Checkout db for save results
-        uses: actions/checkout@v2
-        with:
-          path: db
-          repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
-          ref: db
-          fetch-depth: 0
-
-      - name: upload db
-        env:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cd ${{ steps.pwd.outputs.pwd }}/db
-          git config --local user.email "876670773+github-actions[bot]@qq.com"
-          git config --local user.name "github-actions[bot]"
-          git add benchmark.db
-          git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
-          git push -u origin db
+#      - name: Checkout db for save results
+#        uses: actions/checkout@v2
+#        with:
+#          path: db
+#          repository: 'SteveYurongSu/apache-iotdb-nightly-performance-report'
+#          ref: db
+#          fetch-depth: 0
+#
+#      - name: upload db
+#        env:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          cd ${{ steps.pwd.outputs.pwd }}/db
+#          git config --local user.email "876670773+github-actions[bot]@qq.com"
+#          git config --local user.name "github-actions[bot]"
+#          git add benchmark.db
+#          git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
+#          git push -u origin db
 
       - name: Create release
         id: create_release
