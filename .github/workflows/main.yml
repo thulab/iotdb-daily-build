@@ -14,7 +14,7 @@ env:
 jobs:
   test:
     strategy:
-      max-parallel: 1
+      max-parallel: 20
       matrix:
         iotdb_version: [ rel/0.12,rel/0.13,master ]
         java: [ 8,11 ]
