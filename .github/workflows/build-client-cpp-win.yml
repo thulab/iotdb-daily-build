@@ -97,7 +97,7 @@ jobs:
         id: iotdb-info
         shell: bash
         run: |
-          cd ${{ github.workspace }}/iotdb
+          cd iotdb
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
           echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
           echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
