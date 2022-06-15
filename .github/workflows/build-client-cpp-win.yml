@@ -21,14 +21,6 @@ jobs:
         run: |
           echo "::set-output name=date::$(date +"%Y-%m-%d-%H-%M-%S")"
 
-      - name: checkout iotdb
-        uses: actions/checkout@v2
-        with:
-          path: iotdb
-          repository: 'apache/iotdb'
-          ref: rel/0.13
-          fetch-depth: 0
-
       - name: Create release java-8
         id: create-release-java8
         uses: actions/create-release@v1
@@ -150,7 +142,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.collect.outputs.release-upload-url-java8 }}
-          asset_path: ${{ github.workspace }}/iotdb/client-cpp/target/client-cpp-${{ needs.collect.outputs.iotdb-version }}-cpp-windows-x86_64.zip
+          asset_path: ${{ github.workspace }}/iotdb/client-cpp/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
           asset_name: apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
 
@@ -161,7 +153,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.collect.outputs.release-upload-url-java11 }}
-          asset_path: ${{ github.workspace }}/iotdb/client-cpp/target/client-cpp-${{ needs.collect.outputs.iotdb-version }}-cpp-windows-x86_64.zip
+          asset_path: ${{ github.workspace }}/iotdb/client-cpp/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
           asset_name: apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
 
@@ -169,7 +161,7 @@ jobs:
         shell: bash
         run: |
           cd iotdb/example/client-cpp-example/target
-          7z a  client-cpp-example-${{ needs.collect.outputs.iotdb-version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
+          7z a  client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
 
       - name: Upload apache-iotdb-client-cpp-example-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
         if: ${{ matrix.iotdb_version  == '8' }}
@@ -178,7 +170,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.collect.outputs.release-upload-url-java8 }}
-          asset_path: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ needs.collect.outputs.iotdb-version }}-cpp-windows-x86_64.zip
+          asset_path: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
           asset_name: apache-iotdb-client-cpp-example-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
 
@@ -189,6 +181,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.collect.outputs.release-upload-url-java11 }}
-          asset_path: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ needs.collect.outputs.iotdb-version }}-cpp-windows-x86_64.zip
+          asset_path: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
           asset_name: apache-iotdb-client-cpp-example-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
