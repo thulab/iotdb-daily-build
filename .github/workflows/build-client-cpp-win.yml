@@ -62,12 +62,14 @@ jobs:
         with:
           java-version: ${{ matrix.java_version }}
 
-#      - name: download & unpack boost
-#        shell: cmd
-#        run: |
+      - name: download & unpack boost
+        shell: cmd
+        run: |
 #          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0.zip https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.zip
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0-bin.7z https://github.com/xiaoyekanren/iotdb-daily-build-depend-pkg/releases/download/release-depend-bin/boost_1_78_0-bin.7z
 #          7z x ${{ github.workspace }}/boost_1_78_0.zip -o${{ github.workspace }}/boost_1_78_0
-#
+          7z x ${{ github.workspace }}/boost_1_78_0-bin.7z -o${{ github.workspace }}/boost_1_78_0
+
 #      - name: install boost
 #        id: set-boost
 #        shell: pwsh
@@ -78,11 +80,6 @@ jobs:
 #          echo "::set-output name=include::$(git branch |grep ^*|cut -d ' ' -f 2)"
 #          echo "::set-output name=library::$(git branch |grep ^*|cut -d ' ' -f 2)"
 
-      - name: download & unpack boost
-        shell: cmd
-        run: |
-          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0-bin.7z https://github.com/xiaoyekanren/iotdb-daily-build-depend-pkg/releases/download/release-depend-bin/boost_1_78_0-bin.7z
-          7z x boost_1_78_0-bin.7z
 
       - name: download & unpack flex&bison
         shell: cmd
