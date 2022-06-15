@@ -52,7 +52,7 @@ jobs:
       max-parallel: 20
       matrix:
         iotdb_version: [ rel/0.12,rel/0.13,master ]
-        java_version: [8,11]
+        java_version: [ 8,11 ]
         os: [ windows-2019,windows-2022 ]
     runs-on: ${{ matrix.os }}
 
@@ -100,7 +100,7 @@ jobs:
           cd ${{ github.workspace }}/iotdb
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
           echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
-          echo "::set-output name=version::$(cat pom.xml  | egrep '^    <version>'|sed 's# ##g'|  sed 's#<version>##g' | sed 's#</version>##g')"
+          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
 
       - name: compile client-cpp
         if: ${{ matrix.os == 'windows-2019' }}
