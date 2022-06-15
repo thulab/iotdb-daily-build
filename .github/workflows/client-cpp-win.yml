@@ -23,12 +23,14 @@ jobs:
         run: |
           echo "::set-output name=date::$(date +"%Y-%m-%d-%H-%M-%S")"
           echo "::set-output name=java-version::$(java -version 2>&1 |head -n 1 | cut -d ' ' -f 3 | sed 's/"//g')"
-        uses: actions/checkout@v2
+
+      - uses: actions/checkout@v2
         with:
           path: iotdb
           repository: 'apache/iotdb'
           ref: rel/0.13
           fetch-depth: 0
+
       - id: iotdb-info
         run: |
           cd iotdb
@@ -49,7 +51,6 @@ jobs:
             IoTDB commit ID: [${{ steps.iotdb-info.outputs.commit }}](https://github.com/apache/iotdb/commit/${{ steps.iotdb-info.outputs.commit }})
           draft: false
           prerelease: false
-
 #--------
   build-client-cpp-win:
     needs: collect
