@@ -289,7 +289,7 @@ jobs:
           asset_content_type: application/zip
 #---cluster
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
-        if: ${{ matrix.iotdb_version != 'master' and matrix.java_version == '8' }}
+        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -299,7 +299,7 @@ jobs:
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
-        if: ${{ matrix.iotdb_version != 'master' and matrix.java_version == '11'}}
+        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '11'}}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -310,7 +310,7 @@ jobs:
           asset_content_type: application/zip
 #---grafana-connector-0.12
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-bin.zip
-        if: ${{ matrix.iotdb_version == 'rel/0.12' and matrix.java_version == '8' }}
+        if: ${{ matrix.iotdb_version == 'rel/0.12' && matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -320,7 +320,7 @@ jobs:
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-bin-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-bin.zip
-        if: ${{ matrix.iotdb_version == 'rel/0.12' and matrix.java_version == '11' }}
+        if: ${{ matrix.iotdb_version == 'rel/0.12' && matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -331,7 +331,7 @@ jobs:
           asset_content_type: application/zip
 #---grafana-connector
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
-        if: ${{ matrix.iotdb_version != 'rel/0.12' and matrix.java_version == '8' }}
+        if: ${{ matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -341,7 +341,7 @@ jobs:
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
-        if: ${{ matrix.iotdb_version != 'rel/0.12' and matrix.java_version == '11' }}
+        if: ${{ matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -352,7 +352,7 @@ jobs:
           asset_content_type: application/zip
 #---grafana-plugin
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
-        if: ${{ matrix.iotdb_version != 'rel/0.12' and matrix.java_version == '8' }}
+        if: ${{ matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -362,7 +362,7 @@ jobs:
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
-        if: ${{ matrix.iotdb_version != 'rel/0.12' and matrix.java_version == '11' }}
+        if: ${{ matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
