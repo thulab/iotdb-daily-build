@@ -31,8 +31,7 @@ jobs:
         with:
           tag_name: ${{ steps.sys-info.outputs.date }}-java8-apache-iotdb-client-cpp
           release_name: ${{ steps.sys-info.outputs.date }} java8 apache iotdb client cpp
-          body: |
-          java 8
+          body: java 8
           draft: false
           prerelease: false
 #--------
@@ -49,8 +48,7 @@ jobs:
         with:
           tag_name: ${{ steps.sys-info.outputs.date }}-java11-apache-iotdb-client-cpp
           release_name: ${{ steps.sys-info.outputs.date }} java11 apache iotdb client cpp
-          body: |
-          java 11
+          body: java 11
           draft: false
           prerelease: false
 #--------
