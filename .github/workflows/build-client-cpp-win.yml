@@ -35,6 +35,10 @@ jobs:
           body: java 8
           draft: false
           prerelease: false
+      - name: print upload_url
+        shell: bash
+        run: echo ${{ steps.create-release.outputs.upload-url }}
+
 #--------
   create-release-java11:
     runs-on: ubuntu-latest
@@ -53,6 +57,9 @@ jobs:
           body: java 11
           draft: false
           prerelease: false
+      - name: print upload_url
+        shell: bash
+        run: echo ${{ steps.create-release.outputs.upload-url }}
 #--------
   build-client-cpp-win:
     needs: [ collect,create-release-java8,create-release-java11 ]
