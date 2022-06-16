@@ -12,38 +12,47 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       date: ${{steps.sys-info.outputs.date}}
-      release-upload-url-java8: ${{ steps.create-release-java8.outputs.upload_url }}
-      release-upload-url-java11: ${{ steps.create-release-java11.outputs.upload_url }}
-
     steps:
       - name: collect common information
         shell: bash
         id: sys-info
         run: echo "::set-output name=date::$(date +"%Y-%m-%d-%H-%M-%S")"
-
+#--------
+  create-release-java8:
+    runs-on: ubuntu-latest
+    outputs:
+      upload-url: ${{ steps.create-release.outputs.upload-url }}
+    steps:
       - name: Create release java-8
-        id: create-release-java8
+        id: create-release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.sys-info.outputs.date }}-java8-apache-iotdb-client-cpp
           release_name: ${{ steps.sys-info.outputs.date }} java8 apache iotdb client cpp
-          body: java 8
+          body: |
+          java 8
           draft: false
           prerelease: false
-
-#        - name: Create release java-11
-#          id: create-release-java11
-#          uses: actions/create-release@v1
-#          env:
-#            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          with:
-#            tag_name: ${{ steps.sys-info.outputs.date }}-java11-apache-iotdb-client-cpp
-#            release_name: ${{ steps.sys-info.outputs.date }} java11 apache iotdb client cpp
-#            body: java 11
-#            draft: false
-#            prerelease: false
+#--------
+  create-release-java11:
+    runs-on: ubuntu-latest
+    outputs:
+      upload-url: ${{ steps.create-release.outputs.upload-url }}
+    steps:
+      - name: Create release java-11
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.sys-info.outputs.date }}-java11-apache-iotdb-client-cpp
+          release_name: ${{ steps.sys-info.outputs.date }} java11 apache iotdb client cpp
+          body: |
+          java 11
+          draft: false
+          prerelease: false
 #--------
   build-client-cpp-win:
     needs: collect
