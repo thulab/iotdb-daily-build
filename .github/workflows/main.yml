@@ -438,19 +438,23 @@ jobs:
         id: compile-benchmark
         run: |
           cd ${{ github.workspace }}/iotdb-benchmark
-          mvn clean package -Dmaven.test.skip=True
-#---0.12
-      - name: Upload benchmark-0.12
+          if [ "${{ matrix.java_version }}" = "8" ]; then
+            mvn clean package -Dmaven.test.skip=True
+          elif [ "${{ matrix.java_version }}" = "11" ]; then
+            mvn clean package -pl core,influxdb,influxdb-2.0,kairosdb,opentsdb,tdengine,timescaledb,iotdb-0.13,iotdb-0.12,iotdb-0.11,mssqlserver,sqlite,verification -Dmaven.test.skip=true
+          fi
+#---0.11
+      - name: Upload benchmark-iotdb-0.11
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
-          asset_name: benchmark-0.12-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.11/target/iotdb-0.11-0.0.1.zip
+          asset_name: benchmark-iotdb-0.11-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
-      - name: Upload benchmark-0.12
+      - name: Upload benchmark-iotdb-0.11
         if: ${{ matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
@@ -458,10 +462,31 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
-          asset_name: benchmark-0.12-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_name: benchmark-iotdb-0.11-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_content_type: application/zip
+#---0.12
+      - name: Upload benchmark-iotdb-0.12
+        if: ${{ matrix.java_version == '8' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
+          asset_name: benchmark-iotdb-0.12-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_content_type: application/zip
+      - name: Upload benchmark-iotdb-0.12
+        if: ${{ matrix.java_version == '11' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
+          asset_name: benchmark-iotdb-0.12-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---0.13
-      - name: Upload benchmark-0.13
+      - name: Upload benchmark-iotdb-0.13
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
@@ -469,9 +494,9 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.13/target/iotdb-0.13-0.0.1.zip
-          asset_name: benchmark-0.13-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_name: benchmark-iotdb-0.13-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
-      - name: Upload benchmark-0.13
+      - name: Upload benchmark-iotdb-0.13
         if: ${{ matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
@@ -479,7 +504,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.13/target/iotdb-0.13-0.0.1.zip
-          asset_name: benchmark-0.13-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_name: benchmark-iotdb-0.13-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---tdengine
       - name: Upload benchmark-tdengine
