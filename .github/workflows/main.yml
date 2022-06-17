@@ -441,7 +441,7 @@ jobs:
           if [ "${{ matrix.java_version }}" = "8" ]; then
             mvn clean package -Dmaven.test.skip=True
           elif [ "${{ matrix.java_version }}" = "11" ]; then
-            mvn clean package -pl core,influxdb,influxdb-2.0,kairosdb,opentsdb,tdengine,timescaledb,iotdb-0.13,iotdb-0.12,iotdb-0.11,mssqlserver,sqlite,verification -Dmaven.test.skip=true
+            mvn clean package -pl core,influxdb,influxdb-2.0,kairosdb,opentsdb,tdengine,timescaledb,iotdb-0.13,iotdb-0.12,iotdb-0.11,mssqlserver,sqlite -Dmaven.test.skip=true
           fi
 #---0.11
       - name: Upload benchmark-iotdb-0.11
