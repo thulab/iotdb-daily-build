@@ -148,7 +148,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/client-cpp/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
-          asset_name: apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
+          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-client-cpp-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
       - name: Upload apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
         if: ${{ matrix.java_version == '11' }}
@@ -158,7 +158,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/client-cpp/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
-          asset_name: apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
+          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-client-cpp-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
 #---
       - name: compress client-cpp-example
@@ -175,7 +175,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
-          asset_name: apache-iotdb-client-cpp-example-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
+          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-client-cpp-example-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
       - name: Upload apache-iotdb-client-cpp-example-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
         if: ${{ matrix.java_version == '11' }}
@@ -185,7 +185,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
-          asset_name: apache-iotdb-client-cpp-example-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
+          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-client-cpp-example-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
 #--------
   build-in-linux:
@@ -254,7 +254,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.iotdb-version }}-server-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
         if: ${{ matrix.java_version == '11' }}
@@ -264,7 +264,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.iotdb-version }}-server-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---cli
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip
