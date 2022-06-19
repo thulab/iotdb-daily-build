@@ -58,7 +58,7 @@ jobs:
         with:
           host: ${{ secrets.IOTDBFUTURE_HOST }}
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
-          key: ${{ secrets.IOTDBFUTURE_HOST_KEY }}
+          key: ${{ secrets.IOTDBFUTURE_TOKEN }}
           port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
           script: mkdir -p /home/ubuntu/web/downloads/${{ needs.collect.outputs.date }}/${{ matrix.java_version }}/${{ matrix.iotdb_version }}
       - name: scp to upload file
@@ -69,7 +69,7 @@ jobs:
           host: ${{ secrets.IOTDBFUTURE_HOST }}
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
           port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
-          key: ${{ secrets.IOTDBFUTURE_HOST_KEY }}
+          key: ${{ secrets.IOTDBFUTURE_TOKEN }}
           source: "${{ github.workspace }}/iotdb.zip"
 #          source: "${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip"
           target: "/home/ubuntu/web/downloads/${{ needs.collect.outputs.date }}/${{ matrix.java_version }}/${{ matrix.iotdb_version }}"
