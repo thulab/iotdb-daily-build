@@ -53,6 +53,8 @@ jobs:
 #---upload zip
       - name: ssh to mkdir
         uses: appleboy/ssh-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.IOTDBFUTURE_HOST }}
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
@@ -61,6 +63,8 @@ jobs:
           script: mkdir -p /home/ubuntu/web/downloads/${{ needs.collect.outputs.date }}/${{ matrix.java_version }}/${{ matrix.iotdb_version }}
       - name: scp to upload file
         uses: appleboy/scp-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.IOTDBFUTURE_HOST }}
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
