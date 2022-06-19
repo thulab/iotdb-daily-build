@@ -1,0 +1,69 @@
+name: build & release binary package
+on:
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    outputs:
+      date: ${{steps.sys-info.outputs.date}}
+    steps:
+      - name: collect common info
+        shell: bash
+        id: sys-info
+        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
+#--------
+  build-in-linux:
+    needs: [ collect ]
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        iotdb_version: [ rel/0.12 ]
+        java_version: [ 8 ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set java ${{ matrix.java }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java_version }}
+
+      - name: Checkout apache/iotdb
+        uses: actions/checkout@v2
+        with:
+          path: iotdb
+          repository: 'apache/iotdb'
+          ref: ${{ matrix.iotdb_version }}
+          fetch-depth: 0
+
+      - name: Collect IoTDB info
+        id: iotdb-info
+        run: |
+          cd ${{ github.workspace }}/iotdb
+          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
+          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
+          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
+
+      - name: Build Apache IoTDB binaries
+        run: |
+          cd ${{ github.workspace }}/iotdb
+          mvn clean package -DskipTests
+#---upload zip
+      - name: create remote directory
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.IOTDBFUTURE_HOST }}
+          username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
+          key: ${{ secrets.IOTDBFUTURE_HOST_KEY }}
+          port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
+          script: mkdir -p /home/ubuntu/web/downloads/${{ needs.collect.outputs.date }}/${{ matrix.java_version }}/${{ matrix.iotdb_version }}
+      - name: copy file via ssh key
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.IOTDBFUTURE_HOST }}
+          username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
+          port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
+          key: ${{ secrets.IOTDBFUTURE_HOST_KEY }}
+          source: "${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip"
+          target: "/home/ubuntu/web/downloads/${{ needs.collect.outputs.date }}/${{ matrix.java_version }}/${{ matrix.iotdb_version }}"
