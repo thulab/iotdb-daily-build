@@ -3,6 +3,40 @@ on:
   workflow_dispatch:
 
 jobs:
+#--------
+  check-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone db
+        uses: actions/checkout@v2
+        with:
+          path: iotdb-daily-build-dependence
+          repository: 'xiaoyekanrne/iotdb-daily-build-dependence'
+          ref: master
+          fetch-depth: 0
+
+      - name: check
+        id: check-commit
+        env:
+          PYTHONPATH: $PYTHONPATH:${{ github.workspace }}/iotdb-daily-build-dependence/program
+        run: |
+          
+
+
+      - name: upload db
+        env:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build-dependence
+          git config --local user.email "876670773+github-actions[bot]@qq.com"
+          git config --local user.name "github-actions[bot]"
+          cd db
+          git add db.db
+          git add commit_last.txt
+          
+          git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
+          git push -u origin db
+#--------
   collect:
     runs-on: ubuntu-latest
     outputs:
