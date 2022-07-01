@@ -54,6 +54,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/program
           echo "::set-output name=result::$(python3 check_commit.py '$DB_FILE' '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' '${{ steps.iotdb-info.outputs.commit_time }}')" 
+          echo python3 check_commit.py '$DB_FILE' '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' '${{ steps.iotdb-info.outputs.commit_time }}')
 
       - name: echo check status
         run: |
