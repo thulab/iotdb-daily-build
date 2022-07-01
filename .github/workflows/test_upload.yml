@@ -33,6 +33,8 @@ jobs:
       - name: collect IoTDB information
         id: iotdb-info
         run: |
+          cd ${{ github.workspace }}
+          find ./ -name 'db.db'
           cd ${{ github.workspace }}/iotdb
           echo "::set-output name=commit_id::$(git log  -n 1 | head -n 1  | cut -d ' ' -f 2)"
           echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
