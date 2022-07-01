@@ -6,24 +6,49 @@ jobs:
 #--------
   check-commit:
     runs-on: ubuntu-latest
+    outputs:
+      check_result: ${{ steps.check-commit.outputs.result }}
     steps:
+      - name: collect common info
+        shell: bash
+        id: sys-info
+        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
+
       - name: clone db
         uses: actions/checkout@v2
         with:
           path: iotdb-daily-build-dependence
-          repository: 'xiaoyekanrne/iotdb-daily-build-dependence'
+          repository: 'xiaoyekanren/iotdb-daily-build-dependence'
           ref: master
           fetch-depth: 0
+
+      - name: Checkout apache/iotdb
+        uses: actions/checkout@v2
+        with:
+          path: iotdb
+          repository: 'apache/iotdb'
+          ref: master
+          fetch-depth: 0
+
+      - name: Collect IoTDB information
+        id: iotdb-info
+        run: |
+          cd ${{ github.workspace }}/iotdb
+          echo "::set-output name=commit_id::$(git log  -n 1 | head -n 1  | cut -d ' ' -f 2)"
+          echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
+          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
 
       - name: check
         id: check-commit
         env:
-          PYTHONPATH: $PYTHONPATH:${{ github.workspace }}/iotdb-daily-build-dependence/program
+          PYTHONPATH: $PYTHONPATH:${{ github.workspace }}/iotdb-daily-build/program
+          DB_FILE: ${{ github.workspace }}/iotdb-daily-build-dependence/db/db.db
         run: |
-          
-
+          cd ${{ github.workspace }}/iotdb-daily-build/program
+          echo "::set-output name=result::$(python3 check_commit.py ${{ steps.iotdb-info.outputs.branch }} ${{ steps.iotdb-info.outputs.commit_id }} ${{ steps.iotdb-info.outputs.commit_time }})" 
 
       - name: upload db
+        if: ${{ steps.check-commit.outputs.result }} == 'update'
         env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -32,12 +57,12 @@ jobs:
           git config --local user.name "github-actions[bot]"
           cd db
           git add db.db
-          git add commit_last.txt
-          
-          git commit -m "Nightly Performance Test Results Upload UTC+0 ${{ steps.datetime-information.outputs.date }}"
-          git push -u origin db
+          git commit -m "${{steps.sys-info.outputs.date}} github-actions[bot] push update "
+          git push -u origin master
+
 #--------
   collect:
+    if: ${{ needs.check-commit.outputs.check_result }} == 'abc'
     runs-on: ubuntu-latest
     outputs:
       date: ${{steps.sys-info.outputs.date}}
@@ -48,6 +73,7 @@ jobs:
         run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
 #--------
   build-in-linux:
+    if: ${{ needs.check-commit.outputs.check_result }} == 'abc'
     needs: [ collect ]
     strategy:
       fail-fast: false
