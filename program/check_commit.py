@@ -8,7 +8,7 @@ from src import connect
 # commit_time: git log -n1 --pretty='format:%cd' --date=iso
 # branch: git branch |grep ^*|cut -d ' ' -f 2
 # ----------样例
-# python3 check_commit.py 'query' '/Users/zhangzhengming/Src/Python/iotdb-daily-build-dependence/db/db.db' 'rel/0.12' '34b6a79913d7754f3f8397f9c26bdbef3a6393b5'
+# python3 check_commit.py '/Users/zhangzhengming/Src/Python/iotdb-daily-build-dependence/db/db.db' 'rel/0.12' '34b6a79913d7754f3f8397f9c26bdbef3a6393b5' '2022-06-30 10:57:40 +0800'
 
 
 def check_commit(cur_branch, db_path):
