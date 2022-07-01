@@ -53,8 +53,7 @@ jobs:
           DB_FILE: ${{ github.workspace }}/iotdb-daily-build-dependence/db/db.db
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/program
-          echo "::set-output name=result::$(python3 check_commit.py \"$DB_FILE\" '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' '${{ steps.iotdb-info.outputs.commit_time }}')" 
-          echo python3 check_commit.py \"$DB_FILE\" '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' '${{ steps.iotdb-info.outputs.commit_time }}'
+          echo "::set-output name=result::$(python3 check_commit.py $DB_FILE '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' '${{ steps.iotdb-info.outputs.commit_time }}')"
       - name: echo check status
         run: |
           echo ${{ steps.check-commit.outputs.result }}
@@ -98,7 +97,7 @@ jobs:
           DB_FILE: ${{ github.workspace }}/iotdb-daily-build-dependence/db/db.db
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/program
-          python3 test_db.py \"$DB_FILE\" 'select * from commit_last'
+          python3 test_db.py $DB_FILE 'select * from commit_last'
 
 ##--------
 #  collect:
