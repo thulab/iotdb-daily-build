@@ -6,7 +6,7 @@ from src import connect
 # ----------拿到以下三个值的方式
 # commit_id: git log  -n 1 | head -n 1  | cut -d ' ' -f 2
 # commit_time: git log -n1 --pretty='format:%cd' --date=iso
-# branch: git branch
+# branch: git branch |grep ^*|cut -d ' ' -f 2
 # ----------样例
 # python3 check_commit.py 'query' '/Users/zhangzhengming/Src/Python/iotdb-daily-build-dependence/db/db.db' 'rel/0.12' '34b6a79913d7754f3f8397f9c26bdbef3a6393b5'
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
         print('必须设置4个参数')
         exit()
     dbpath, branch, commit_id, commit_time = sys.argv[1:]
-    dbpath = '/Users/zhangzhengming/Src/Python/iotdb-daily-build-dependence/db/db.db'
+    # dbpath = '/Users/zhangzhengming/Src/Python/iotdb-daily-build-dependence/db/db.db'
 
     db_branch, db_commit_id, db_commit_time = check_commit(branch, dbpath)
 
