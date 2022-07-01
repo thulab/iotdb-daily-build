@@ -14,7 +14,7 @@ jobs:
         id: sys-info
         run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
 
-      - name: clone db
+      - name: checkout db
         uses: actions/checkout@v2
         with:
           path: iotdb-daily-build-dependence
@@ -22,7 +22,7 @@ jobs:
           ref: master
           fetch-depth: 0
 
-      - name: Checkout apache/iotdb
+      - name: checkout apache/iotdb
         uses: actions/checkout@v2
         with:
           path: iotdb
@@ -30,7 +30,7 @@ jobs:
           ref: master
           fetch-depth: 0
 
-      - name: Collect IoTDB information
+      - name: collect IoTDB information
         id: iotdb-info
         run: |
           cd ${{ github.workspace }}/iotdb
@@ -38,7 +38,7 @@ jobs:
           echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
           echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
 
-      - name: Checkout iotdb-daily-build
+      - name: checkout iotdb-daily-build
         uses: actions/checkout@v2
         with:
           path: iotdb-daily-build
@@ -72,6 +72,34 @@ jobs:
           git add db.db
           git commit -m "${{steps.sys-info.outputs.date}} github-actions[bot] push update "
           git push -u origin master
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout db
+        uses: actions/checkout@v2
+        with:
+          path: iotdb-daily-build-dependence
+          repository: 'xiaoyekanren/iotdb-daily-build-dependence'
+          ref: master
+          fetch-depth: 0
+
+      - name: checkout iotdb-daily-build
+        uses: actions/checkout@v2
+        with:
+          path: iotdb-daily-build
+          repository: 'xiaoyekanren/iotdb-daily-build'
+          ref: master
+          fetch-depth: 0
+
+      - name: check
+        id: check-commit
+        env:
+          PYTHONPATH: $PYTHONPATH:${{ github.workspace }}/iotdb-daily-build/program
+          DB_FILE: ${{ github.workspace }}/iotdb-daily-build-dependence/db/db.db
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build/program
+          python3 test_db.py '$DB_FILE' 'select * from commit_last'
 
 ##--------
 #  collect:
