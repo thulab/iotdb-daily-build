@@ -57,14 +57,14 @@ jobs:
           PYTHONPATH: $PYTHONPATH:${{ github.workspace }}/iotdb-daily-build/program
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/program
-          echo "::set-output name=result::$(python3 check_commit.py '${{ github.workspace }}/iotdb-daily-build-dependence/db/db.db' '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' \'${{ steps.iotdb-info.outputs.commit_time }}\')"
+          echo "::set-output name=result::$(python3 check_commit.py '${{ github.workspace }}/iotdb-daily-build-dependence/db/db.db' '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' '${{ steps.iotdb-info.outputs.commit_time }}')"
 # 输出检查结果
       - name: echo check status
         run: |
           echo ${{ steps.check-commit.outputs.result }}
 # 上传sqlite文件
       - name: upload db
-        if: ${{ steps.check-commit.outputs.result == 'update'}}
+        if: ${{ steps.check-commit.outputs.result == 'update' }}
         env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -84,9 +84,9 @@ jobs:
 #          cd ${{ github.workspace }}/iotdb-daily-build/program
 #          python3 test_db.py '${{ github.workspace }}/iotdb-daily-build-dependence/db/db.db' 'select * from commit_last'
 
-#--------]
+#--------
   build-in-linux:
-    if: ${{ needs.check-commit.outputs.check_result }} == 'update'
+    if: ${{ needs.check-commit.outputs.check_result == 'update' }}
     needs: [ check-commit ]
     strategy:
       fail-fast: false
@@ -133,7 +133,7 @@ jobs:
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
           key: ${{ secrets.IOTDBFUTURE_TOKEN }}
           port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
-          script: mkdir -p /home/ubuntu/web/downloads/${{ needs.collect.outputs.date }}/${{ matrix.java_version }}/${{ matrix.iotdb_version }}
+          script: mkdir -p /home/ubuntu/web/downloads/${{ matrix.java_version }}
 # 上传iotdb包
       - name: scp to upload file
         uses: appleboy/scp-action@master
@@ -146,4 +146,4 @@ jobs:
           key: ${{ secrets.IOTDBFUTURE_TOKEN }}
           source: "${{ github.workspace }}/iotdb.zip"
 #          source: "${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip"
-          target: "/home/ubuntu/web/downloads/${{ needs.check-commit.outputs.date }}/java-${{ matrix.java_version }}"
+          target: "/home/ubuntu/web/downloads/${{ matrix.java_version }}"
