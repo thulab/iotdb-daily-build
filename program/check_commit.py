@@ -13,7 +13,7 @@ from src import connect
 
 def check_commit(cur_branch, db_path):
     sql = 'select branch,commit_id,commit_time from commit_last where branch=\'%s\'' % cur_branch
-    print(sql)
+    # print(sql)
     for i in connect.select_db(sql, db_path):
         return i
 
