@@ -34,8 +34,11 @@ jobs:
         id: iotdb-info
         run: |
           cd ${{ github.workspace }}/iotdb
+          echo $(git log  -n 1 | head -n 1  | cut -d ' ' -f 2)
           echo "::set-output name=commit_id::$(git log  -n 1 | head -n 1  | cut -d ' ' -f 2)"
+          echo $(git log -n1 --pretty='format:%cd' --date=iso)
           echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
+          echo $(git branch |grep ^*|cut -d ' ' -f 2)
           echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
 
       - name: checkout iotdb-daily-build
@@ -52,7 +55,9 @@ jobs:
           PYTHONPATH: $PYTHONPATH:${{ github.workspace }}/iotdb-daily-build/program
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/program
+          echo python3 check_commit.py 1-'${{ github.workspace }}/iotdb-daily-build-dependence/db/db.db' 2-'${{ steps.iotdb-info.outputs.branch }}' 3-'${{ steps.iotdb-info.outputs.commit_id }}' 4-'${{ steps.iotdb-info.outputs.commit_time }}'
           echo "::set-output name=result::$(python3 check_commit.py '${{ github.workspace }}/iotdb-daily-build-dependence/db/db.db' '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' '${{ steps.iotdb-info.outputs.commit_time }}')"
+
       - name: echo check status
         run: |
           echo ${{ steps.check-commit.outputs.result }}
