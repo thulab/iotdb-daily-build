@@ -64,27 +64,18 @@ jobs:
         run: |
           echo ${{ steps.check-commit.outputs.result }}
 # 上传sqlite文件
-#      - name: upload db
-#        if: ${{ steps.check-commit.outputs.result == 'update' }}
-#        env:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#        run: |
-#          cd ${{ github.workspace }}/iotdb-daily-build-dependence
-#          git config --local user.email "876670773+github-actions[bot]@qq.com"
-#          git config --local user.name "github-actions[bot]"
-#          cd db
-#          git add db.db
-#          git commit -m "${{steps.sys-info.outputs.date}} github-actions[bot] push update "
-#          git push -u origin master
-      - name: Pushes to another repository
-        uses: cpina/github-action-push-to-another-repository@main
+      - name: upload db
+        if: ${{ steps.check-commit.outputs.result == 'update' }}
         env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source-directory: '${{ github.workspace }}/iotdb-daily-build-dependence'
-          destination-repository-name: 'iotdb-daily-build-dependence'
-          user-email: 876670773+github-actions[bot]@qq.com
-          target-branch: master
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build-dependence
+          git config --local user.email "876670773+github-actions[bot]@qq.com"
+          git config --local user.name "github-actions[bot]"
+          cd db
+          git add db.db
+          git commit -m "${{steps.sys-info.outputs.date}} github-actions[bot] push update "
+          git push -u origin master
 ## debug
 #      - name: check
 #        id: check-commit
