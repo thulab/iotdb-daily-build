@@ -128,7 +128,7 @@ jobs:
       - name: ssh to mkdir
         uses: appleboy/ssh-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           host: ${{ secrets.IOTDBFUTURE_HOST }}
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}

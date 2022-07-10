@@ -43,3 +43,21 @@
 3. benchmark
    1. 打包各个benchmark的包
 
+## tips
+### push到另外一个仓库
+参考https://github.com/marketplace/actions/push-directory-to-another-repository，
+```shell
+Generate your personal token following the steps:
+
+Go to the GitHub Settings (on the right-hand side on the profile picture)
+On the left-hand side pane click on "Developer Settings"
+Click on "Personal Access Tokens" (also available at https://github.com/settings/tokens)
+Generate a new token, choose "Repo". Copy the token.
+Then make the token available to the Github Action following the steps:
+
+Go to the GitHub page for the repository that you push from. Click on "Settings"
+On the left-hand side pane click on "Secrets" then "Actions"
+Click on "New repository secret"
+Name: "API_TOKEN_GITHUB"
+Value: paste the token that you copied earlier
+```
