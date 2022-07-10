@@ -75,7 +75,7 @@ jobs:
           cd db
           git add db.db
           git commit -m "${{steps.sys-info.outputs.date}} github-actions[bot] push update "
-          git push -u origin master
+          git push -u origin db
 ## debug
 #      - name: check
 #        id: check-commit
