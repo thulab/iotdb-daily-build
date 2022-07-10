@@ -18,21 +18,6 @@ jobs:
         shell: bash
         id: sys-info
         run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
-# clone db分支
-#      - name: checkout db
-#        uses: actions/checkout@v2
-#        with:
-#          path: iotdb-daily-build-dependence
-#          repository: 'xiaoyekanren/iotdb-daily-build-dependence'
-#          ref: master
-#          fetch-depth: 0
-      - name: Checkout db for save results
-        uses: actions/checkout@v2
-        with:
-          path: db
-          repository: 'xiaoyekanren/iotdb-daily-build'
-          ref: db
-          fetch-depth: 0
 # clone iotdb
       - name: checkout apache/iotdb
         uses: actions/checkout@v2
@@ -49,7 +34,7 @@ jobs:
           echo "::set-output name=commit_id::$(git log  -n 1 | head -n 1  | cut -d ' ' -f 2)"
           echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
           echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
-# clone 本程序自身
+# clone 本程序
       - name: checkout iotdb-daily-build
         uses: actions/checkout@v2
         with:
@@ -57,7 +42,15 @@ jobs:
           repository: 'xiaoyekanren/iotdb-daily-build'
           ref: master
           fetch-depth: 0
-# 检查sqlite文件，如果有commit就更新sqlite，并开始后续测试
+# clone 本程序 db分支
+      - name: Checkout db for save results
+        uses: actions/checkout@v2
+        with:
+          path: db
+          repository: 'xiaoyekanren/iotdb-daily-build'
+          ref: db
+          fetch-depth: 0
+# 检查db文件，如果有commit就更新db，并开始后续测试
       - name: check
         id: check-commit
         env:
@@ -70,7 +63,7 @@ jobs:
       - name: echo check status
         run: |
           echo ${{ steps.check-commit.outputs.result }}
-# 上传sqlite文件
+# 上传db文件
       - name: upload db
         if: ${{ steps.check-commit.outputs.result == 'update' }}
         env:
