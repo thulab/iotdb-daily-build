@@ -36,6 +36,6 @@ if __name__ == '__main__':
         print('stop')
         exit()
     elif commit_id != db_commit_id:
-        update_commit(branch, commit_id, commit_time, dbpath)
+        # update_commit(branch, commit_id, commit_time, dbpath)
         print('update')
         exit()
