@@ -26,7 +26,7 @@ jobs:
         id: sys-info
         run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
       - name: fast failer
-        run: set -eo pipefail
+        run: exit
 # clone iotdb
       - name: checkout apache/iotdb
         uses: actions/checkout@v2
