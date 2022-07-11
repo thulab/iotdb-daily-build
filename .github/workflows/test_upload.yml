@@ -9,9 +9,16 @@ jobs:
 #--------
   check-commit:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        iotdb_version: [ master,rel/0.12,rel/0.13 ]
+        java_version: [ 8 ]
     outputs:
       check_result: ${{ steps.check-commit.outputs.result }}
       date: ${{ steps.sys-info.outputs.date }}
+      branch: ${{ steps.iotdb-info.outputs.branch }}
     steps:
 # 收集公共信息
       - name: collect common info
@@ -24,7 +31,7 @@ jobs:
         with:
           path: iotdb
           repository: 'apache/iotdb'
-          ref: master
+          ref: ${{ matrix.iotdb_version }}
           fetch-depth: 0
 # 收集iotdb信息
       - name: collect IoTDB information
@@ -93,7 +100,7 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        iotdb_version: [ rel/0.12,master,rel/0.13 ]
+        iotdb_version: [ needs.check-commit.outputs.branch ]
         java_version: [ 8 ]
     runs-on: ubuntu-latest
     steps:
@@ -120,8 +127,10 @@ jobs:
           echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
 # 编译打包iotdb
       - name: Build Apache IoTDB binaries
+        id: dest-info
         run: |
           zip -r iotdb.zip iotdb
+          echo "::set-output name=destpath::$(echo /home/ubuntu/web/downloads/${{ matrix.java_version }})"
 #          cd ${{ github.workspace }}/iotdb
 #          mvn clean package -DskipTests
 # 创建对应文件夹
@@ -147,4 +156,5 @@ jobs:
           key: ${{ secrets.IOTDBFUTURE_TOKEN }}
           source: "${{ github.workspace }}/iotdb.zip"
 #          source: "${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip"
-          target: "/home/ubuntu/web/downloads/${{ matrix.java_version }}"
+#          target: "/home/ubuntu/web/downloads/${{ matrix.java_version }}"
+          target: "${{ steps.dest-info.outputs.dest_path }}"
