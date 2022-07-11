@@ -13,8 +13,8 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-#        iotdb_version: [ master,rel/0.12,rel/0.13 ]
-        iotdb_version: [ master ]
+        iotdb_version: [ master,rel/0.12,rel/0.13 ]
+#        iotdb_version: [ master ]
         java_version: [ 8 ]
     outputs:
       check_date: ${{ steps.sys-info.outputs.date }}
@@ -158,5 +158,5 @@ jobs:
           source: "${{ github.workspace }}/iotdb.zip"
 #          source: "${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip"
 #          target: "/home/ubuntu/web/downloads/${{ matrix.java_version }}"
-          target: "${{ steps.dest-info.outputs.dest_path }}"
+          target: "${{ steps.dest-info.outputs.destpath }}"
 
