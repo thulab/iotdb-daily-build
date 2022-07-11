@@ -101,12 +101,13 @@ jobs:
 
 #--------
   build-in-linux:
+    if: ${{ steps.check-commit.outputs.result  != 'stop' }}
     needs: [ check-commit ]
     strategy:
       fail-fast: false
       max-parallel: 20
       matrix:
-        iotdb_version: [ needs.check-commit.outputs.branch ]
+        iotdb_version: [ ${{ needs.check-commit.outputs.branch }} ]
         java_version: [ 8 ]
     runs-on: ubuntu-latest
     steps:
