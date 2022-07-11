@@ -16,8 +16,9 @@ jobs:
         iotdb_version: [ master,rel/0.12,rel/0.13 ]
         java_version: [ 8 ]
     outputs:
-      check_result: ${{ steps.check-commit.outputs.result }}
-      date: ${{ steps.sys-info.outputs.date }}
+      check_date: ${{ steps.sys-info.outputs.date }}
+      commit_id: ${{ steps.iotdb-info.outputs.commit_id }}
+      commit_time: ${{ steps.iotdb-info.outputs.commit_time }}
       branch: ${{ steps.iotdb-info.outputs.branch }}
     steps:
 # 收集公共信息
@@ -25,9 +26,6 @@ jobs:
         shell: bash
         id: sys-info
         run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
-# test quit
-      - name: test quit
-        run: exit 1
 # clone iotdb
       - name: checkout apache/iotdb
         uses: actions/checkout@v2
@@ -73,7 +71,12 @@ jobs:
       - name: echo check status
         run: |
           echo ${{ steps.check-commit.outputs.result }}
-## 上传db文件
+# 判断是stop还是update
+# exit 0 是正常退出，exit 其他数 是错误退出
+      - name: check check's results
+        if: ${{ steps.check-commit.outputs.result  == 'stop' }}
+        run: exit 0
+  ## 上传db文件
 #      - name: upload db
 #        if: ${{ steps.check-commit.outputs.result == 'update' }}
 #        env:
@@ -97,7 +100,6 @@ jobs:
 
 #--------
   build-in-linux:
-    if: ${{ needs.check-commit.outputs.check_result == 'update' }}
     needs: [ check-commit ]
     strategy:
       fail-fast: false
@@ -125,9 +127,10 @@ jobs:
         id: iotdb-info
         run: |
           cd ${{ github.workspace }}/iotdb
-          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
-          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
-          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
+          git checkout ${{ needs.check-commit.outputs.commit_id }}
+#          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
+#          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
+#          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
 # 编译打包iotdb
       - name: Build Apache IoTDB binaries
         id: dest-info
