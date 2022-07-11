@@ -137,19 +137,19 @@ jobs:
       - name: echo check status
         run: |
           echo ${{ steps.check-commit.outputs.result }}
-# 上传db文件
-      - name: upload db
-        if: ${{ steps.check-commit.outputs.result == 'update' }}
-        env:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cd ${{ github.workspace }}/db
-          git config --local user.email "876670773+github-actions[bot]@qq.com"
-          git config --local user.name "github-actions[bot]"
-          cd db
-          git add db.db
-          git commit -m "${{steps.sys-info.outputs.date}} github-actions[bot] push update "
-          git push -u origin db
+## 上传db文件
+#      - name: upload db
+#        if: ${{ steps.check-commit.outputs.result == 'update' }}
+#        env:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          cd ${{ github.workspace }}/db
+#          git config --local user.email "876670773+github-actions[bot]@qq.com"
+#          git config --local user.name "github-actions[bot]"
+#          cd db
+#          git add db.db
+#          git commit -m "${{steps.sys-info.outputs.date}} github-actions[bot] push update "
+#          git push -u origin db
 ## debug
 #      - name: check
 #        id: check-commit
