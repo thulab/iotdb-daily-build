@@ -25,8 +25,9 @@ jobs:
         shell: bash
         id: sys-info
         run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
-      - name: fast failer
-        run: exit
+# test quit
+      - name: test quit
+        run: exit 1
 # clone iotdb
       - name: checkout apache/iotdb
         uses: actions/checkout@v2
