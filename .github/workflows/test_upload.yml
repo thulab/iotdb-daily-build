@@ -102,26 +102,20 @@ jobs:
 #--------
   build-in-linux:
     needs: [ check-commit ]
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        iotdb_version: [ ${{ needs.check-commit.outputs.branch }} ]
-        java_version: [ 8 ]
     runs-on: ubuntu-latest
     steps:
 # set java
-      - name: Set java ${{ matrix.java }}
+      - name: Set java 8
         uses: actions/setup-java@v1
         with:
-          java-version: ${{ matrix.java_version }}
+          java-version: 8
 # clone iotdb
       - name: Checkout apache/iotdb
         uses: actions/checkout@v2
         with:
           path: iotdb
           repository: 'apache/iotdb'
-          ref: ${{ matrix.iotdb_version }}
+          ref: ${{ needs.check-commit.outputs.branch }}
           fetch-depth: 0
 # 收集iotdb信息
       - name: Collect IoTDB info
@@ -137,7 +131,7 @@ jobs:
         id: dest-info
         run: |
           zip -r iotdb.zip iotdb
-          echo "::set-output name=destpath::$(echo /home/ubuntu/web/downloads/${{ matrix.java_version }})"
+          echo "::set-output name=destpath::$(echo /home/ubuntu/web/downloads/8)"
 #          cd ${{ github.workspace }}/iotdb
 #          mvn clean package -DskipTests
 # 创建对应文件夹
@@ -150,7 +144,7 @@ jobs:
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
           key: ${{ secrets.IOTDBFUTURE_TOKEN }}
           port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
-          script: mkdir -p /home/ubuntu/web/downloads/${{ matrix.java_version }}
+          script: mkdir -p /home/ubuntu/web/downloads/8
 # 上传iotdb包
       - name: scp to upload file
         uses: appleboy/scp-action@master
