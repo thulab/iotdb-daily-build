@@ -19,6 +19,7 @@ jobs:
       commit_time: ${{ steps.iotdb-info.outputs.commit_time }}
       branch: ${{ steps.iotdb-info.outputs.branch }}
       version: ${{ matrix.iotdb_version }}
+      filename_version: ${{ steps.iotdb-info.outputs.filename_version }}
     steps:
 # 收集公共信息
       - name: collect common info
@@ -41,7 +42,8 @@ jobs:
           echo "::set-output name=commit_id::$(git log  -n 1 | head -n 1  | cut -d ' ' -f 2)"
           echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
           echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
-# clone 本程序
+          echo "::set-output name=filename_version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
+      # clone 本程序
       - name: checkout iotdb-daily-build
         uses: actions/checkout@v2
         with:
@@ -119,7 +121,7 @@ jobs:
           ref: ${{ needs.check-commit.outputs.branch }}
           fetch-depth: 0
 # 编译IoTDB
-      - name: Collect IoTDB info
+      - name: compile iotdb
         run: |
           cd ${{ github.workspace }}/iotdb
           git checkout ${{ needs.check-commit.outputs.commit_id }}
@@ -128,8 +130,6 @@ jobs:
       - name: ready to upload
         id: ready-upload
         run: |
-          cd ${{ github.workspace }}/iotdb
-          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
           echo "::set-output name=dest_path::$(echo /home/ubuntu/web/downloads/${{ matrix.java_version }})"
 # 创建对应文件夹
       - name: ssh to mkdir
@@ -152,5 +152,99 @@ jobs:
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
           port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
           key: ${{ secrets.IOTDBFUTURE_TOKEN }}
-          source: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.ready-upload.outputs.version }}-all-bin.zip
+          source: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.filename_version }}-all-bin.zip
+          target: ${{ steps.ready-upload.outputs.dest_path }}
+#--------
+  build-in-win:
+    needs: [ check-commit ]
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        java_version: [ 8,11 ]
+        os: [ windows-2022 ]
+    runs-on: ubuntu-latest
+    steps:
+# 设置java
+      - name: Set java ${{ matrix.java }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java_version }}
+# 从iotdb-daily-build-dependence下载已经编译好的boost
+      - name: download & unpack & install -> boost
+        shell: cmd
+        run: |
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0-bin.7z https://github.com/xiaoyekanren/iotdb-daily-build-dependence/releases/download/release-depend-bin/boost_1_78_0-bin.7z
+          7z x ${{ github.workspace }}/boost_1_78_0-bin.7z -o${{ github.workspace }}/boost_1_78_0
+#          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0.zip https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.zip
+#          7z x ${{ github.workspace }}/boost_1_78_0.zip -o${{ github.workspace }}/boost_1_78_0
+#          cd ${{ github.workspace }}/boost_1_78_0/boost_1_78_0
+#          .\bootstrap.bat
+#          .\b2
+#          echo "::set-output name=include::$(git branch |grep ^*|cut -d ' ' -f 2)"
+#          echo "::set-output name=library::$(git branch |grep ^*|cut -d ' ' -f 2)"
+# 下载解压flex和bison
+      - name: download & unpack flex&bison
+        shell: cmd
+        run: |
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/win_flex_bison-latest.zip https://jaist.dl.sourceforge.net/project/winflexbison/win_flex_bison-latest.zip
+          7z x ${{ github.workspace }}/win_flex_bison-latest.zip -o${{ github.workspace }}/win_flex_bison-latest
+# chcoc安装openssl
+      - name: install openssl
+        run: |
+          choco install openssl
+# clone iotdb
+      - name: Checkout apache/iotdb
+        uses: actions/checkout@v2
+        with:
+          path: iotdb
+          repository: 'apache/iotdb'
+          ref: ${{ needs.check-commit.outputs.branch }}
+          fetch-depth: 0
+# 编译iotdb client-cpp
+      - name: compile client-cpp
+        shell: cmd
+        env:
+          boost-include-dir: ${{ github.workspace }}\boost_1_78_0\boost_1_78_0
+          boost-library.dir: ${{ github.workspace }}\boost_1_78_0\boost_1_78_0\stage\lib
+          cmake-url: https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip
+          cmake-root-dir: ${{ github.workspace }}\iotdb\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64
+        run: |
+          cd ${{ github.workspace }}\iotdb
+          set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
+          set Path
+          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl server,client-cpp,example/client-cpp-example -am -DskipTests -Dboost.include.dir="%boost-include-dir%" -Dboost.library.dir="%boost-library.dir%" -Dcmake.url="%cmake-url%" -Dcmake.root.dir="%cmake-root-dir%"
+# 压缩example文件
+      - name: compress client-cpp-example
+        shell: bash
+        run: |
+          cd iotdb/example/client-cpp-example/target
+          7z a  client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
+# 准备上传用信息
+      - name: ready to upload
+        id: ready-upload
+        run: |
+          echo "::set-output name=dest_path::$(echo /home/ubuntu/web/downloads/${{ matrix.java_version }})"
+# 创建对应文件夹
+      - name: ssh to mkdir
+        uses: appleboy/ssh-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          host: ${{ secrets.IOTDBFUTURE_HOST }}
+          username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
+          key: ${{ secrets.IOTDBFUTURE_TOKEN }}
+          port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
+          script: mkdir -p ${{ steps.ready-upload.outputs.dest_path }}
+# 上传iotdb包
+      - name: scp to upload file
+        uses: appleboy/scp-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.IOTDBFUTURE_HOST }}
+          username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
+          port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
+          key: ${{ secrets.IOTDBFUTURE_TOKEN }}
+          source: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ needs.check-commit.outputs.filename_version }}-cpp-windows-x86_64.zip
           target: ${{ steps.ready-upload.outputs.dest_path }}

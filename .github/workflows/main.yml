@@ -75,7 +75,7 @@ jobs:
       - name: download & unpack & install -> boost
         shell: cmd
         run: |
-          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0-bin.7z https://github.com/xiaoyekanren/iotdb-daily-build-depend-pkg/releases/download/release-depend-bin/boost_1_78_0-bin.7z
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0-bin.7z https://github.com/xiaoyekanren/iotdb-daily-build-dependence/releases/download/release-depend-bin/boost_1_78_0-bin.7z
           7z x ${{ github.workspace }}/boost_1_78_0-bin.7z -o${{ github.workspace }}/boost_1_78_0
 #          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0.zip https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.zip
 #          7z x ${{ github.workspace }}/boost_1_78_0.zip -o${{ github.workspace }}/boost_1_78_0
