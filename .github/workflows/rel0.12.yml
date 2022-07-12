@@ -1,7 +1,9 @@
-name: test for upload
+name: check rel/0.12
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
-
 jobs:
 #--------
   check-commit:
@@ -10,14 +12,13 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        iotdb_version: [ master,rel/0.12,rel/0.13 ]
-#        iotdb_version: [ master ]
-        java_version: [ 8 ]
+        iotdb_version: [ rel/0.12 ]
     outputs:
       check_date: ${{ steps.sys-info.outputs.date }}
       commit_id: ${{ steps.iotdb-info.outputs.commit_id }}
       commit_time: ${{ steps.iotdb-info.outputs.commit_time }}
       branch: ${{ steps.iotdb-info.outputs.branch }}
+      version: ${{ matrix.iotdb_version }}
     steps:
 # 收集公共信息
       - name: collect common info
@@ -65,16 +66,13 @@ jobs:
           cd ${{ github.workspace }}/iotdb-daily-build/program
           result=$(python3 check_commit.py '${{ github.workspace }}/db/db/db.db' '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' '${{ steps.iotdb-info.outputs.commit_time }}')
           echo "::set-output name=result::$(echo $result)"
-# 输出检查结果
-      - name: echo check status
-        run: |
-          echo ${{ steps.check-commit.outputs.result }}
+          echo $result
 # 判断是stop还是update
 # exit 0 是正常退出，exit 其他数 是错误退出
       - name: check check's results
         if: ${{ steps.check-commit.outputs.result  == 'stop' }}
         run: exit 0
-  ## 上传db文件
+## 上传db文件
 #      - name: upload db
 #        if: ${{ steps.check-commit.outputs.result == 'update' }}
 #        env:
@@ -95,17 +93,23 @@ jobs:
 #        run: |
 #          cd ${{ github.workspace }}/iotdb-daily-build/program
 #          python3 test_db.py '${{ github.workspace }}/db/db/db.db' 'select * from commit_last'
-
+      - name: for Collapse code
+        run: echo "whoami,hhahha"
 #--------
   build-in-linux:
     needs: [ check-commit ]
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        java_version: [ 8,11 ]
     runs-on: ubuntu-latest
     steps:
 # set java
       - name: Set java 8
         uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: ${{ matrix.java_version }}
 # clone iotdb
       - name: Checkout apache/iotdb
         uses: actions/checkout@v2
@@ -114,23 +118,19 @@ jobs:
           repository: 'apache/iotdb'
           ref: ${{ needs.check-commit.outputs.branch }}
           fetch-depth: 0
-# 收集iotdb信息
+# 编译IoTDB
       - name: Collect IoTDB info
-        id: iotdb-info
         run: |
           cd ${{ github.workspace }}/iotdb
           git checkout ${{ needs.check-commit.outputs.commit_id }}
-#          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
-#          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
-#          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
-# 编译打包iotdb
-      - name: Build Apache IoTDB binaries
-        id: dest-info
+          mvn clean package -DskipTests
+# 准备上传用信息
+      - name: ready to upload
+        id: ready-upload
         run: |
-          zip -r iotdb.zip iotdb
-          echo "::set-output name=destpath::$(echo /home/ubuntu/web/downloads/8)"
-#          cd ${{ github.workspace }}/iotdb
-#          mvn clean package -DskipTests
+          cd ${{ github.workspace }}/iotdb
+          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
+          echo "::set-output name=dest_path::$(echo /home/ubuntu/web/downloads/${{ matrix.java_version }})"
 # 创建对应文件夹
       - name: ssh to mkdir
         uses: appleboy/ssh-action@master
@@ -141,7 +141,7 @@ jobs:
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
           key: ${{ secrets.IOTDBFUTURE_TOKEN }}
           port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
-          script: mkdir -p /home/ubuntu/web/downloads/8
+          script: mkdir -p ${{ steps.ready-upload.outputs.dest_path }}
 # 上传iotdb包
       - name: scp to upload file
         uses: appleboy/scp-action@master
@@ -152,8 +152,5 @@ jobs:
           username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
           port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
           key: ${{ secrets.IOTDBFUTURE_TOKEN }}
-          source: "${{ github.workspace }}/iotdb.zip"
-#          source: "${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip"
-#          target: "/home/ubuntu/web/downloads/${{ matrix.java_version }}"
-          target: "${{ steps.dest-info.outputs.destpath }}"
-
+          source: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.ready-upload.outputs.version }}-all-bin.zip
+          target: ${{ steps.ready-upload.outputs.dest_path }}
