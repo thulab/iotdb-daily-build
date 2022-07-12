@@ -163,7 +163,7 @@ jobs:
       matrix:
         java_version: [ 8,11 ]
         os: [ windows-2022 ]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
 # 设置java
       - name: Set java ${{ matrix.java }}
