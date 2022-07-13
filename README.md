@@ -1,4 +1,6 @@
-# title
+# title  
+![daily-build](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/main.yml/badge.svg)
+
 
 | 版本   | 打包项                                                                                   |
 |------|---------------------------------------------------------------------------------------|
