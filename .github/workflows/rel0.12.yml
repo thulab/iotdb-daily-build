@@ -98,8 +98,57 @@ jobs:
       - name: for Collapse code
         run: echo "whoami,hhahha"
 #--------
-  build-in-linux:
+  remote-mkdir-path:
+    if: ${{ steps.check-commit.outputs.result != 'stop' }}
     needs: [ check-commit ]
+    runs-on: ubuntu-latest
+    outputs:
+      remote_path: ${{ steps.ready-upload.outputs.dest_path }}
+    steps: |
+# 准备上传用信息
+      - name: ready to upload
+        id: ready-upload
+        run: |
+          echo "::set-output name=dest_path::$(echo /home/ubuntu/web/downloads/${{ matrix.java_version }})"
+# 创建对应文件夹
+      - name: ssh to mkdir
+        uses: appleboy/ssh-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          host: ${{ secrets.IOTDBFUTURE_HOST }}
+          username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
+          key: ${{ secrets.IOTDBFUTURE_TOKEN }}
+          port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
+          script: mkdir -p ${{ steps.ready-upload.outputs.dest_path }}
+#--------
+  create-release:
+    needs: collect
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create-release.outputs.upload_url }}
+    steps:
+      - name: Create release java-8
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.collect.outputs.date }}-apache-iotdb
+          release_name: ${{ needs.collect.outputs.date }} apache iotdb
+          body: ｜
+          ${{ needs.check-commit.outputs.check_date }}
+          ${{ needs.check-commit.outputs.commit_id }}
+          ${{ needs.check-commit.outputs.commit_time }}
+          ${{ needs.check-commit.outputs.branch }}
+          ${{ needs.check-commit.outputs.version }}
+          ${{ needs.check-commit.outputs.filename_version }}
+          draft: false
+          prerelease: false
+#--------
+  build-in-linux:
+    if: ${{ steps.check-commit.outputs.result  != 'stop' }}
+    needs: [ check-commit,remote-mkdir-path,create-release ]
     strategy:
       fail-fast: false
       max-parallel: 20
@@ -126,23 +175,7 @@ jobs:
           cd ${{ github.workspace }}/iotdb
           git checkout ${{ needs.check-commit.outputs.commit_id }}
           mvn clean package -DskipTests
-# 准备上传用信息
-      - name: ready to upload
-        id: ready-upload
-        run: |
-          echo "::set-output name=dest_path::$(echo /home/ubuntu/web/downloads/${{ matrix.java_version }})"
-# 创建对应文件夹
-      - name: ssh to mkdir
-        uses: appleboy/ssh-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          host: ${{ secrets.IOTDBFUTURE_HOST }}
-          username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
-          key: ${{ secrets.IOTDBFUTURE_TOKEN }}
-          port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
-          script: mkdir -p ${{ steps.ready-upload.outputs.dest_path }}
-# 上传iotdb包
+# 上传iotdb包到远程服务器
       - name: scp to upload file
         uses: appleboy/scp-action@master
         env:
@@ -156,6 +189,7 @@ jobs:
           target: ${{ steps.ready-upload.outputs.dest_path }}
 #--------
   build-in-win:
+    if: ${{ steps.check-commit.outputs.result  != 'stop' }}
     needs: [ check-commit ]
     strategy:
       fail-fast: false
@@ -220,23 +254,7 @@ jobs:
         run: |
           cd iotdb/example/client-cpp-example/target
           7z a  client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
-# 准备上传用信息
-      - name: ready to upload
-        id: ready-upload
-        run: |
-          echo "::set-output name=dest_path::$(echo /home/ubuntu/web/downloads/${{ matrix.java_version }})"
-# 创建对应文件夹
-      - name: ssh to mkdir
-        uses: appleboy/ssh-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          host: ${{ secrets.IOTDBFUTURE_HOST }}
-          username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
-          key: ${{ secrets.IOTDBFUTURE_TOKEN }}
-          port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
-          script: mkdir -p ${{ steps.ready-upload.outputs.dest_path }}
-# 上传iotdb包
+# 上传iotdb包到远程服务器
       - name: scp to upload file
         uses: appleboy/scp-action@master
         env:
