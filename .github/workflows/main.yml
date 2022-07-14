@@ -223,7 +223,7 @@ jobs:
       - name: Build Apache IoTDB binaries
         run: |
           cd ${{ github.workspace }}/iotdb
-          mvn clean package -P compile-grafana-plugin -DskipTests
+          mvn clean package -P compile-grafana-plugin -DskipTests -P compile-cpp -pl example/client-cpp-example
 #---all
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
         if: ${{ matrix.java_version == '8' }}
