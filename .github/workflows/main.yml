@@ -1,8 +1,5 @@
 name: build & release binary package
 on:
-#  push:
-#    branches:
-#      - master
   schedule:
     - cron: "0 12 * * *"
   workflow_dispatch:
@@ -221,6 +218,7 @@ jobs:
           echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
 
       - name: Build Apache IoTDB binaries
+        shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
           mvn clean package -P compile-grafana-plugin -DskipTests
