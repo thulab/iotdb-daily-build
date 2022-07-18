@@ -224,7 +224,8 @@ jobs:
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
-          mvn clean package -P compile-grafana-plugin -DskipTests
+          mvn clean package
+          # -P compile-grafana-plugin -DskipTests
 #---all
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
         if: ${{ matrix.java_version == '8' }}
