@@ -1,4 +1,4 @@
-name: build & release binary package
+name: test mvn grafana on master
 on:
   workflow_dispatch:
 
