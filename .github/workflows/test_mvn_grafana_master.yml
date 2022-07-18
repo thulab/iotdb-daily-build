@@ -11,7 +11,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-
       - name: Checkout apache/iotdb
         uses: actions/checkout@v2
         with:
@@ -19,10 +18,8 @@ jobs:
           repository: 'xiaoyekanren/iotdb'
           ref: modi_grafana_compile
           fetch-depth: 0
-
       - name: Build Apache IoTDB binaries
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
-#          mvn clean package -P compile-grafana-plugin -DskipTests
           mvn clean package -pl distribution -am -DskipTests -P compile-grafana-plugin
