@@ -138,7 +138,7 @@ jobs:
           cd ${{ github.workspace }}\iotdb
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
           set Path
-          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -P compile-grafana-plugin -pl server,grafana-plugin,client-cpp,example/client-cpp-example -am -DskipTests -Dboost.include.dir="%boost-include-dir%" -Dboost.library.dir="%boost-library.dir%" -Dcmake.url="%cmake-url%" -Dcmake.root.dir="%cmake-root-dir%"
+          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl server,client-cpp,example/client-cpp-example -am -DskipTests -Dboost.include.dir="%boost-include-dir%" -Dboost.library.dir="%boost-library.dir%" -Dcmake.url="%cmake-url%" -Dcmake.root.dir="%cmake-root-dir%"
 #---client-cpp
       - name: Upload apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
         if: ${{ matrix.java_version == '8' }}
@@ -188,8 +188,13 @@ jobs:
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-client-cpp-example-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
 #---grafana-plugin
+      - name: compile grafana-plugin
+        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '8'}}
+        shell: cmd
+        run: |
+          mvn package -P compile-grafana-plugin -pl grafana-plugin -am -DskipTests
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
-        if: ${{ matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '8' }}
+        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
