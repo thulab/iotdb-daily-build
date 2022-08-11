@@ -138,13 +138,7 @@ jobs:
           cd ${{ github.workspace }}\iotdb
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
           set Path
-          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -P compile-grafana-plugin -pl server,client-cpp,example/client-cpp-example -am -DskipTests -Dboost.include.dir="%boost-include-dir%" -Dboost.library.dir="%boost-library.dir%" -Dcmake.url="%cmake-url%" -Dcmake.root.dir="%cmake-root-dir%"
-          
-      - name: compile grafana-plugin
-        if: ${{ matrix.os == 'windows-2022' }}
-        shell: cmd
-        run: |
-          mvn package -P compile-grafana-plugin -pl grafana-plugin -am -DskipTests
+          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -P compile-grafana-plugin -pl server,grafana-plugin,client-cpp,example/client-cpp-example -am -DskipTests -Dboost.include.dir="%boost-include-dir%" -Dboost.library.dir="%boost-library.dir%" -Dcmake.url="%cmake-url%" -Dcmake.root.dir="%cmake-root-dir%"
 #---client-cpp
       - name: Upload apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
         if: ${{ matrix.java_version == '8' }}
