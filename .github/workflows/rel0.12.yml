@@ -104,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       remote_path: ${{ steps.ready-upload.outputs.dest_path }}
-    steps: |
+    steps:
 # 准备上传用信息
       - name: ready to upload
         id: ready-upload
