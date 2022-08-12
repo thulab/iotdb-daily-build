@@ -23,4 +23,5 @@ jobs:
           user_password: ${{ secrets.IOTDBFUTURE_HOST_USER_PASSWORD }}
           user_home: ${{ secrets.IOTDBFUTURE_HOST_USER_HOME }}
         run:
+          sudo sshpass -p '${user_password}' ssh ${username}@${host}:${user_home} -p ${port} whoami
           sudo sshpass -p '${user_password}' scp -P ${port} ${{ github.workspace }}/iotdb.zip ${username}@${host}:${user_home}/files/
