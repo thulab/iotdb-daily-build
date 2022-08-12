@@ -194,26 +194,6 @@ jobs:
         run: |
           cd ${{ github.workspace }}\iotdb
           mvn package -P compile-grafana-plugin -pl grafana-plugin -am -DskipTests
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
-        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '8' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
-        if: ${{ matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '11' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
 #--------
   build-in-linux:
     needs: [ collect,create-release-java8,create-release-java11 ]
