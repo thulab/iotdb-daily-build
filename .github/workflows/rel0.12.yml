@@ -1,8 +1,8 @@
 name: check rel/0.12
 on:
-  push:
-    branches:
-      - master
+#  push:
+#    branches:
+#      - master
   workflow_dispatch:
 jobs:
 #--------
