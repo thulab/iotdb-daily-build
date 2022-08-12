@@ -136,13 +136,13 @@ jobs:
         with:
           tag_name: ${{ needs.collect.outputs.date }}-apache-iotdb
           release_name: ${{ needs.collect.outputs.date }} apache iotdb
-          body: ｜
-          ${{ needs.check-commit.outputs.check_date }}
-          ${{ needs.check-commit.outputs.commit_id }}
-          ${{ needs.check-commit.outputs.commit_time }}
-          ${{ needs.check-commit.outputs.branch }}
-          ${{ needs.check-commit.outputs.version }}
-          ${{ needs.check-commit.outputs.filename_version }}
+          body: |
+            ${{ needs.check-commit.outputs.check_date }},
+            ${{ needs.check-commit.outputs.commit_id }},
+            ${{ needs.check-commit.outputs.commit_time }},
+            ${{ needs.check-commit.outputs.branch }},
+            ${{ needs.check-commit.outputs.version }},
+            ${{ needs.check-commit.outputs.filename_version }}
           draft: false
           prerelease: false
 #--------
