@@ -1,4 +1,4 @@
-name: test ssh path
+name: test sshpass
 on:
   workflow_dispatch:
 
@@ -10,7 +10,7 @@ jobs:
 # 下载iotdb
       - name: download iotdb
         run: | 
-          apt-get install sshpass
+          sudo apt-get install sshpass
           wget https://github.com/apache/iotdb/releases/download/v0.12.6/apache-iotdb-0.12.6-server-bin.zip -O ${{ github.workspace }}/iotdb.zip
           du -sh ${{ github.workspace }}/iotdb.zip
 
