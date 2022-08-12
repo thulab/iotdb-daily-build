@@ -192,6 +192,7 @@ jobs:
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '8'}}
         shell: cmd
         run: |
+          cd ${{ github.workspace }}\iotdb
           mvn package -P compile-grafana-plugin -pl grafana-plugin -am -DskipTests
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'rel/0.12' && matrix.java_version == '8' }}
