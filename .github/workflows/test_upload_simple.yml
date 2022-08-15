@@ -1,0 +1,35 @@
+name: test for upload
+on:
+  workflow_dispatch:
+
+jobs:
+#--------
+  check-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: wget a daemon iotdb
+        run: |
+          wget https://github.com/apache/iotdb/releases/download/v0.12.6/apache-iotdb-0.12.6-server-bin.zip ${{ github.workspace }}/iotdb-012.zip
+          wget https://github.com/apache/iotdb/releases/download/v0.13.1/apache-iotdb-0.13.1-server-bin.zip ${{ github.workspace }}/iotdb-013.zip
+
+# 上传iotdb包 0.12
+    - name: copy file via ssh password
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.IOTDBFUTURE_HOST }}
+        username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
+        password: ${{ secrets.IOTDBFUTURE_HOST_USER_PASSWORD }}
+        port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
+        source: "${{ github.workspace }}/iotdb-012.zip"
+        target: "files/012/"
+
+# 上传iotdb包 0.13
+    - name: copy file via ssh password
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.IOTDBFUTURE_HOST }}
+        username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
+        password: ${{ secrets.IOTDBFUTURE_HOST_USER_PASSWORD }}
+        port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
+        source: "${{ github.workspace }}/iotdb-013.zip"
+        target: "files/013"
