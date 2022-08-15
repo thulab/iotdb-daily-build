@@ -8,8 +8,8 @@ jobs:
     steps:
       - name: wget a daemon iotdb
         run: |
-          wget https://github.com/apache/iotdb/releases/download/v0.12.6/apache-iotdb-0.12.6-server-bin.zip ${{ github.workspace }}/iotdb-012.zip
-          wget https://github.com/apache/iotdb/releases/download/v0.13.1/apache-iotdb-0.13.1-server-bin.zip ${{ github.workspace }}/iotdb-013.zip
+          wget https://github.com/apache/iotdb/releases/download/v0.12.6/apache-iotdb-0.12.6-server-bin.zip -O ${{ github.workspace }}/iotdb-012.zip
+          wget https://github.com/apache/iotdb/releases/download/v0.13.1/apache-iotdb-0.13.1-server-bin.zip -O ${{ github.workspace }}/iotdb-013.zip
   # 上传iotdb包 0.12
       - name: copy file via ssh password
         uses: appleboy/scp-action@master
