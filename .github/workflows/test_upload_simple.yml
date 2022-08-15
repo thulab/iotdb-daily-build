@@ -1,4 +1,4 @@
-name: test for upload
+name: test for upload simple
 on:
   workflow_dispatch:
 
