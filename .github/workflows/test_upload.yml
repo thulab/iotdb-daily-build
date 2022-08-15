@@ -4,20 +4,27 @@ on:
 
 jobs:
 #--------
-  test_upload:
+  check-commit:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 20
       matrix:
-        iotdb_version: [ master,rel/0.12,rel/0.13 ]
-#        iotdb_version: [ master ]
-        java_version: [ 8 ]
+        iotdb_version: [ rel/0.12 ]
     outputs:
       check_date: ${{ steps.sys-info.outputs.date }}
+      # commit_id: dc2062c0dc2146b9967572c3989b3a234765a033
       commit_id: ${{ steps.iotdb-info.outputs.commit_id }}
+      # commit_id_short: dc2062c
+      commit_id_short: ${{ steps.iotdb-info.outputs.commit_id_short }}
+      # commit_time: 2022-08-15 14:09:59 +0800
       commit_time: ${{ steps.iotdb-info.outputs.commit_time }}
+      # branch: master, rel/0.12, rel/0.13
       branch: ${{ steps.iotdb-info.outputs.branch }}
+      # version, eg: 0.13.2-SNAPSHOT
+      version: ${{ steps.iotdb-info.outputs.version }}
+      # commit_timestamp: 1660550464
+      commit_timestamp: ${{ steps.check-commit.outputs.commit_timestamp }}
     steps:
 # 收集公共信息
       - name: collect common info
@@ -37,9 +44,11 @@ jobs:
         id: iotdb-info
         run: |
           cd ${{ github.workspace }}/iotdb
-          echo "::set-output name=commit_id::$(git log  -n 1 | head -n 1  | cut -d ' ' -f 2)"
+          echo "::set-output name=commit_id::$(git rev-parse HEAD)"
+          echo "::set-output name=commit_id_short::$(git rev-parse --short HEAD)"
           echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
           echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
+          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
 # clone 本程序
       - name: checkout iotdb-daily-build
         uses: actions/checkout@v2
@@ -65,6 +74,8 @@ jobs:
           cd ${{ github.workspace }}/iotdb-daily-build/program
           result=$(python3 check_commit.py '${{ github.workspace }}/db/db/db.db' '${{ steps.iotdb-info.outputs.branch }}' '${{ steps.iotdb-info.outputs.commit_id }}' '${{ steps.iotdb-info.outputs.commit_time }}')
           echo "::set-output name=result::$(echo $result)"
+          commit_timestamp=$(python3 time_switch.py '${{ steps.iotdb-info.outputs.commit_time }}')
+          echo "::set-output name=commit_timestamp::$(echo $commit_timestamp)"
 # 输出检查结果
       - name: echo check status
         run: |
@@ -97,15 +108,18 @@ jobs:
 #          python3 test_db.py '${{ github.workspace }}/db/db/db.db' 'select * from commit_last'
 
 #--------
-  build-in-linux:
+  build:
     needs: [ check-commit ]
+    strategy:
+      matrix:
+        java_version: [ 8,11 ]
     runs-on: ubuntu-latest
     steps:
 # set java
-      - name: Set java 8
+      - name: Set java ${{ matrix.java_version }}
         uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: ${{ matrix.java_version }}
 # clone iotdb
       - name: Checkout apache/iotdb
         uses: actions/checkout@v2
@@ -114,46 +128,38 @@ jobs:
           repository: 'apache/iotdb'
           ref: ${{ needs.check-commit.outputs.branch }}
           fetch-depth: 0
-# 收集iotdb信息
-      - name: Collect IoTDB info
+# 编译打包iotdb
+      - name: compile iotdb
         id: iotdb-info
         run: |
           cd ${{ github.workspace }}/iotdb
           git checkout ${{ needs.check-commit.outputs.commit_id }}
-#          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
-#          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
-#          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
-# 编译打包iotdb
-      - name: Build Apache IoTDB binaries
-        id: dest-info
+          mvn clean package -DskipTests
+# 给压缩包重命名，最终上传的文件名称
+      - name: reanme zip
+        id: rename
         run: |
-          zip -r iotdb.zip iotdb
-          echo "::set-output name=destpath::$(echo /home/ubuntu/web/downloads/8)"
-#          cd ${{ github.workspace }}/iotdb
-#          mvn clean package -DskipTests
-# 创建对应文件夹
-      - name: ssh to mkdir
-        uses: appleboy/ssh-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          host: ${{ secrets.IOTDBFUTURE_HOST }}
-          username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
-          key: ${{ secrets.IOTDBFUTURE_TOKEN }}
-          port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
-          script: mkdir -p /home/ubuntu/web/downloads/8
+          echo "::set-output name=all::$(echo ${{ github.workspace }}/upload_folder/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin-${{ needs.check-commit.outputs.commit_timestamp }}-${{ needs.check-commit.outputs.commit_id_short }}-java${{ matrix.java_version }}.zip)"
+          echo "::set-output name=cli::$(echo ${{ github.workspace }}/upload_folder/apache-iotdb-${{ needs.check-commit.outputs.version }}-cli-bin-${{ needs.check-commit.outputs.commit_timestamp }}-${{ needs.check-commit.outputs.commit_id_short }}-java${{ matrix.java_version }}.zip)"
+# 拷贝要上传的文件到外层目录
+      - name: ready to upload file
+        run: |
+          mkdir -p ${{ github.workspace }}/upload_folder
+          cd ${{ github.workspace }}/upload_folder
+          cp ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin.zip ${{ steps.rename.outputs.all }}
+          cp ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-cli-bin.zip ${{ steps.rename.outputs.cli }}
 # 上传iotdb包
-      - name: scp to upload file
+      - name: copy file via ssh password
         uses: appleboy/scp-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          host: ${{ secrets.IOTDBFUTURE_HOST }}
-          username: ${{ secrets.IOTDBFUTURE_HOST_USER }}
-          port: ${{ secrets.IOTDBFUTURE_HOST_PORT }}
-          key: ${{ secrets.IOTDBFUTURE_TOKEN }}
-          source: "${{ github.workspace }}/iotdb.zip"
-#          source: "${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip,${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip"
-#          target: "/home/ubuntu/web/downloads/${{ matrix.java_version }}"
-          target: "${{ steps.dest-info.outputs.destpath }}"
-
+          host: ${{ secrets.FILE_SERVER_IP }}
+          username: ${{ secrets.FILE_SERVER_IP_USER }}
+          password: ${{ secrets.FILE_SERVER_IP_PASSWORD }}
+          port: ${{ secrets.FILE_SERVER_IP_PORT }}
+          timeout: 120s
+          command_timeout: 60m
+          source: "${{ steps.rename.outputs.all }},${{ steps.rename.outputs.cli }}"
+          target: "files/${{ needs.check-commit.outputs.version }}"
+          tar_tmp_path: "/tmp"
+          # strip_components - remove the specified number of leading path elements.
+          strip_components: 3
