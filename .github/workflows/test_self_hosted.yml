@@ -28,5 +28,4 @@ jobs:
       - name: compile iotdb
         run: |
           cd ${{ github.workspace }}/iotdb
-          git checkout ${{ needs.check-commit.outputs.commit_id }}
           mvn clean package -DskipTests
