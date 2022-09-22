@@ -1,0 +1,32 @@
+name: test self hosted
+on:
+  workflow_dispatch:
+jobs:
+#--------
+  build-in-linux:
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        java_version: [ 8,11 ]
+    runs-on: [self-hosted,Linux,X64]
+    steps:
+# set java
+      - name: Set java 8
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java_version }}
+# clone iotdb
+      - name: Checkout apache/iotdb
+        uses: actions/checkout@v2
+        with:
+          path: iotdb
+          repository: 'apache/iotdb'
+          ref: ${{ needs.check-commit.outputs.branch }}
+          fetch-depth: 0
+# 编译IoTDB
+      - name: compile iotdb
+        run: |
+          cd ${{ github.workspace }}/iotdb
+          git checkout ${{ needs.check-commit.outputs.commit_id }}
+          mvn clean package -DskipTests
