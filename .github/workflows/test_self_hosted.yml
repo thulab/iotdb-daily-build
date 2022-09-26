@@ -30,4 +30,4 @@ jobs:
       - name: compile iotdb
         run: |
           cd ${{ github.workspace }}/iotdb
-          mvn clean package
+          mvn clean verify
