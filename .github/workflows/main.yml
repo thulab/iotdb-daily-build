@@ -1,3 +1,5 @@
+# Build iotdb-rel/0.12, iotdb-rel/0.13, iotdb-rel/0.14, iotdb-benchmark
+# Everyday
 name: build & release
 on:
 #  push:

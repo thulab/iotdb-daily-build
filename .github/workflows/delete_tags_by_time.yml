@@ -1,3 +1,5 @@
+# Save only the latest 10 versions
+# Not ready.
 name: Regularly delete redundant labels
 on:
   workflow_dispatch:

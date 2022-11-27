@@ -1,3 +1,5 @@
+# Test on own server
+# Only test.
 name: test self hosted
 on:
 #  schedule:
