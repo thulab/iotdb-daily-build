@@ -10,6 +10,9 @@ on:
 jobs:
   #--------
   check-commit:
+    outputs:
+      commit_id: ${{steps.check-cur-status.outputs.commit_id}}
+      commit_id_short: ${{ steps.check-cur-status.outputs.commit_id_short }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -62,11 +65,6 @@ jobs:
       - name: check check's results
         if: ${{ steps.check-cur-status.outputs.commit_id == steps.check-old-commit.outputs.last_commit || steps.check-cur-status.outputs.commit_user == 'github-actions[bot]' }}
         run: exit 1
-      # get time
-      - name: collect common info
-        shell: bash
-        id: sys-info
-        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
       # set java
       - name: Set java ${{ matrix.java_version }}
         uses: actions/setup-java@v3
@@ -124,7 +122,25 @@ jobs:
               echo "Check stop-confignode failed. exit.."
               exit 1
           fi
-      # git push alrecommit
+
+  push-commit-id:
+    needs: check-commit
+    runs-on: ubuntu-latest
+    steps:
+      # get time
+      - name: collect common info
+        shell: bash
+        id: sys-info
+        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
+      # get cur-repository
+      - name: Checkout iotdb-daily-build
+        uses: actions/checkout@v2
+        with:
+          path: iotdb-daily-build
+          repository: 'xiaoyekanren/iotdb-daily-build'
+          ref: 'master'
+          fetch-depth: 0
+      # push commit id to repository
       - name: push commit
         env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -132,7 +148,7 @@ jobs:
           cd ${{ github.workspace }}/iotdb-daily-build
           git config --local user.email "876670773+github-actions[bot]@qq.com"
           git config --local user.name "github-actions[bot]"
-          echo ${{ steps.check-cur-status.outputs.commit_id }} >> .github/release_history.txt
+          echo ${{ needs.check-commit.outputs.commit_id }} >> .github/release_history.txt
           git add .github/release_history.txt
-          git commit -m "${{ steps.sys-info.outputs.date }}-${{ steps.check-cur-status.outputs.commit_id_short }}"
+          git commit -m "${{ steps.sys-info.outputs.date }}-${{ needs.check-commit.outputs.commit_id_short }}"
           git push -u origin master
