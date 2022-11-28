@@ -113,7 +113,7 @@ jobs:
               echo "Check start-confignode Success. "
           fi
 
-          sbin/stop-datanode.sh
+          sbin/stop-datanode.sh && sleep 5
           ps_df_pid=$(ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
           if [ "${ps_df_pid}1" == "1" ]; then
               echo "Check stop-datanode Success. "
@@ -123,7 +123,7 @@ jobs:
               exit 1
           fi
 
-          sbin/stop-confignode.sh
+          sbin/stop-confignode.sh && sleep 5
           ps_cf_pid=$(ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
           if [ "${ps_cf_pid}1" == "1" ]; then
               echo "Check stop-confignode Success. "
