@@ -418,11 +418,11 @@ jobs:
       - name: compile iotdb
         run: |
           cd ${{ github.workspace }}/iotdb-master
-          mvn clean package -DskipTests
-          cd ${{ github.workspace }}/iotdb-rel0.12
-          mvn clean package -DskipTests
-          cd ${{ github.workspace }}/iotdb-rel0.13
-          mvn clean package -DskipTests
+          mvn clean install -DskipTests
+#          cd ${{ github.workspace }}/iotdb-rel0.12
+#          mvn clean package -DskipTests
+#          cd ${{ github.workspace }}/iotdb-rel0.13
+#          mvn clean package -DskipTests
 
       - name: Checkout iotdb-benchmark
         uses: actions/checkout@v2
@@ -442,32 +442,33 @@ jobs:
         id: compile-benchmark
         run: |
           cd ${{ github.workspace }}/iotdb-benchmark
-          if [ "${{ matrix.java_version }}" = "8" ]; then
-            mvn clean package -Dmaven.test.skip=True
-          elif [ "${{ matrix.java_version }}" = "11" ]; then
-            mvn clean package -pl core,influxdb,influxdb-2.0,kairosdb,opentsdb,tdengine,timescaledb,iotdb-0.13,iotdb-0.12,iotdb-0.11,mssqlserver,sqlite -Dmaven.test.skip=true
-          fi
-#---0.11
-      - name: Upload benchmark-iotdb-0.11
-        if: ${{ matrix.java_version == '8' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.11/target/iotdb-0.11-0.0.1.zip
-          asset_name: benchmark-iotdb-0.11-${{ steps.benchmark-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-      - name: Upload benchmark-iotdb-0.11
-        if: ${{ matrix.java_version == '11' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
-          asset_name: benchmark-iotdb-0.11-${{ steps.benchmark-info.outputs.commit }}.zip
-          asset_content_type: application/zip
+          mvn clean package -DskipTests
+#          if [ "${{ matrix.java_version }}" = "8" ]; then
+#            mvn clean package -Dmaven.test.skip=True
+#          elif [ "${{ matrix.java_version }}" = "11" ]; then
+#            mvn clean package -pl core,influxdb,influxdb-2.0,kairosdb,opentsdb,tdengine,timescaledb,iotdb-0.13,iotdb-0.12,iotdb-0.11,mssqlserver,sqlite -Dmaven.test.skip=true
+#          fi
+##---0.11
+#      - name: Upload benchmark-iotdb-0.11
+#        if: ${{ matrix.java_version == '8' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.11/target/iotdb-0.11-0.0.1.zip
+#          asset_name: benchmark-iotdb-0.11-${{ steps.benchmark-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+#      - name: Upload benchmark-iotdb-0.11
+#        if: ${{ matrix.java_version == '11' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
+#          asset_name: benchmark-iotdb-0.11-${{ steps.benchmark-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
 #---0.12
       - name: Upload benchmark-iotdb-0.12
         if: ${{ matrix.java_version == '8' }}
@@ -594,45 +595,66 @@ jobs:
           asset_path: ${{ github.workspace }}/iotdb-benchmark/timescaledb/target/timescaledb-0.0.1.zip
           asset_name: benchmark-timescaledb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
-#---mssqlserver
-      - name: Upload benchmark-mssqlserver
+##---mssqlserver
+#      - name: Upload benchmark-mssqlserver
+#        if: ${{ matrix.java_version == '8' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb-benchmark/mssqlserver/target/mssqlserver-0.0.1.zip
+#          asset_name: benchmark-mssqlserver-${{ steps.benchmark-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+#      - name: Upload benchmark-mssqlserver
+#        if: ${{ matrix.java_version == '11' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb-benchmark/mssqlserver/target/mssqlserver-0.0.1.zip
+#          asset_name: benchmark-mssqlserver-${{ steps.benchmark-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+##---opentsdb
+#      - name: Upload benchmark-opentsdb
+#        if: ${{ matrix.java_version == '8' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb-benchmark/opentsdb/target/opentsdb-0.0.1.zip
+#          asset_name: benchmark-opentsdb-${{ steps.benchmark-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+#      - name: Upload benchmark-opentsdb
+#        if: ${{ matrix.java_version == '11' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb-benchmark/opentsdb/target/opentsdb-0.0.1.zip
+#          asset_name: benchmark-opentsdb-${{ steps.benchmark-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+#---kairosdb
+      - name: Upload benchmark-kairosdb
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/mssqlserver/target/mssqlserver-0.0.1.zip
-          asset_name: benchmark-mssqlserver-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_path: ${{ github.workspace }}/iotdb-benchmark/kairosdb/target/kairosdb-0.0.1.zip
+          asset_name: benchmark-kairosdb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
-      - name: Upload benchmark-mssqlserver
+      - name: Upload benchmark-kairosdb
         if: ${{ matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/mssqlserver/target/mssqlserver-0.0.1.zip
-          asset_name: benchmark-mssqlserver-${{ steps.benchmark-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-#---opentsdb
-      - name: Upload benchmark-opentsdb
-        if: ${{ matrix.java_version == '8' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/opentsdb/target/opentsdb-0.0.1.zip
-          asset_name: benchmark-opentsdb-${{ steps.benchmark-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-      - name: Upload benchmark-opentsdb
-        if: ${{ matrix.java_version == '11' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/opentsdb/target/opentsdb-0.0.1.zip
-          asset_name: benchmark-opentsdb-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_path: ${{ github.workspace }}/iotdb-benchmark/kairosdb/target/kairosdb-0.0.1.zip
+          asset_name: benchmark-kairosdb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
