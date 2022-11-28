@@ -418,7 +418,7 @@ jobs:
       - name: compile iotdb
         run: |
           cd ${{ github.workspace }}/iotdb-master
-          mvn clean install -DskipTests
+          mvn clean package -DskipTests
 #          cd ${{ github.workspace }}/iotdb-rel0.12
 #          mvn clean package -DskipTests
 #          cd ${{ github.workspace }}/iotdb-rel0.13
