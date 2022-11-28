@@ -79,7 +79,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iotdb
           mvn clean package -DskipTests -am -pl distribution
-          cd ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-0.14.0-SNAPSHOT-all-bin/apache-iotdb-0.14.0-SNAPSHOT-all-bin
+          cd ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-1.0.0-SNAPSHOT-all-bin/apache-iotdb-1.0.0-SNAPSHOT-all-bin
           echo "::set-output name=iotdb_home::$(pwd)"
       # test start
       - name: test start
