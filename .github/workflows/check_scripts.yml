@@ -1,0 +1,137 @@
+# 用于在多种不同操作系统，多种jdk环境下，进行iotdb的启停测试
+name: check scripts
+on:
+  #  push:
+  #    branches:
+  #      - master
+  #  schedule:
+  #      - cron: "* */24 * * *"
+  workflow_dispatch:
+jobs:
+  #--------
+  check-commit:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        java_version: [ 8, 11, 16, 17 ]
+        # os: [windows-2022, ubuntu-22.04, macos-12]
+        os: [ubuntu-22.04]
+    steps:
+      # get iotdb
+      - name: Checkout apache/iotdb
+        uses: actions/checkout@v2
+        with:
+          path: iotdb
+          repository: 'apache/iotdb'
+          ref: 'master'
+          fetch-depth: 0
+      # get cur-repository
+      - name: Checkout iotdb-daily-build
+        uses: actions/checkout@v2
+        with:
+          path: iotdb-daily-build
+          repository: 'xiaoyekanren/iotdb-daily-build'
+          ref: 'master'
+          fetch-depth: 0
+      # check cur status
+      - name: check
+        id: check-cur-status
+        run: |
+          cd ${{ github.workspace }}/iotdb
+          echo "::set-output name=commit_id::$( git rev-parse HEAD )"
+          echo "::set-output name=commit_id_short::$( git rev-parse --short HEAD )"
+          echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
+          echo "::set-output name=commit_user::$(git log | head -n 2 | tail -n 1 | cut -d ' ' -f 2)"
+          echo $(git rev-parse HEAD)
+      # check update
+      - name: check
+        id: check-old-commit
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build
+          echo "::set-output name=last_commit::$(cat .github/release_history.txt | tail -n 1)"
+          echo $(cat .github/release_history.txt | tail -n 1)
+      # compare
+      - name: check check's results
+        run: |
+          echo "txt pid: ${{ steps.check-old-commit.outputs.last_commit }}"
+          echo "res pid: ${{ steps.check-cur-status.outputs.commit_id }}"
+      # equal means no update
+      # "exit 0" is exits normally，"exit other" is exception exit
+      - name: check check's results
+        if: ${{ steps.check-cur-status.outputs.commit_id == steps.check-old-commit.outputs.last_commit || steps.check-cur-status.outputs.commit_user == 'github-actions[bot]' }}
+        run: exit 1
+      # get time
+      - name: collect common info
+        shell: bash
+        id: sys-info
+        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
+      # set java
+      - name: Set java ${{ matrix.java_version }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java_version }}
+      # build iotdb
+      - name: build iotdb
+        id: build-iotdb
+        run: |
+          cd ${{ github.workspace }}/iotdb
+          mvn clean package -DskipTests -am -pl distribution
+          cd ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-0.14.0-SNAPSHOT-all-bin/apache-iotdb-0.14.0-SNAPSHOT-all-bin
+          echo "::set-output name=iotdb_home::$(pwd)"
+      # test start
+      - name: test start
+        run: |
+          cd ${{ steps.build-iotdb.outputs.iotdb_home }}
+          nohup sbin/start-confignode.sh > /dev/null 2>&1 &
+          cf_pid=$!
+          sleep 5
+          nohup sbin/start-datanode.sh > /dev/null 2>&1 &
+          df_pid=$!
+          sleep 60
+
+          ps_cf_pid=$(ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
+          ps_df_pid=$(ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
+
+          if [ "${ps_df_pid}1" == "1" ]; then
+              echo "Check start-datanode failed. exit.."
+              exit 1
+          else
+              echo "Check start-datanode Success. "
+          fi
+
+          if [ "${ps_cf_pid}1" == "1" ]; then
+              echo "Check start-confignode failed. exit.."
+              exit 1
+          else
+              echo "Check start-confignode Success. "
+          fi
+
+          sbin/stop-datanode.sh
+          if [ "${ps_df_pid}1" == "1" ]; then
+              echo "Check stop-datanode Success. "
+          else
+              echo "Check stop-datanode failed. exit.."
+              exit 1
+          fi
+
+          sbin/stop-confignode.sh
+          if [ "${ps_cf_pid}1" == "1" ]; then
+              echo "Check stop-confignode Success. "
+          else
+              echo "Check stop-confignode failed. exit.."
+              exit 1
+          fi
+      # git push alrecommit
+      - name: push commit
+        env:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build
+          git config --local user.email "876670773+github-actions[bot]@qq.com"
+          git config --local user.name "github-actions[bot]"
+          echo ${{ steps.check-cur-status.outputs.commit_id }} >> .github/release_history.txt
+          git add .github/release_history.txt
+          git commit -m "${{ steps.sys-info.outputs.date }}-${{ steps.check-cur-status.outputs.commit_id_short }}"
+          git push -u origin master
