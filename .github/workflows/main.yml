@@ -399,26 +399,27 @@ jobs:
           ref: master
           fetch-depth: 0
 
-      - name: Checkout iotdb-rel0.12
-        uses: actions/checkout@v2
-        with:
-          path: iotdb-rel0.12
-          repository: 'apache/iotdb'
-          ref: rel/0.12
-          fetch-depth: 0
-
-      - name: Checkout iotdb-rel0.13
-        uses: actions/checkout@v2
-        with:
-          path: iotdb-rel0.13
-          repository: 'apache/iotdb'
-          ref: rel/0.13
-          fetch-depth: 0
+#      - name: Checkout iotdb-rel0.12
+#        uses: actions/checkout@v2
+#        with:
+#          path: iotdb-rel0.12
+#          repository: 'apache/iotdb'
+#          ref: rel/0.12
+#          fetch-depth: 0
+#
+#      - name: Checkout iotdb-rel0.13
+#        uses: actions/checkout@v2
+#        with:
+#          path: iotdb-rel0.13
+#          repository: 'apache/iotdb'
+#          ref: rel/0.13
+#          fetch-depth: 0
 
       - name: compile iotdb
         run: |
           cd ${{ github.workspace }}/iotdb-master
-          mvn clean package -DskipTests
+          mvn install -DskipTests -am -pl distribution
+#          mvn clean package -DskipTests
 #          cd ${{ github.workspace }}/iotdb-rel0.12
 #          mvn clean package -DskipTests
 #          cd ${{ github.workspace }}/iotdb-rel0.13
