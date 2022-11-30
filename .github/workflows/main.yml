@@ -1,4 +1,4 @@
-# Build iotdb-rel/0.12, iotdb-rel/0.13, iotdb-rel/0.14, iotdb-benchmark
+# Build iotdb-rel/0.12, iotdb-rel/0.13, iotdb-rel/0.14, iot-benchmark
 # Everyday
 name: build & release
 on:
@@ -425,24 +425,24 @@ jobs:
 #          cd ${{ github.workspace }}/iotdb-rel0.13
 #          mvn clean package -DskipTests
 
-      - name: Checkout iotdb-benchmark
+      - name: Checkout iot-benchmark
         uses: actions/checkout@v2
         with:
-          path: iotdb-benchmark
-          repository: 'thulab/iotdb-benchmark'
+          path: iot-benchmark
+          repository: 'thulab/iot-benchmark'
           ref: master
           fetch-depth: 0
 
       - name: Collect benchmark info
         id: benchmark-info
         run: |
-          cd ${{ github.workspace }}/iotdb-benchmark
+          cd ${{ github.workspace }}/iot-benchmark
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
 
       - name: Build benchmark binaries
         id: compile-benchmark
         run: |
-          cd ${{ github.workspace }}/iotdb-benchmark
+          cd ${{ github.workspace }}/iot-benchmark
           mvn clean package -DskipTests
 #          if [ "${{ matrix.java_version }}" = "8" ]; then
 #            mvn clean package -Dmaven.test.skip=True
@@ -457,7 +457,7 @@ jobs:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
 #          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-#          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.11/target/iotdb-0.11-0.0.1.zip
+#          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-0.11/target/iotdb-0.11-0.0.1.zip
 #          asset_name: benchmark-iotdb-0.11-${{ steps.benchmark-info.outputs.commit }}.zip
 #          asset_content_type: application/zip
 #      - name: Upload benchmark-iotdb-0.11
@@ -467,7 +467,7 @@ jobs:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
 #          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-#          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
+#          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
 #          asset_name: benchmark-iotdb-0.11-${{ steps.benchmark-info.outputs.commit }}.zip
 #          asset_content_type: application/zip
 #---0.12
@@ -478,7 +478,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
           asset_name: benchmark-iotdb-0.12-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload benchmark-iotdb-0.12
@@ -488,7 +488,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-0.12/target/iotdb-0.12-0.0.1.zip
           asset_name: benchmark-iotdb-0.12-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---0.13
@@ -499,7 +499,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.13/target/iotdb-0.13-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-0.13/target/iotdb-0.13-0.0.1.zip
           asset_name: benchmark-iotdb-0.13-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload benchmark-iotdb-0.13
@@ -509,7 +509,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/iotdb-0.13/target/iotdb-0.13-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-0.13/target/iotdb-0.13-0.0.1.zip
           asset_name: benchmark-iotdb-0.13-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---tdengine
@@ -520,7 +520,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/tdengine/target/tdengine-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine/target/tdengine-0.0.1.zip
           asset_name: benchmark-tdengine-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload benchmark-tdengine
@@ -530,7 +530,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/tdengine/target/tdengine-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine/target/tdengine-0.0.1.zip
           asset_name: benchmark-tdengine-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---influxdb
@@ -541,7 +541,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/influxdb/target/influxdb-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/influxdb/target/influxdb-0.0.1.zip
           asset_name: benchmark-influxdb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload benchmark-influxdb
@@ -551,7 +551,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/influxdb/target/influxdb-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/influxdb/target/influxdb-0.0.1.zip
           asset_name: benchmark-influxdb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---influxdb2.0
@@ -562,7 +562,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/influxdb-2.0/target/influxdb-2.0-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/influxdb-2.0/target/influxdb-2.0-0.0.1.zip
           asset_name: benchmark-influxdb-2.0-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload benchmark-influxdb2.0
@@ -572,7 +572,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/influxdb-2.0/target/influxdb-2.0-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/influxdb-2.0/target/influxdb-2.0-0.0.1.zip
           asset_name: benchmark-influxdb-2.0-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---timescaledb
@@ -583,7 +583,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/timescaledb/target/timescaledb-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/timescaledb/target/timescaledb-0.0.1.zip
           asset_name: benchmark-timescaledb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload benchmark-timescaledb
@@ -593,7 +593,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/timescaledb/target/timescaledb-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/timescaledb/target/timescaledb-0.0.1.zip
           asset_name: benchmark-timescaledb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 ##---mssqlserver
@@ -604,7 +604,7 @@ jobs:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
 #          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-#          asset_path: ${{ github.workspace }}/iotdb-benchmark/mssqlserver/target/mssqlserver-0.0.1.zip
+#          asset_path: ${{ github.workspace }}/iot-benchmark/mssqlserver/target/mssqlserver-0.0.1.zip
 #          asset_name: benchmark-mssqlserver-${{ steps.benchmark-info.outputs.commit }}.zip
 #          asset_content_type: application/zip
 #      - name: Upload benchmark-mssqlserver
@@ -614,7 +614,7 @@ jobs:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
 #          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-#          asset_path: ${{ github.workspace }}/iotdb-benchmark/mssqlserver/target/mssqlserver-0.0.1.zip
+#          asset_path: ${{ github.workspace }}/iot-benchmark/mssqlserver/target/mssqlserver-0.0.1.zip
 #          asset_name: benchmark-mssqlserver-${{ steps.benchmark-info.outputs.commit }}.zip
 #          asset_content_type: application/zip
 ##---opentsdb
@@ -625,7 +625,7 @@ jobs:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
 #          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-#          asset_path: ${{ github.workspace }}/iotdb-benchmark/opentsdb/target/opentsdb-0.0.1.zip
+#          asset_path: ${{ github.workspace }}/iot-benchmark/opentsdb/target/opentsdb-0.0.1.zip
 #          asset_name: benchmark-opentsdb-${{ steps.benchmark-info.outputs.commit }}.zip
 #          asset_content_type: application/zip
 #      - name: Upload benchmark-opentsdb
@@ -635,7 +635,7 @@ jobs:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
 #          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-#          asset_path: ${{ github.workspace }}/iotdb-benchmark/opentsdb/target/opentsdb-0.0.1.zip
+#          asset_path: ${{ github.workspace }}/iot-benchmark/opentsdb/target/opentsdb-0.0.1.zip
 #          asset_name: benchmark-opentsdb-${{ steps.benchmark-info.outputs.commit }}.zip
 #          asset_content_type: application/zip
 #---kairosdb
@@ -646,7 +646,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/kairosdb/target/kairosdb-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/kairosdb/target/kairosdb-0.0.1.zip
           asset_name: benchmark-kairosdb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
       - name: Upload benchmark-kairosdb
@@ -656,6 +656,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb-benchmark/kairosdb/target/kairosdb-0.0.1.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/kairosdb/target/kairosdb-0.0.1.zip
           asset_name: benchmark-kairosdb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
