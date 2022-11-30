@@ -399,31 +399,10 @@ jobs:
           ref: master
           fetch-depth: 0
 
-#      - name: Checkout iotdb-rel0.12
-#        uses: actions/checkout@v2
-#        with:
-#          path: iotdb-rel0.12
-#          repository: 'apache/iotdb'
-#          ref: rel/0.12
-#          fetch-depth: 0
-#
-#      - name: Checkout iotdb-rel0.13
-#        uses: actions/checkout@v2
-#        with:
-#          path: iotdb-rel0.13
-#          repository: 'apache/iotdb'
-#          ref: rel/0.13
-#          fetch-depth: 0
-
       - name: compile iotdb
         run: |
           cd ${{ github.workspace }}/iotdb-master
           mvn install -DskipTests -am -pl distribution
-#          mvn clean package -DskipTests
-#          cd ${{ github.workspace }}/iotdb-rel0.12
-#          mvn clean package -DskipTests
-#          cd ${{ github.workspace }}/iotdb-rel0.13
-#          mvn clean package -DskipTests
 
       - name: Checkout iot-benchmark
         uses: actions/checkout@v2
@@ -443,7 +422,7 @@ jobs:
         id: compile-benchmark
         run: |
           cd ${{ github.workspace }}/iot-benchmark
-          mvn clean package -DskipTests -am -pl core,influxdb,influxdb-2.0,kairosdb,opentsdb,tdengine,questdb,timescaledb,iotdb-0.14,iotdb-0.13,iotdb-0.12,iotdb-0.11,mssqlserver,sqlite,verification
+          mvn clean package -DskipTests -am -pl core,influxdb,influxdb-2.0,kairosdb,opentsdb,tdengine,questdb,timescaledb,iotdb-0.14,iotdb-0.13,iotdb-0.12,iotdb-0.11,mssqlserver,sqlite
 #---0.12
       - name: Upload benchmark-iotdb-0.12
         if: ${{ matrix.java_version == '8' }}
