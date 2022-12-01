@@ -67,6 +67,17 @@ jobs:
         run: |
           exit 0
           exit 1
+
+  check-in-linux:
+    needs: check-commit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        java_version: [ 8, 11, 13, 15, 17, 18, 19 ]
+        os: [ ubuntu-latest ]
+    steps:
       # set java
       - name: Set java ${{ matrix.java_version }}
         uses: actions/setup-java@v3
@@ -79,12 +90,12 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iotdb
           mvn clean package -DskipTests -am -pl distribution
-          cd ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-1.0.0-SNAPSHOT-all-bin/apache-iotdb-1.0.0-SNAPSHOT-all-bin
-          echo "::set-output name=iotdb_home::$(pwd)"
-      # test start
-      - name: test start
+          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-1.0.0-SNAPSHOT-all-bin/apache-iotdb-1.0.0-SNAPSHOT-all-bin ${{ github.workspace }}/iotdb-binary
+      # test
+      - name: test start on ${{matrix.os}}
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
         run: |
-          cd ${{ steps.build-iotdb.outputs.iotdb_home }}
+          cd ${{ github.workspace }}/iotdb-binary
           nohup sbin/start-confignode.sh > /dev/null 2>&1 &
           cf_pid=$!
           echo "confignode pid is ${cf_pid}"
@@ -135,8 +146,144 @@ jobs:
               exit 1
           fi
 
-  push-commit-id:
+  check-in-windows:
     needs: check-commit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        java_version: [ 8, 11, 13, 15, 17, 18, 19 ]
+        os: [ windows-latest ]
+    steps:
+      # set java
+      - name: Set java ${{ matrix.java_version }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java_version }}
+          distribution: 'zulu'
+      # build iotdb
+      - name: build iotdb
+        id: build-iotdb
+        run: |
+          cd ${{ github.workspace }}/iotdb
+          mvn clean package -DskipTests -am -pl distribution
+          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-1.0.0-SNAPSHOT-all-bin/apache-iotdb-1.0.0-SNAPSHOT-all-bin ${{ github.workspace }}/iotdb-binary
+      # test start on windows
+      - name: test start on ${{matrix.os}}
+        if: ${{ matrix.os == 'windows-2022' }}
+        shell: cmd
+        run: |
+          cd ${{ github.workspace }}/iotdb-binary/sbin
+          set current_dir=%~dp0
+          set superior_dir=%current_dir%\..\
+
+          @REM -----启动confignode-----
+          echo start confignode..
+          start-confignode.bat -d
+          echo
+
+          @REM -----睡10秒-----
+          echo sleep 10..
+          TIMEOUT /T 10 /NOBREAK
+
+          @REM -----检查 confignode PID 是否存在-----
+          @REM 拿到 cn_internal_port
+          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_port"
+          %superior_dir%\conf\iotdb-confignode.properties') do (
+            set cn_internal_port=%%i
+          )
+          @REM 拿到 cn_internal_address
+          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "cn_internal_address"
+          %superior_dir%\conf\iotdb-confignode.properties') do (
+            set cn_internal_address=%%i
+          )
+          @REM 通过这两个连起来拿到pid %%a
+          for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
+            if "%%a"=="" (
+              echo "start confignode failed."
+              exit
+              ) else (
+                echo "start confignode succeed. continue."
+                )
+
+          @REM -----检查 confignode 端口占用-----
+          echo Use netstat check port binding about confignode..
+          netstat -ano|findstr 22277
+
+          @REM -----启动datanode-----
+          echo start datanode..
+          start-datanode.bat -d
+          echo
+
+          @REM -----睡10秒-----
+          echo sleep 10..
+          TIMEOUT /T 10 /NOBREAK
+
+          @REM -----检查 datanode PID 是否存在-----
+          @REM 拿到 dn_rpc_port
+          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_port"
+          %superior_dir%\conf\iotdb-datanode.properties') do (
+            set dn_rpc_port=%%i
+          )
+          @REM @REM 拿到 dn_rpc_address
+          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "dn_rpc_address"
+          %superior_dir%\conf\iotdb-datanode.properties') do (
+            set dn_rpc_address=%%i
+          )
+          for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
+            if "%%a"=="" (
+              echo "start datanode failed."
+              exit
+              ) else (
+                echo "start datanode succeed. continue."
+                )
+          )
+
+          @REM -----检查 datanode 端口占用-----
+          echo Use netstat check port binding about datanode..
+          netstat -ano|findstr 6667
+
+          echo "Both confignode and datanode start suceessed."
+
+          @REM -----停止 datanode-----
+          echo "stop datanode."
+          stop-datanode.bat
+          echo
+
+          @REM -----检查 datanode PID 是否存在-----
+          echo "check datanode pid.."
+          for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
+            if "%%a"=="" (
+              echo "stop datanode succeed. continue."
+              ) else (
+                echo "PID is %%a"
+                echo "stop datanode failed. exit."
+                exit
+                )
+          )
+
+          @REM -----停止 confignode-----
+          echo "stop confignode."
+          stop-confignode.bat
+          echo
+
+          @REM -----检查 confignode PID 是否存在-----
+          echo "check confignode pid.."
+          for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
+            if "%%a"=="" (
+              echo "stop confignode succeed. continue."
+              ) else (
+                echo "PID is %%a"
+                echo "stop confignode failed. exit."
+                exit
+                )
+
+
+
+
+  push-commit-id:
+    needs: [ check-in-linux,check-in-windows ]
     runs-on: ubuntu-latest
     steps:
       # get time
