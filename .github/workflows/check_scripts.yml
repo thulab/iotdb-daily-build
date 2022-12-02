@@ -237,6 +237,7 @@ jobs:
           echo
       # check datanode
       - name: check datanode
+        run: |
           @REM -----睡10秒-----
           echo sleep 10..
           TIMEOUT /T 10 /NOBREAK
@@ -262,6 +263,7 @@ jobs:
           )
       # echo pid
       - name: echo pid
+        run: |
           @REM -----检查 confignode 端口占用-----
           echo Use netstat check port binding about confignode..
           netstat -ano|findstr 22277
@@ -273,12 +275,14 @@ jobs:
           echo "Both confignode and datanode start suceessed."
       # stop datanode
       - name: stop datanode
+        run: |
           @REM -----停止 datanode-----
           echo "stop datanode."
           stop-datanode.bat
           echo
       # check stop datanode
       - name: check stop datanode
+        run: |
           @REM -----检查 datanode PID 是否存在-----
           echo "check datanode pid.."
           for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
@@ -292,12 +296,14 @@ jobs:
           )
       # stop confignode
       - name: stop confignode
+        run: |
           @REM -----停止 confignode-----
           echo "stop confignode."
           stop-confignode.bat
           echo
       # check stop confignode
       - name: check stop confignode
+        run: |
           @REM -----检查 confignode PID 是否存在-----
           echo "check confignode pid.."
           for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
