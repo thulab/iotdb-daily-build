@@ -198,15 +198,16 @@ jobs:
           echo start confignode..
           start-confignode.bat -d
           echo
-      # check confignode
+      # sleep wait confignode start
+      - name: sleep wait confignode start
+        shell: pwsh
+        run: |
+          @REM -----睡10秒-----
+          sleep 10
       - name: check confignode
         if: ${{ matrix.os == 'windows-latest' }}
         shell: cmd
         run: |
-          @REM -----睡10秒-----
-          echo sleep 10..
-          TIMEOUT /T 10 /NOBREAK
-
           @REM -----检查 confignode PID 是否存在-----
           @REM 拿到 cn_internal_port
           for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_port"
@@ -236,13 +237,14 @@ jobs:
           echo start datanode..
           start-datanode.bat -d
           echo
-      # check datanode
-      - name: check datanode
+      # sleep wait datanode start
+      - name: sleep wait datanode start
+        shell: pwsh
         run: |
           @REM -----睡10秒-----
-          echo sleep 10..
-          TIMEOUT /T 10 /NOBREAK
-
+          sleep 10
+      # check datanode
+      - name: check datanode
           @REM -----检查 datanode PID 是否存在-----
           @REM 拿到 dn_rpc_port
           for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_port"
