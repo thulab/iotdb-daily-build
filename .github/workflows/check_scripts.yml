@@ -68,91 +68,91 @@ jobs:
           exit 0
           exit 1
 
-  check-in-linux:
-    needs: check-commit
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        java_version: [ 8, 11, 13, 15, 17, 18, 19 ]
-        os: [ ubuntu-latest ]
-    steps:
-      # set java
-      - name: Set java ${{ matrix.java_version }}
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ matrix.java_version }}
-          distribution: 'zulu'
-      # get iotdb
-      - name: Checkout apache/iotdb
-        uses: actions/checkout@v2
-        with:
-          path: iotdb
-          repository: 'apache/iotdb'
-          ref: 'rel/1.0'
-          fetch-depth: 0
-      # build iotdb
-      - name: build iotdb
-        id: build-iotdb
-        run: |
-          cd ${{ github.workspace }}/iotdb
-          mvn clean package -DskipTests -am -pl distribution
-          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
-      # test
-      - name: test start on ${{matrix.os}}
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          cd ${{ github.workspace }}/iotdb-binary
-          nohup sbin/start-confignode.sh > /dev/null 2>&1 &
-          cf_pid=$!
-          echo "confignode pid is ${cf_pid}"
-          sleep 5
-          nohup sbin/start-datanode.sh > /dev/null 2>&1 &
-          df_pid=$!
-          echo "datanode pid is ${df_pid}"
-          sleep 60
-
-          ps_cf_pid=$(ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
-          ps_df_pid=$(ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
-
-          if [ "${ps_df_pid}1" == "1" ]; then
-              echo "Check start-datanode failed. exit.."
-              echo ------${ps_df_pid}1------
-              exit 1
-          else
-              echo "Check start-datanode Success. "
-          fi
-
-          if [ "${ps_cf_pid}1" == "1" ]; then
-              echo "Check start-confignode failed. exit.."
-              echo ------${ps_cf_pid}1------
-              exit 1
-          else
-              echo "Check start-confignode Success. "
-          fi
-
-          sbin/stop-datanode.sh && sleep 5
-          ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}'
-          ps_df_pid=$(ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
-          if [ "${ps_df_pid}1" == "1" ]; then
-              echo "Check stop-datanode Success. "
-          else
-              echo "Check stop-datanode failed. exit.."
-              echo ------${ps_df_pid}1------
-              exit 1
-          fi
-
-          sbin/stop-confignode.sh && sleep 5
-          ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}'
-          ps_cf_pid=$(ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
-          if [ "${ps_cf_pid}1" == "1" ]; then
-              echo "Check stop-confignode Success. "
-          else
-              echo "Check stop-confignode failed. exit.."
-              echo ------${ps_cf_pid}1------
-              exit 1
-          fi
+#  check-in-linux:
+#    needs: check-commit
+#    runs-on: ${{ matrix.os }}
+#    strategy:
+#      fail-fast: false
+#      max-parallel: 20
+#      matrix:
+#        java_version: [ 8, 11, 13, 15, 17, 18, 19 ]
+#        os: [ ubuntu-latest ]
+#    steps:
+#      # set java
+#      - name: Set java ${{ matrix.java_version }}
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: ${{ matrix.java_version }}
+#          distribution: 'zulu'
+#      # get iotdb
+#      - name: Checkout apache/iotdb
+#        uses: actions/checkout@v2
+#        with:
+#          path: iotdb
+#          repository: 'apache/iotdb'
+#          ref: 'rel/1.0'
+#          fetch-depth: 0
+#      # build iotdb
+#      - name: build iotdb
+#        id: build-iotdb
+#        run: |
+#          cd ${{ github.workspace }}/iotdb
+#          mvn clean package -DskipTests -am -pl distribution
+#          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
+#      # test
+#      - name: test start on ${{matrix.os}}
+#        if: ${{ matrix.os == 'ubuntu-latest' }}
+#        run: |
+#          cd ${{ github.workspace }}/iotdb-binary
+#          nohup sbin/start-confignode.sh > /dev/null 2>&1 &
+#          cf_pid=$!
+#          echo "confignode pid is ${cf_pid}"
+#          sleep 5
+#          nohup sbin/start-datanode.sh > /dev/null 2>&1 &
+#          df_pid=$!
+#          echo "datanode pid is ${df_pid}"
+#          sleep 60
+#
+#          ps_cf_pid=$(ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
+#          ps_df_pid=$(ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
+#
+#          if [ "${ps_df_pid}1" == "1" ]; then
+#              echo "Check start-datanode failed. exit.."
+#              echo ------${ps_df_pid}1------
+#              exit 1
+#          else
+#              echo "Check start-datanode Success. "
+#          fi
+#
+#          if [ "${ps_cf_pid}1" == "1" ]; then
+#              echo "Check start-confignode failed. exit.."
+#              echo ------${ps_cf_pid}1------
+#              exit 1
+#          else
+#              echo "Check start-confignode Success. "
+#          fi
+#
+#          sbin/stop-datanode.sh && sleep 5
+#          ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}'
+#          ps_df_pid=$(ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
+#          if [ "${ps_df_pid}1" == "1" ]; then
+#              echo "Check stop-datanode Success. "
+#          else
+#              echo "Check stop-datanode failed. exit.."
+#              echo ------${ps_df_pid}1------
+#              exit 1
+#          fi
+#
+#          sbin/stop-confignode.sh && sleep 5
+#          ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}'
+#          ps_cf_pid=$(ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
+#          if [ "${ps_cf_pid}1" == "1" ]; then
+#              echo "Check stop-confignode Success. "
+#          else
+#              echo "Check stop-confignode failed. exit.."
+#              echo ------${ps_cf_pid}1------
+#              exit 1
+#          fi
 
   check-in-windows:
     needs: check-commit
@@ -193,6 +193,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         shell: cmd
         run: |
+          cd ${{ github.workspace }}/iotdb-binary/sbin
           @REM -----启动confignode-----
           echo start confignode..
           start-confignode.bat -d
@@ -230,6 +231,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         shell: cmd
         run: |
+          cd ${{ github.workspace }}/iotdb-binary/sbin
           @REM -----启动datanode-----
           echo start datanode..
           start-datanode.bat -d
@@ -275,6 +277,7 @@ jobs:
       # stop datanode
       - name: stop datanode
         run: |
+          cd ${{ github.workspace }}/iotdb-binary/sbin
           @REM -----停止 datanode-----
           echo "stop datanode."
           stop-datanode.bat
@@ -296,6 +299,7 @@ jobs:
       # stop confignode
       - name: stop confignode
         run: |
+          cd ${{ github.workspace }}/iotdb-binary/sbin
           @REM -----停止 confignode-----
           echo "stop confignode."
           stop-confignode.bat
