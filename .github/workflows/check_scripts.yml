@@ -194,7 +194,6 @@ jobs:
         shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-binary/sbin
-          @REM -----启动confignode-----
           echo start confignode..
           start-confignode.bat -d
           echo
@@ -207,18 +206,14 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
         run: |
-          @REM -----检查 confignode PID 是否存在-----
-          @REM 拿到 cn_internal_port
           for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_port"
           %superior_dir%\conf\iotdb-confignode.properties') do (
             set cn_internal_port=%%i
           )
-          @REM 拿到 cn_internal_address
           for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "cn_internal_address"
           %superior_dir%\conf\iotdb-confignode.properties') do (
             set cn_internal_address=%%i
           )
-          @REM 通过这两个连起来拿到pid %%a
           for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
             if "%%a"=="" (
               echo "start confignode failed."
@@ -232,7 +227,6 @@ jobs:
         shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-binary/sbin
-          @REM -----启动datanode-----
           echo start datanode..
           start-datanode.bat -d
           echo
@@ -245,13 +239,10 @@ jobs:
       - name: check datanode
         shell: pwsh
         run: |
-          @REM -----检查 datanode PID 是否存在-----
-          @REM 拿到 dn_rpc_port
           for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_port"
           %superior_dir%\conf\iotdb-datanode.properties') do (
             set dn_rpc_port=%%i
           )
-          @REM @REM 拿到 dn_rpc_address
           for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "dn_rpc_address"
           %superior_dir%\conf\iotdb-datanode.properties') do (
             set dn_rpc_address=%%i
@@ -268,11 +259,9 @@ jobs:
       - name: echo pid
         shell: pwsh
         run: |
-          @REM -----检查 confignode 端口占用-----
           echo Use netstat check port binding about confignode..
           netstat -ano|findstr 22277
 
-          @REM -----检查 datanode 端口占用-----
           echo Use netstat check port binding about datanode..
           netstat -ano|findstr 6667
 
@@ -282,7 +271,6 @@ jobs:
         shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-binary/sbin
-          @REM -----停止 datanode-----
           echo "stop datanode."
           stop-datanode.bat
           echo
@@ -290,7 +278,6 @@ jobs:
       - name: check stop datanode
         shell: pwsh
         run: |
-          @REM -----检查 datanode PID 是否存在-----
           echo "check datanode pid.."
           for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
             if "%%a"=="" (
@@ -306,7 +293,6 @@ jobs:
         shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-binary/sbin
-          @REM -----停止 confignode-----
           echo "stop confignode."
           stop-confignode.bat
           echo
@@ -314,7 +300,6 @@ jobs:
       - name: check stop confignode
         shell: pwsh
         run: |
-          @REM -----检查 confignode PID 是否存在-----
           echo "check confignode pid.."
           for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
             if "%%a"=="" (
