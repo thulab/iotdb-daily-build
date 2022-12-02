@@ -205,7 +205,7 @@ jobs:
           sleep 10
       - name: check confignode
         if: ${{ matrix.os == 'windows-latest' }}
-        shell: cmd
+        shell: pwsh
         run: |
           @REM -----检查 confignode PID 是否存在-----
           @REM 拿到 cn_internal_port
@@ -229,7 +229,7 @@ jobs:
       # start datanode
       - name: start datanode
         if: ${{ matrix.os == 'windows-latest' }}
-        shell: cmd
+        shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-binary/sbin
           @REM -----启动datanode-----
@@ -243,7 +243,7 @@ jobs:
           sleep 10
       # check datanode
       - name: check datanode
-        shell: cmd
+        shell: pwsh
         run: |
           @REM -----检查 datanode PID 是否存在-----
           @REM 拿到 dn_rpc_port
@@ -266,6 +266,7 @@ jobs:
           )
       # echo pid
       - name: echo pid
+        shell: pwsh
         run: |
           @REM -----检查 confignode 端口占用-----
           echo Use netstat check port binding about confignode..
@@ -278,6 +279,7 @@ jobs:
           echo "Both confignode and datanode start suceessed."
       # stop datanode
       - name: stop datanode
+        shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-binary/sbin
           @REM -----停止 datanode-----
@@ -286,6 +288,7 @@ jobs:
           echo
       # check stop datanode
       - name: check stop datanode
+        shell: pwsh
         run: |
           @REM -----检查 datanode PID 是否存在-----
           echo "check datanode pid.."
@@ -300,6 +303,7 @@ jobs:
           )
       # stop confignode
       - name: stop confignode
+        shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-binary/sbin
           @REM -----停止 confignode-----
@@ -308,6 +312,7 @@ jobs:
           echo
       # check stop confignode
       - name: check stop confignode
+        shell: pwsh
         run: |
           @REM -----检查 confignode PID 是否存在-----
           echo "check confignode pid.."
