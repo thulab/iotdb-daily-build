@@ -185,8 +185,8 @@ jobs:
           cd ${{ github.workspace }}/iotdb
           mvn clean package -DskipTests -am -pl distribution
           mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
-      # test start on windows
-      - name: test start on ${{matrix.os}}
+      # start confignode
+      - name: start confignode.
         if: ${{ matrix.os == 'windows-latest' }}
         shell: cmd
         run: |
@@ -198,7 +198,11 @@ jobs:
           echo start confignode..
           start-confignode.bat -d
           echo
-
+      # check confignode
+      - name: check confignode
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: cmd
+        run: |
           @REM -----睡10秒-----
           echo sleep 10..
           TIMEOUT /T 10 /NOBREAK
@@ -222,7 +226,11 @@ jobs:
               ) else (
                 echo "start confignode succeed. continue."
                 )
-
+      # start datanode
+      - name: start datanode
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: cmd
+        run: |
           @REM -----检查 confignode 端口占用-----
           echo Use netstat check port binding about confignode..
           netstat -ano|findstr 22277
@@ -231,7 +239,8 @@ jobs:
           echo start datanode..
           start-datanode.bat -d
           echo
-
+      # check datanode
+      - name: check datanode
           @REM -----睡10秒-----
           echo sleep 10..
           TIMEOUT /T 10 /NOBREAK
@@ -261,12 +270,14 @@ jobs:
           netstat -ano|findstr 6667
 
           echo "Both confignode and datanode start suceessed."
-
+      # stop datanode
+      - name: stop datanode
           @REM -----停止 datanode-----
           echo "stop datanode."
           stop-datanode.bat
           echo
-
+      # check stop datanode
+      - name: check stop datanode
           @REM -----检查 datanode PID 是否存在-----
           echo "check datanode pid.."
           for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
@@ -278,12 +289,14 @@ jobs:
                 exit
                 )
           )
-
+      # stop confignode
+      - name: stop confignode
           @REM -----停止 confignode-----
           echo "stop confignode."
           stop-confignode.bat
           echo
-
+      # check stop confignode
+      - name: check stop confignode
           @REM -----检查 confignode PID 是否存在-----
           echo "check confignode pid.."
           for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
