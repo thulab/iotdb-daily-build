@@ -13,6 +13,7 @@ jobs:
     outputs:
       commit_id: ${{steps.check-cur-status.outputs.commit_id}}
       commit_id_short: ${{ steps.check-cur-status.outputs.commit_id_short }}
+      version: ${{ steps.check-cur-status.outputs.version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -45,6 +46,7 @@ jobs:
           echo "::set-output name=commit_id_short::$( git rev-parse --short HEAD )"
           echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
           echo "::set-output name=commit_user::$(git log | head -n 2 | tail -n 1 | cut -d ' ' -f 2)"
+          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
           echo $(git rev-parse HEAD)
       # check update
       - name: check
@@ -96,7 +98,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iotdb
           mvn clean package -DskipTests -am -pl distribution
-          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-1.0.0-SNAPSHOT-all-bin/apache-iotdb-1.0.0-SNAPSHOT-all-bin ${{ github.workspace }}/iotdb-binary
+          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
       # test
       - name: test start on ${{matrix.os}}
         if: ${{ matrix.os == 'ubuntu-22.04' }}
@@ -182,7 +184,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iotdb
           mvn clean package -DskipTests -am -pl distribution
-          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-1.0.0-SNAPSHOT-all-bin/apache-iotdb-1.0.0-SNAPSHOT-all-bin ${{ github.workspace }}/iotdb-binary
+          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
       # test start on windows
       - name: test start on ${{matrix.os}}
         if: ${{ matrix.os == 'windows-2022' }}
