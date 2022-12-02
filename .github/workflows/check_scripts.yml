@@ -245,6 +245,8 @@ jobs:
           sleep 10
       # check datanode
       - name: check datanode
+        shell: cmd
+        run: |
           @REM -----检查 datanode PID 是否存在-----
           @REM 拿到 dn_rpc_port
           for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_port"
