@@ -198,11 +198,10 @@ jobs:
           echo start confignode..
           start-confignode.bat -d
           echo
-      # sleep wait confignode start
-      - name: sleep wait confignode start
+      # sleep 10s wait confignode start
+      - name: sleep 10s wait confignode start
         shell: pwsh
         run: |
-          @REM -----睡10秒-----
           sleep 10
       - name: check confignode
         if: ${{ matrix.os == 'windows-latest' }}
@@ -237,11 +236,10 @@ jobs:
           echo start datanode..
           start-datanode.bat -d
           echo
-      # sleep wait datanode start
-      - name: sleep wait datanode start
+      # sleep 10s wait datanode start
+      - name: sleep 10s wait datanode start
         shell: pwsh
         run: |
-          @REM -----睡10秒-----
           sleep 10
       # check datanode
       - name: check datanode
