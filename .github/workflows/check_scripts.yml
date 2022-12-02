@@ -231,10 +231,6 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         shell: cmd
         run: |
-          @REM -----检查 confignode 端口占用-----
-          echo Use netstat check port binding about confignode..
-          netstat -ano|findstr 22277
-
           @REM -----启动datanode-----
           echo start datanode..
           start-datanode.bat -d
@@ -264,6 +260,11 @@ jobs:
                 echo "start datanode succeed. continue."
                 )
           )
+      # echo pid
+      - name: echo pid
+          @REM -----检查 confignode 端口占用-----
+          echo Use netstat check port binding about confignode..
+          netstat -ano|findstr 22277
 
           @REM -----检查 datanode 端口占用-----
           echo Use netstat check port binding about datanode..
