@@ -101,7 +101,7 @@ jobs:
           mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
       # test
       - name: test start on ${{matrix.os}}
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           cd ${{ github.workspace }}/iotdb-binary
           nohup sbin/start-confignode.sh > /dev/null 2>&1 &
@@ -187,7 +187,7 @@ jobs:
           mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
       # test start on windows
       - name: test start on ${{matrix.os}}
-        if: ${{ matrix.os == 'windows-2022' }}
+        if: ${{ matrix.os == 'windows-latest' }}
         shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-binary/sbin
