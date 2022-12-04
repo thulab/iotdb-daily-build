@@ -16,12 +16,12 @@ jobs:
           repository: 'xiaoyekanren/iotdb-daily-build'
           ref: master
           fetch-depth: 0
-      - name: get tag list && push commit
+      - name: delete tag
         env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build
-          bash ${program_path}/shell/tag_delete.sh
+          bash shell/tag_delete.sh
 
 # git push commit
       - name: push commit
