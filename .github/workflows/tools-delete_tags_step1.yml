@@ -1,6 +1,6 @@
 # Save only the latest 10 versions
 # Not ready.
-name: tools 删除过早的tag
+name: tools 删除过早的tag 步骤1
 on:
   workflow_dispatch:
 
