@@ -62,7 +62,7 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        iotdb_version: [ rel/0.12,rel/0.13,master ]
+        iotdb_version: [ rel/0.12,rel/0.13,rel/1.0,master ]
         java_version: [ 8,11 ]
         os: [ windows-2022 ]
 #        os: [ windows-2019,windows-2022 ]
@@ -196,7 +196,7 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        iotdb_version: [ rel/0.12,rel/0.13,master ]
+        iotdb_version: [ rel/0.12,rel/0.13,rel/1.0,master ]
         java_version: [ 8,11 ]
     runs-on: ubuntu-latest
 
@@ -249,69 +249,69 @@ jobs:
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
-#---server
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
-        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '8' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
-        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '11' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-#---cli
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip
-        if: ${{ matrix.java_version == '8' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip
-        if: ${{ matrix.java_version == '11' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-#---cluster
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
-        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '8' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
-        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '11'}}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
+##---server
+#      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
+#        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '8' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
+#          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+#      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
+#        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '11' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
+#          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+##---cli
+#      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip
+#        if: ${{ matrix.java_version == '8' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip
+#          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+#      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip
+#        if: ${{ matrix.java_version == '11' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin.zip
+#          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cli-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+##---cluster
+#      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
+#        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '8' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
+#          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+#      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
+#        if: ${{ matrix.iotdb_version != 'master' && matrix.java_version == '11'}}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin.zip
+#          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-cluster-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
 #---grafana-connector-0.12
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-bin.zip
         if: ${{ matrix.iotdb_version == 'rel/0.12' && matrix.java_version == '8' }}
