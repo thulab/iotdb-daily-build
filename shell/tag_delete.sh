@@ -1,11 +1,13 @@
 #!/bin/bash
-cd ${program_path}
+set -e
+
+cd ${{ github.workspace }}/iotdb-daily-build
 
 # tag_list.txt --> 当前tag列表
-git tag > ${progra_path}/tag_list.txt
+git tag > tag_list.txt
 
 # all_line --> 全部行数
-all_line=$(cat ${progra_path}/tag_list.txt | wc -l)
+all_line=$(cat tag_list.txt | wc -l)
 
 # reserved_rows --> 要保留的tag数量
 reserved_rows=20
@@ -17,11 +19,11 @@ if [ ${reserved_rows} -gt ${all_line} ]; then
 fi
 
 # tag_delete.txt --> 要删除的tag
-cat ${progra_path}/tag_list.txt | head -n $(expr $all_line - $reserved_rows) > ${progra_path}/tag_delete.txt
+cat tag_list.txt | head -n $(expr $all_line - $reserved_rows) > tag_delete.txt
 
 # 删除tag
 while read line
 do
     git tag -d ${line}
     git push origin :refs/tags/${line}
-done < ${progra_path}/tag_delete.txt
+done < tag_delete.txt

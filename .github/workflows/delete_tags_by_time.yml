@@ -21,8 +21,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build
-          program_path=$(pwd)
-          /bin/bash ${program_path}/shell/tag_delete.sh
+          bash ${program_path}/shell/tag_delete.sh
 
 # git push commit
       - name: push commit
