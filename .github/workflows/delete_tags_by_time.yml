@@ -19,9 +19,9 @@ jobs:
       - name: get tag list && push commit
         env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          program_path: ${{ github.workspace }}/iotdb-daily-build
         run: |
-          cd ${program_path}
+          cd ${{ github.workspace }}/iotdb-daily-build
+          program_path=$(pwd)
           /bin/bash ${program_path}/shell/tag_delete.sh
 
 # git push commit
