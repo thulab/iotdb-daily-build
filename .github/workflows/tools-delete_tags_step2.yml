@@ -1,6 +1,6 @@
-# 将清理标记为"Draft"的release
-# 20天以前
-# 一次只能删除30个
+# 轻易的不要执行这两步。。
+# 清理10天以前 标记为"Draft"的release，一次只能删除30个
+# 参考https://github.com/marketplace/actions/delete-draft-releases
 name: tools 删除过早的tag 步骤2
 on:
   workflow_dispatch:
@@ -12,6 +12,6 @@ jobs:
       - name: Delete drafts
         uses: hugo19941994/delete-draft-releases@v1.0.0
         with:
-          threshold: 20d
+          threshold: 10d
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
