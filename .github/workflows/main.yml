@@ -221,6 +221,8 @@ jobs:
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
           echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
           echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
+          # To distinguish master and rel/1.0 branches, add temporary variables
+          echo "::set-output name=tmp_branch::$(echo ${{ matrix.iotdb_version }} | sed "s:/::")"
 
       - name: Build Apache IoTDB binaries
         shell: bash
@@ -247,7 +249,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.tmp_branch }}-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
 ##---server
 #      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-server-bin.zip
