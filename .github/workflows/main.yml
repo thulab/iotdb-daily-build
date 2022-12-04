@@ -386,25 +386,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+# set java
       - name: Set java ${{ matrix.java }}
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java_version }}
-
-      - name: Checkout iotdb-master
+# clone iotdb-1.0
+      - name: Checkout iotdb-1.0
         uses: actions/checkout@v2
         with:
           path: iotdb-1.0
           repository: 'apache/iotdb'
           ref: rel/1.0
           fetch-depth: 0
-
+# compile iotdb's jdbc and session
       - name: compile iotdb
         run: |
           cd ${{ github.workspace }}/iotdb-1.0
           mvn clean install -DskipTests -am -pl jdbc,session
 #          mvn install -DskipTests -am -pl distribution
-
+# clone iot-benchmark
       - name: Checkout iot-benchmark
         uses: actions/checkout@v2
         with:
@@ -418,12 +419,12 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iot-benchmark
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
-
+# compile iot-benchmark
       - name: Build benchmark binaries
         id: compile-benchmark
         run: |
           cd ${{ github.workspace }}/iot-benchmark
-          mvn clean package -DskipTests -am -pl core,influxdb-2.0,tdengine-3.0,timescaledb,timescaledb-cluster,iotdb-1.0,iotdb-0.13,iotdb-0.12
+          mvn clean package -DskipTests -am -pl core,iotdb-0.12,iotdb-0.13,iotdb-1.0,influxdb-2.0,timescaledb,timescaledb-cluster,tdengine,tdengine-3.0
 #          mssqlserver,sqlite,kairosdb,questdb,influxdb,opentsdb,tdengine
 #---0.12
       - name: Upload benchmark-iotdb-0.12
@@ -467,47 +468,26 @@ jobs:
           asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-0.13/target/iot-benchmark-iotdb-0.13.zip
           asset_name: iot-benchmark-iotdb-0.13-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
-#---tdengine
-      - name: Upload benchmark-tdengine
+#---1.0
+      - name: Upload benchmark-iotdb-1.0
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine/target/iot-benchmark-tdengine.zip
-          asset_name: iot-benchmark-tdengine-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-1.0/target/iot-benchmark-iotdb-1.0.zip
+          asset_name: iot-benchmark-iotdb-1.0-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
-      - name: Upload benchmark-tdengine
+      - name: Upload benchmark-iotdb-1.0
         if: ${{ matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine/target/iot-benchmark-tdengine.zip
-          asset_name: iot-benchmark-tdengine-${{ steps.benchmark-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-#---tdengine 3.0
-      - name: Upload benchmark-tdengine 3.0
-        if: ${{ matrix.java_version == '8' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine-3.0/target/iot-benchmark-tdengine-3.0.zip
-          asset_name: iot-benchmark-tdengine-3.0-${{ steps.benchmark-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-      - name: Upload benchmark-tdengine
-        if: ${{ matrix.java_version == '11' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine-3.0/target/iot-benchmark-tdengine-3.0.zip
-          asset_name: iot-benchmark-tdengine-3.0-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-1.0/target/iot-benchmark-iotdb-1.0.zip
+          asset_name: iot-benchmark-iotdb-1.0-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---influxdb 2.0
       - name: Upload benchmark-influxdb
@@ -571,4 +551,46 @@ jobs:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iot-benchmark/timescaledb-cluster/target/iot-benchmark-timescaledb-cluster.zip
           asset_name: iot-benchmark-timescaledb-cluster-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_content_type: application/zip
+#---tdengine
+      - name: Upload benchmark-tdengine
+        if: ${{ matrix.java_version == '8' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine/target/iot-benchmark-tdengine.zip
+          asset_name: iot-benchmark-tdengine-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_content_type: application/zip
+      - name: Upload benchmark-tdengine
+        if: ${{ matrix.java_version == '11' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine/target/iot-benchmark-tdengine.zip
+          asset_name: iot-benchmark-tdengine-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_content_type: application/zip
+#---tdengine 3.0
+      - name: Upload benchmark-tdengine 3.0
+        if: ${{ matrix.java_version == '8' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine-3.0/target/iot-benchmark-tdengine-3.0.zip
+          asset_name: iot-benchmark-tdengine-3.0-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_content_type: application/zip
+      - name: Upload benchmark-tdengine
+        if: ${{ matrix.java_version == '11' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iot-benchmark/tdengine-3.0/target/iot-benchmark-tdengine-3.0.zip
+          asset_name: iot-benchmark-tdengine-3.0-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
