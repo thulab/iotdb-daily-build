@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-cd ${{ github.workspace }}/iotdb-daily-build
+cd $1
 
 # tag_list.txt --> 当前tag列表
 git tag > tag_list.txt
