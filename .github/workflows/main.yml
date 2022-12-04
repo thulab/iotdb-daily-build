@@ -231,7 +231,7 @@ jobs:
           mvn clean package -DskipTests
           # -P compile-grafana-plugin
 #---all
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
+      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.tmp_branch }}.zip
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
@@ -239,9 +239,9 @@ jobs:
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.tmp_branch }}-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
+      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.tmp_branch }}.zip
         if: ${{ matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
