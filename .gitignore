@@ -2,3 +2,5 @@
 **/.DS_Store
 __pycache__
 test.txt
+tag_list.txt
+tag_delete.txt
