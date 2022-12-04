@@ -1,5 +1,5 @@
-# Save only the latest 10 versions
-# Not ready.
+# 清理20个之前的tag，约10天以前
+# 删除了tag的release会变成"Draft"状态，需要步骤2清理
 name: tools 删除过早的tag 步骤1
 on:
   workflow_dispatch:

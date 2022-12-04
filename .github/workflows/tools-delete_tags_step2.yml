@@ -1,5 +1,6 @@
-# Save only the latest 10 versions
-# Not ready.
+# 将清理标记为"Draft"的release
+# 20天以前
+# 一次只能删除30个
 name: tools 删除过早的tag 步骤2
 on:
   workflow_dispatch:
