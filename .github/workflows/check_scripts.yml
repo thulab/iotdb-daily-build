@@ -1,5 +1,5 @@
 # 用于在多种不同操作系统，多种jdk环境下，进行iotdb的启停测试
-name: check scripts
+name: iotdb 启动测试
 on:
   #  push:
   #    branches:

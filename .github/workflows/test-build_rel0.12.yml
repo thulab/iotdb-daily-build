@@ -1,4 +1,4 @@
-name: check rel/0.12
+name: test build rel/0.12
 on:
 #  push:
 #    branches:
