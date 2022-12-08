@@ -11,11 +11,12 @@ for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "cn_internal_address"
 set cn_internal_address=%%i
 )
 echo "start loop"
+netstat /ano | findstr %cn_internal_address%:%cn_internal_port%
 for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
 echo %cn_internal_address%:%cn_internal_port%, pid=%%a
 echo "start confignode succeed. continue."
 exit /B
 )
-echo "over loop"
+echo "after loop"
 echo "start confignode failed."
 exit 1
