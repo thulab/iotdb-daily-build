@@ -176,26 +176,30 @@ jobs:
           echo "Both confignode and datanode start suceessed."
       # stop datanode
       - name: stop datanode.
-        shell: pwsh
+        shell: cmd
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           echo "stop datanode."
           stop-datanode.bat
+      - name: sleep 3.
+        shell: pwsh
+        run: |
           sleep 3
-#          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: check stop datanode.
         shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
           step_5_check_stop_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
       - name: stop confignode.
-        shell: pwsh
+        shell: cmd
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           echo "stop confignode."
           stop-confignode.bat
+      - name: sleep 3.
+        shell: pwsh
+        run: |
           sleep 3
-#          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: check stop confignode.
         shell: cmd
         run: |
