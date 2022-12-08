@@ -130,6 +130,7 @@ jobs:
         run: |
           sleep 10
       - name: check start confignode.
+        shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
           check_1_start_confignode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
@@ -146,7 +147,7 @@ jobs:
         run: |
           sleep 10
       - name: check start datanode
-        shell: pwsh
+        shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
           check_2_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
@@ -169,7 +170,7 @@ jobs:
           echo
 #          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: check stop datanode.
-        shell: pwsh
+        shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
           check_3_stop_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
@@ -182,7 +183,7 @@ jobs:
           echo
 #          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: check stop confignode.
-        shell: pwsh
+        shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
           check_4_stop_confignode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
