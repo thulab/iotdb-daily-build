@@ -68,6 +68,128 @@ jobs:
           exit 0
           exit 1
 
+  check-in-windows:
+    needs: check-commit
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        java_version: [ 8 ]
+#        java_version: [ 8, 11, 13, 15, 17, 18, 19 ]
+        os: [ windows-latest ]
+    env:
+      current_dir: ${{ github.workspace }}/iotdb-binary/sbin
+      superior_dir: ${{ github.workspace }}/iotdb-binary
+    steps:
+      # set java
+      - name: Set java ${{ matrix.java_version }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java_version }}
+          distribution: 'zulu'
+      - name: checkout iotdb-daily-build
+        uses: actions/checkout@v2
+        with:
+          path: iotdb-daily-build
+          repository: 'xiaoyekanren/iotdb-daily-build'
+          ref: master
+          fetch-depth: 0
+#      # get iotdb
+#      - name: Checkout apache/iotdb
+#        uses: actions/checkout@v2
+#        with:
+#          path: iotdb
+#          repository: 'apache/iotdb'
+#          ref: 'rel/1.0'
+#          fetch-depth: 0
+      - name: build iotdb
+        id: build-iotdb
+        shell: bash
+        run: |
+#          tmp
+          cd ${{ github.workspace }}
+          wget https://dlcdn.apache.org/iotdb/1.0.0/apache-iotdb-1.0.0-all-bin.zip
+          unzip apache-iotdb-1.0.0-all-bin.zip
+          cd apache-iotdb-1.0.0-all-bin
+          echo "::set-output name=iotdb_home::$(pwd)"
+#          cd ${{ github.workspace }}/iotdb
+#          mvn clean package -DskipTests -am -pl distribution
+#          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
+      - name: start confignode.
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: cmd
+        run: |
+          echo ${{ steps.build-iotdb.outputs.iotdb_home }}
+#          cd ${{ github.workspace }}/iotdb-binary/sbin
+          cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
+          echo start confignode..
+          start-confignode.bat -d
+          echo
+      - name: sleep 10s.
+        shell: pwsh
+        run: |
+          sleep 10
+      - name: check start confignode.
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
+          1-check_start_confignode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
+      - name: start datanode.
+        shell: cmd
+        run: |
+#          cd ${{ github.workspace }}/iotdb-binary/sbin
+          cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
+          echo start datanode..
+          start-datanode.bat -d
+          echo
+      - name: sleep 10s.
+        shell: pwsh
+        run: |
+          sleep 10
+      - name: check start datanode
+        shell: pwsh
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
+          2-check_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
+      # echo pid
+      - name: echo pid.
+        shell: pwsh
+        run: |
+          echo Use netstat check port binding about confignode..
+          netstat -ano|findstr 22277
+          echo Use netstat check port binding about datanode..
+          netstat -ano|findstr 6667
+          echo "Both confignode and datanode start suceessed."
+      # stop datanode
+      - name: stop datanode.
+        shell: cmd
+        run: |
+#          cd ${{ github.workspace }}/iotdb-binary/sbin
+          cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
+          echo "stop datanode."
+          stop-datanode.bat
+          echo
+      # check stop datanode
+      - name: check stop datanode
+        shell: pwsh
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
+          3-check_stop_datanode.bat
+      # stop confignode
+      - name: stop confignode
+        shell: pwsh
+        run: |
+#          cd ${{ github.workspace }}/iotdb-binary/sbin
+          cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
+          echo "stop confignode."
+          stop-confignode.bat
+          echo
+      # check stop confignode
+      - name: check stop confignode
+        shell: pwsh
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
+          4-check_stop_confignode.bat
 #  check-in-linux:
 #    needs: check-commit
 #    runs-on: ${{ matrix.os }}
@@ -153,190 +275,34 @@ jobs:
 #              echo ------${ps_cf_pid}1------
 #              exit 1
 #          fi
-
-  check-in-windows:
-    needs: check-commit
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        java_version: [ 8, 11, 13, 15, 17, 18, 19 ]
-        os: [ windows-latest ]
-    env:
-      current_dir: ${{ github.workspace }}/iotdb-binary/sbin
-      superior_dir: ${{ github.workspace }}/iotdb-binary
-    steps:
-      # set java
-      - name: Set java ${{ matrix.java_version }}
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ matrix.java_version }}
-          distribution: 'zulu'
-      # get iotdb
-      - name: Checkout apache/iotdb
-        uses: actions/checkout@v2
-        with:
-          path: iotdb
-          repository: 'apache/iotdb'
-          ref: 'rel/1.0'
-          fetch-depth: 0
-      # build iotdb
-      - name: build iotdb
-        id: build-iotdb
-        run: |
-          cd ${{ github.workspace }}/iotdb
-          mvn clean package -DskipTests -am -pl distribution
-          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
-      # start confignode
-      - name: start confignode.
-        if: ${{ matrix.os == 'windows-latest' }}
-        shell: cmd
-        run: |
-          cd ${{ github.workspace }}/iotdb-binary/sbin
-          echo start confignode..
-          start-confignode.bat -d
-          echo
-      # sleep 10s wait confignode start
-      - name: sleep 10s wait confignode start
-        shell: pwsh
-        run: |
-          sleep 10
-      - name: check confignode
-        if: ${{ matrix.os == 'windows-latest' }}
-        shell: pwsh
-        run: |
-          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_port"
-          %superior_dir%\conf\iotdb-confignode.properties') do (
-            set cn_internal_port=%%i
-          )
-          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "cn_internal_address"
-          %superior_dir%\conf\iotdb-confignode.properties') do (
-            set cn_internal_address=%%i
-          )
-          for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
-            if "%%a"=="" (
-              echo "start confignode failed."
-              exit
-              ) else (
-                echo "start confignode succeed. continue."
-                )
-      # start datanode
-      - name: start datanode
-        if: ${{ matrix.os == 'windows-latest' }}
-        shell: pwsh
-        run: |
-          cd ${{ github.workspace }}/iotdb-binary/sbin
-          echo start datanode..
-          start-datanode.bat -d
-          echo
-      # sleep 10s wait datanode start
-      - name: sleep 10s wait datanode start
-        shell: pwsh
-        run: |
-          sleep 10
-      # check datanode
-      - name: check datanode
-        shell: pwsh
-        run: |
-          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_port"
-          %superior_dir%\conf\iotdb-datanode.properties') do (
-            set dn_rpc_port=%%i
-          )
-          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "dn_rpc_address"
-          %superior_dir%\conf\iotdb-datanode.properties') do (
-            set dn_rpc_address=%%i
-          )
-          for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
-            if "%%a"=="" (
-              echo "start datanode failed."
-              exit
-              ) else (
-                echo "start datanode succeed. continue."
-                )
-          )
-      # echo pid
-      - name: echo pid
-        shell: pwsh
-        run: |
-          echo Use netstat check port binding about confignode..
-          netstat -ano|findstr 22277
-
-          echo Use netstat check port binding about datanode..
-          netstat -ano|findstr 6667
-
-          echo "Both confignode and datanode start suceessed."
-      # stop datanode
-      - name: stop datanode
-        shell: pwsh
-        run: |
-          cd ${{ github.workspace }}/iotdb-binary/sbin
-          echo "stop datanode."
-          stop-datanode.bat
-          echo
-      # check stop datanode
-      - name: check stop datanode
-        shell: pwsh
-        run: |
-          echo "check datanode pid.."
-          for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
-            if "%%a"=="" (
-              echo "stop datanode succeed. continue."
-              ) else (
-                echo "PID is %%a"
-                echo "stop datanode failed. exit."
-                exit
-                )
-          )
-      # stop confignode
-      - name: stop confignode
-        shell: pwsh
-        run: |
-          cd ${{ github.workspace }}/iotdb-binary/sbin
-          echo "stop confignode."
-          stop-confignode.bat
-          echo
-      # check stop confignode
-      - name: check stop confignode
-        shell: pwsh
-        run: |
-          echo "check confignode pid.."
-          for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
-            if "%%a"=="" (
-              echo "stop confignode succeed. continue."
-              ) else (
-                echo "PID is %%a"
-                echo "stop confignode failed. exit."
-                exit
-                )
-
-  push-commit-id:
-#    needs: [ check-in-linux,check-in-windows ]
-    needs: [ check-in-windows ]
-    runs-on: ubuntu-latest
-    steps:
-      # get time
-      - name: collect common info
-        shell: bash
-        id: sys-info
-        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
-      # get cur-repository
-      - name: Checkout iotdb-daily-build
-        uses: actions/checkout@v2
-        with:
-          path: iotdb-daily-build
-          repository: 'xiaoyekanren/iotdb-daily-build'
-          ref: 'master'
-          fetch-depth: 0
-      # push commit id to repository
-      - name: push commit
-        env:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cd ${{ github.workspace }}/iotdb-daily-build
-          git config --local user.email "876670773+github-actions[bot]@qq.com"
-          git config --local user.name "github-actions[bot]"
-          echo ${{ needs.check-commit.outputs.commit_id }} >> .github/release_history.txt
-          git add .github/release_history.txt
-          git commit -m "${{ steps.sys-info.outputs.date }}-${{ needs.check-commit.outputs.commit_id_short }}"
-          git push -u origin master
+#
+#  push-commit-id:
+##    needs: [ check-in-linux,check-in-windows ]
+#    needs: [ check-in-windows ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      # get time
+#      - name: collect common info
+#        shell: bash
+#        id: sys-info
+#        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
+#      # get cur-repository
+#      - name: Checkout iotdb-daily-build
+#        uses: actions/checkout@v2
+#        with:
+#          path: iotdb-daily-build
+#          repository: 'xiaoyekanren/iotdb-daily-build'
+#          ref: 'master'
+#          fetch-depth: 0
+#      # push commit id to repository
+#      - name: push commit
+#        env:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          cd ${{ github.workspace }}/iotdb-daily-build
+#          git config --local user.email "876670773+github-actions[bot]@qq.com"
+#          git config --local user.name "github-actions[bot]"
+#          echo ${{ needs.check-commit.outputs.commit_id }} >> .github/release_history.txt
+#          git add .github/release_history.txt
+#          git commit -m "${{ steps.sys-info.outputs.date }}-${{ needs.check-commit.outputs.commit_id_short }}"
+#          git push -u origin master
