@@ -108,8 +108,8 @@ jobs:
         shell: pwsh
         run: |
           cd ${{ github.workspace }}
-          wget https://dlcdn.apache.org/iotdb/1.0.0/apache-iotdb-1.0.0-all-bin.zip
-          unzip apache-iotdb-1.0.0-all-bin.zip
+          C:\msys64\usr\bin\wget.exe -O${{ github.workspace }}/apache-iotdb-1.0.0-all-bin.zip https://dlcdn.apache.org/iotdb/1.0.0/apache-iotdb-1.0.0-all-bin.zip
+          7z x apache-iotdb-1.0.0-all-bin.zip
           cd apache-iotdb-1.0.0-all-bin
           echo "::set-output name=iotdb_home::$(pwd)"
 #          cd ${{ github.workspace }}/iotdb
