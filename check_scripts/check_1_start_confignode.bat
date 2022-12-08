@@ -12,10 +12,9 @@ set cn_internal_address=%%i
 )
 
 for /f "tokens=5" %%a in ('netstat /ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
-if "%%a"=="" (
-  echo "start confignode failed."
-  exit
-  ) else (
-    echo "start confignode succeed. continue."
-    )
+echo "start confignode succeed. continue."
+exit /B
 )
+
+echo "start confignode failed."
+exit
