@@ -129,12 +129,14 @@ jobs:
           echo "idb_home: ${{ steps.info-idb.outputs.idb_home }}"
           cp ${{ steps.info-idb.outputs.idb_home }}/check_scripts/step_1_start_confignode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_1_start_confignode.vbs
           cp ${{ steps.info-idb.outputs.idb_home }}/check_scripts/step_3_start_datanode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_3_start_datanode.vbs
-
       - name: start confignode.
         shell: cmd
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           step_1_start_confignode.vbs
+      - name: sleep 10.
+        shell: pwsh
+        run: |
           sleep 10
 #          echo "start confignode.."
 #          .\start-confignode.bat -d
@@ -146,10 +148,13 @@ jobs:
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
           step_2_check_start_confignode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
       - name: start datanode.
-        shell: pwsh
+        shell: cmd
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           step_3_start_datanode.vbs
+      - name: sleep 10.
+        shell: pwsh
+        run: |
           sleep 10
 #          echo start datanode..
 #          start-datanode.bat -d
