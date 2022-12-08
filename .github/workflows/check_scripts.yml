@@ -135,32 +135,26 @@ jobs:
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           step_1_start_confignode.vbs
+          sleep 10
 #          echo "start confignode.."
 #          .\start-confignode.bat -d
 #          echo
 #          cd ${{ github.workspace }}/iotdb-binary/sbin
-      - name: sleep 10s.
-        shell: pwsh
-        run: |
-          sleep 10
       - name: check start confignode.
         shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
           step_2_check_start_confignode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
       - name: start datanode.
-        shell: cmd
+        shell: pwsh
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           step_3_start_datanode.vbs
+          sleep 10
 #          echo start datanode..
 #          start-datanode.bat -d
 #          echo
 #          cd ${{ github.workspace }}/iotdb-binary/sbin
-      - name: sleep 10s.
-        shell: pwsh
-        run: |
-          sleep 10
       - name: check start datanode
         shell: cmd
         run: |
@@ -177,12 +171,12 @@ jobs:
           echo "Both confignode and datanode start suceessed."
       # stop datanode
       - name: stop datanode.
-        shell: cmd
+        shell: pwsh
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           echo "stop datanode."
           stop-datanode.bat
-          echo
+          sleep 3
 #          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: check stop datanode.
         shell: cmd
@@ -195,7 +189,7 @@ jobs:
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           echo "stop confignode."
           stop-confignode.bat
-          echo
+          sleep 3
 #          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: check stop confignode.
         shell: cmd

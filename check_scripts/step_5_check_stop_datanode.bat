@@ -19,3 +19,4 @@ exit 1
 )
 
 echo "stop datanode succeed. continue."
+exit /B

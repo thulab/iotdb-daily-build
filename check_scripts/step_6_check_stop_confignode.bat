@@ -19,3 +19,4 @@ exit 1
 )
 
 echo "start confignode succeed. continue."
+exit /B
