@@ -11,12 +11,11 @@ for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "dn_rpc_address"
 set dn_rpc_address=%%i
 )
 
+netstat /ano | findstr %dn_rpc_address%:%dn_rpc_port%
+
 for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
-if "%%a"=="" (
-  echo "stop datanode succeed. continue."
-  ) else (
-    echo "PID is %%a"
-    echo "stop datanode failed. exit."
-    exit
-    )
+echo "PID is %%a, stop datanode failed. exit."
+exit 1
 )
+
+echo "stop datanode succeed. continue."

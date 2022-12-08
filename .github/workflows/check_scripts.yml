@@ -170,9 +170,9 @@ jobs:
       - name: echo pid.
         shell: pwsh
         run: |
-          echo Use netstat check port binding about confignode..
+          echo "Use netstat check port binding about confignode.."
           netstat -ano|findstr 22277
-          echo Use netstat check port binding about datanode..
+          echo "Use netstat check port binding about datanode.."
           netstat -ano|findstr 6667
           echo "Both confignode and datanode start suceessed."
       # stop datanode
