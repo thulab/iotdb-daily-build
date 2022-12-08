@@ -105,7 +105,7 @@ jobs:
 #          fetch-depth: 0
       - name: build iotdb
         id: build-iotdb
-        shell: bash
+        shell: pwsh
         run: |
           cd ${{ github.workspace }}
           wget https://dlcdn.apache.org/iotdb/1.0.0/apache-iotdb-1.0.0-all-bin.zip
