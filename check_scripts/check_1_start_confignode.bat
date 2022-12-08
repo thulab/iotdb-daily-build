@@ -17,4 +17,4 @@ exit /B
 )
 
 echo "start confignode failed."
-exit
+exit 1
