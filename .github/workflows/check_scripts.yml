@@ -95,6 +95,12 @@ jobs:
           repository: 'xiaoyekanren/iotdb-daily-build'
           ref: master
           fetch-depth: 0
+      - name: iotdb-daily-build info
+        id: info-idb
+        shell: pwsh
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build
+          echo "::set-output name=idb_home::$(pwd)"
 #      # get iotdb
 #      - name: Checkout apache/iotdb
 #        uses: actions/checkout@v2
@@ -115,15 +121,23 @@ jobs:
 #          cd ${{ github.workspace }}/iotdb
 #          mvn clean package -DskipTests -am -pl distribution
 #          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
-      - name: start confignode.
+      - name: check para.
         if: ${{ matrix.os == 'windows-latest' }}
+        shell: pwsh
+        run: |
+          echo "iotdb_home: ${{ steps.build-iotdb.outputs.iotdb_home }}"
+          echo "idb_home: ${{ steps.info-idb.outputs.idb_home }}"
+          cp ${{ steps.info-idb.outputs.idb_home }}/check_scripts/step_1_start_confignode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_1_start_confignode.vbs
+          cp ${{ steps.info-idb.outputs.idb_home }}/check_scripts/step_3_start_datanode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_3_start_datanode.vbs
+
+      - name: start confignode.
         shell: cmd
         run: |
-          echo ${{ steps.build-iotdb.outputs.iotdb_home }}
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
-          echo "start confignode.."
-          .\start-confignode.bat -d
-          echo
+          step_1_start_confignode.vbs
+#          echo "start confignode.."
+#          .\start-confignode.bat -d
+#          echo
 #          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: sleep 10s.
         shell: pwsh
@@ -133,14 +147,15 @@ jobs:
         shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
-          check_1_start_confignode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
+          step_2_check_start_confignode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
       - name: start datanode.
         shell: cmd
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
-          echo start datanode..
-          start-datanode.bat -d
-          echo
+          step_3_start_datanode.vbs
+#          echo start datanode..
+#          start-datanode.bat -d
+#          echo
 #          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: sleep 10s.
         shell: pwsh
@@ -150,7 +165,7 @@ jobs:
         shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
-          check_2_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
+          step_4_check_start_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
       # echo pid
       - name: echo pid.
         shell: pwsh
@@ -173,7 +188,7 @@ jobs:
         shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
-          check_3_stop_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
+          step_5_check_stop_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
       - name: stop confignode.
         shell: pwsh
         run: |
@@ -186,7 +201,7 @@ jobs:
         shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
-          check_4_stop_confignode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
+          step_6_check_stop_confignode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
 
 #  check-in-linux:
 #    needs: check-commit
