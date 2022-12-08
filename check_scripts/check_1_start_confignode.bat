@@ -18,3 +18,4 @@ if "%%a"=="" (
   ) else (
     echo "start confignode succeed. continue."
     )
+)
