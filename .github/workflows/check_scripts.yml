@@ -169,6 +169,7 @@ jobs:
       - name: echo pid.
         shell: cmd
         run: |
+          cd ${{ steps.build-iotdb.outputs.iotdb_home }}
           for /f  "eol=; tokens=2,2 delims==" %i in ('findstr /i "^cn_internal_port" conf\iotdb-confignode.properties') do (  set cn_internal_port=%i )
           for /f  "eol=; tokens=2,2 delims==" %i in ('findstr /i "^cn_internal_address" conf\iotdb-confignode.properties') do (  set cn_internal_address=%i )
           for /f  "eol=; tokens=2,2 delims==" %i in ('findstr /i "^dn_rpc_port" conf\iotdb-datanode.properties') do (  set dn_rpc_port=%i )
