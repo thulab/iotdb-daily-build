@@ -15,7 +15,7 @@ netstat /ano | findstr %dn_rpc_address%:%dn_rpc_port%
 echo "check port"
 for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
 echo "PID is %%a, stop datanode failed. exit."
-exit 1
+exit 0
 )
 echo "finally"
 echo "stop datanode succeed. continue."
