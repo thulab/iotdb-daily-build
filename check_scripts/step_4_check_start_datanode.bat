@@ -11,9 +11,9 @@ for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "dn_rpc_address"
 set dn_rpc_address=%%i
 )
 
-netstat -ano ^| findstr %dn_rpc_address%:%dn_rpc_port% ^| findstr LISTENING
+netstat -ano | findstr %dn_rpc_address%:%dn_rpc_port% | findstr LISTENING
 
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr %dn_rpc_address%:%dn_rpc_port% ^| findstr LISTENING') do (
+for /f "tokens=5" %%a in ('netstat -ano | findstr %dn_rpc_address%:%dn_rpc_port% | findstr LISTENING') do (
 echo "start datanode succeed. continue."
 exit /B
 )

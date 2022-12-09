@@ -171,9 +171,9 @@ jobs:
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}
           echo "Use netstat check port binding about confignode.."
-          netstat -ano ^| findstr 127.0.0.1:22277 ^| findstr LISTENING
+          netstat -ano | findstr 127.0.0.1:22277 | findstr LISTENING
           echo "Use netstat check port binding about datanode.."
-          netstat -ano ^| findstr 127.0.0.1:6667 ^| findstr LISTENING
+          netstat -ano | findstr 127.0.0.1:6667 | findstr LISTENING
           echo "Both confignode and datanode start suceessed."
 #          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_port" conf\iotdb-confignode.properties') do (  set cn_internal_port=%%i )
 #          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_address" conf\iotdb-confignode.properties') do (  set cn_internal_address=%%i )
