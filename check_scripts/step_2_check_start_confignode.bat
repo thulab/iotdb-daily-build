@@ -11,9 +11,9 @@ for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "cn_internal_address"
 set cn_internal_address=%%i
 )
 
-netstat -ano | findstr %cn_internal_address%:%cn_internal_port%
+netstat -ano ^| findstr %cn_internal_address%:%cn_internal_port% ^| findstr LISTENING
 
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr %cn_internal_address%:%cn_internal_port%') do (
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr %cn_internal_address%:%cn_internal_port% ^| findstr LISTENING') do (
 echo "start confignode succeed. continue."
 exit /B
 )
