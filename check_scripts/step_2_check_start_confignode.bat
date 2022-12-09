@@ -13,7 +13,7 @@ set cn_internal_address=%%i
 
 netstat -ano | findstr %cn_internal_address%:%cn_internal_port% | findstr LISTENING
 
-for /f "tokens=5" %%a in ('netstat -ano | findstr %cn_internal_address%:%cn_internal_port% | findstr LISTENING') do (
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr %cn_internal_address%:%cn_internal_port% ^| findstr LISTENING') do (
 echo "start confignode succeed. continue."
 exit /B
 )

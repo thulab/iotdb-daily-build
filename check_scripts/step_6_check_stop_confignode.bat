@@ -13,7 +13,7 @@ set cn_internal_address=%%i
 echo "netstat" %ERRORLEVEL%
 netstat -ano | findstr %cn_internal_address%:%cn_internal_port% | findstr /V TIME_WAIT & set %ERRORLEVEL%=0
 echo "check port" %ERRORLEVEL%
-for /f "tokens=5" %%a in ('netstat -ano | findstr %cn_internal_address%:%cn_internal_port% | findstr /V TIME_WAIT') do (
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr %cn_internal_address%:%cn_internal_port% ^| findstr /V TIME_WAIT') do (
 echo "PID is %%a, stop confignode failed. exit."
 exit 1
 )
