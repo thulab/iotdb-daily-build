@@ -175,9 +175,9 @@ jobs:
           for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_port" conf\iotdb-datanode.properties') do (  set dn_rpc_port=%%i )
           for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_address" conf\iotdb-datanode.properties') do (  set dn_rpc_address=%%i )
           echo "Use netstat check port binding about confignode.."
-          netstat -ano|findstr %cn_internal_address%:%cn_internal_port%
+          netstat -ano ^| findstr %cn_internal_address%:%cn_internal_port%
           echo "Use netstat check port binding about datanode.."
-          netstat -ano|findstr %dn_rpc_address%:%dn_rpc_port%
+          netstat -ano ^| findstr %dn_rpc_address%:%dn_rpc_port%
 
           echo "Both confignode and datanode start suceessed."
       # stop datanode
