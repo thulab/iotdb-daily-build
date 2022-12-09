@@ -11,7 +11,7 @@ for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "dn_rpc_address"
 set dn_rpc_address=%%i
 )
 echo "netstat" %ERRORLEVEL%
-netstat /ano | findstr %dn_rpc_address%:%dn_rpc_port%
+netstat /ano | findstr %dn_rpc_address%:%dn_rpc_port%  & set %ERRORLEVEL%=0
 echo "check port" %ERRORLEVEL%
 for /f "tokens=5" %%a in ('netstat /ano ^| findstr %dn_rpc_address%:%dn_rpc_port%') do (
 echo "PID is %%a, stop datanode failed. exit."
