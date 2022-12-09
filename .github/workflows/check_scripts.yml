@@ -167,7 +167,7 @@ jobs:
           step_4_check_start_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
       # echo pid
       - name: echo pid.
-        shell: pwsh
+        shell: cmd
         run: |
           for /f  "eol=; tokens=2,2 delims==" %i in ('findstr /i "^cn_internal_port" conf\iotdb-confignode.properties') do (  set cn_internal_port=%i )
           for /f  "eol=; tokens=2,2 delims==" %i in ('findstr /i "^cn_internal_address" conf\iotdb-confignode.properties') do (  set cn_internal_address=%i )
