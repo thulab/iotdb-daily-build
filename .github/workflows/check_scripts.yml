@@ -78,9 +78,9 @@ jobs:
         java_version: [ 8 ]
 #        java_version: [ 8, 11, 13, 15, 17, 18, 19 ]
         os: [ windows-latest ]
-    env:
-      current_dir: ${{ github.workspace }}/iotdb-binary/sbin
-      superior_dir: ${{ github.workspace }}/iotdb-binary
+#    env:
+#      current_dir: ${{ github.workspace }}/iotdb-binary/sbin
+#      superior_dir: ${{ github.workspace }}/iotdb-binary
     steps:
       # set java
       - name: Set java ${{ matrix.java_version }}
@@ -88,6 +88,7 @@ jobs:
         with:
           java-version: ${{ matrix.java_version }}
           distribution: 'zulu'
+      # clone i-d-b
       - name: checkout iotdb-daily-build
         uses: actions/checkout@v2
         with:
@@ -95,43 +96,57 @@ jobs:
           repository: 'xiaoyekanren/iotdb-daily-build'
           ref: master
           fetch-depth: 0
+      # collect i-d-b information
       - name: iotdb-daily-build info
         id: info-idb
         shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build
           echo "::set-output name=idb_home::$(pwd)"
-#      # get iotdb
-#      - name: Checkout apache/iotdb
-#        uses: actions/checkout@v2
-#        with:
-#          path: iotdb
-#          repository: 'apache/iotdb'
-#          ref: 'rel/1.0'
-#          fetch-depth: 0
+      # get iotdb
+      - name: Checkout apache/iotdb
+        uses: actions/checkout@v2
+        with:
+          path: iotdb-src
+          repository: 'apache/iotdb'
+          ref: 'rel/1.0'
+          fetch-depth: 0
+      # build iotdb
       - name: build iotdb
         id: build-iotdb
         shell: pwsh
         run: |
-          cd ${{ github.workspace }}
           C:\msys64\usr\bin\wget.exe -O${{ github.workspace }}/apache-iotdb-1.0.1-SNAPSHOT-all-bin-master-e68f560463.zip  https://github.com/xiaoyekanren/iotdb-daily-build/releases/download/2022-12-12-java8-apache-iotdb/apache-iotdb-1.0.1-SNAPSHOT-all-bin-master-e68f560463.zip
           7z x apache-iotdb-1.0.1-SNAPSHOT-all-bin-master-e68f560463.zip
           cd apache-iotdb-1.0.1-SNAPSHOT-all-bin
           echo "::set-output name=iotdb_home::$(pwd)"
-#          cd apache-iotdb-1.0.0-all-bin
-#          7z x apache-iotdb-1.0.0-all-bin.zip
-#          C:\msys64\usr\bin\wget.exe -O${{ github.workspace }}/apache-iotdb-1.0.0-all-bin.zip https://dlcdn.apache.org/iotdb/1.0.0/apache-iotdb-1.0.0-all-bin.zip
-#          cd ${{ github.workspace }}/iotdb
+#          cd ${{ github.workspace }}/iotdb-src
 #          mvn clean package -DskipTests -am -pl distribution
-#          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-binary
+#          mv ${{ github.workspace }}/iotdb-src/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-bin
+#          cd ${{ github.workspace }}/iotdb-bin
+      # get para
+      - name: get netstat info
+        id: get-net-info
+        shell: pwsh
+        run: |
+          echo "get-net-info"
+          cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
+          step_0_get_path.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
+          echo "::set-output name=cn_internal_port::$(echo %cn_internal_port%)"
+          echo "::set-output name=cn_internal_address::$(echo %cn_internal_address%)"
+          echo "::set-output name=dn_rpc_port::$(echo %dn_rpc_port%)"
+          echo "::set-output name=dn_rpc_address::$(echo %dn_rpc_address%)"
       - name: check para.
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
         run: |
           echo "iotdb_home: ${{ steps.build-iotdb.outputs.iotdb_home }}"
           echo "idb_home: ${{ steps.info-idb.outputs.idb_home }}"
+
+          echo "copy start-scripts to <iotdb>/sbin..."
           cp ${{ steps.info-idb.outputs.idb_home }}/check_scripts/step_1_start_confignode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_1_start_confignode.vbs
           cp ${{ steps.info-idb.outputs.idb_home }}/check_scripts/step_3_start_datanode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_3_start_datanode.vbs
+      # start test...
       - name: start confignode.
         shell: cmd
         run: |
@@ -141,10 +156,6 @@ jobs:
         shell: pwsh
         run: |
           sleep 10
-#          echo "start confignode.."
-#          .\start-confignode.bat -d
-#          echo
-#          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: check start confignode.
         shell: cmd
         run: |
@@ -159,29 +170,20 @@ jobs:
         shell: pwsh
         run: |
           sleep 10
-#          echo start datanode..
-#          start-datanode.bat -d
-#          echo
-#          cd ${{ github.workspace }}/iotdb-binary/sbin
       - name: check start datanode
         shell: cmd
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
           step_4_check_start_datanode.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
-      # echo pid
       - name: echo pid.
         shell: cmd
         run: |
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}
           echo "Use netstat check port binding about confignode.."
-          netstat -ano | findstr 127.0.0.1:22277 | findstr LISTENING
+          netstat -ano | findstr ${{ steps.get-net-info.outputs.cn_internal_address }}:${{ steps.get-net-info.outputs.cn_internal_port }} | findstr LISTENING
           echo "Use netstat check port binding about datanode.."
-          netstat -ano | findstr 127.0.0.1:6667 | findstr LISTENING
+          netstat -ano | findstr ${{ steps.get-net-info.outputs.dn_rpc_address }}:${{ steps.get-net-info.outputs.dn_rpc_port }} | findstr LISTENING
           echo "Both confignode and datanode start suceessed."
-#          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_port" conf\iotdb-confignode.properties') do (  set cn_internal_port=%%i )
-#          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_address" conf\iotdb-confignode.properties') do (  set cn_internal_address=%%i )
-#          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_port" conf\iotdb-datanode.properties') do (  set dn_rpc_port=%%i )
-#          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_address" conf\iotdb-datanode.properties') do (  set dn_rpc_address=%%i )
       # stop datanode
       - name: stop datanode.
         shell: cmd
