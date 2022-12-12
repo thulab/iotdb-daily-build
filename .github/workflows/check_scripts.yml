@@ -124,40 +124,12 @@ jobs:
 #          mvn clean package -DskipTests -am -pl distribution
 #          mv ${{ github.workspace }}/iotdb-src/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-bin
 #          cd ${{ github.workspace }}/iotdb-bin
-#      # get para
-#      - name: get netstat info
-#        id: get-net-info
-#        shell: cmd
-#        run: |
-#          echo "get-net-info"
-#          cd ${{ steps.build-iotdb.outputs.iotdb_home }}
-#          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_port" conf\iotdb-confignode.properties') do (  set cn_internal_port=%%i )
-#          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_address" conf\iotdb-confignode.properties') do (  set cn_internal_address=%%i )
-#          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_port" conf\iotdb-datanode.properties') do (  set dn_rpc_port=%%i )
-#          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_address" conf\iotdb-datanode.properties') do (  set dn_rpc_address=%%i )
-#
-#          echo %cn_internal_port% %cn_internal_address% %dn_rpc_port% %dn_rpc_address%
-#          echo "cn_internal_port=%cn_internal_port%" >> $GITHUB_OUTPUT
-#          echo "cn_internal_address=%cn_internal_address%" >> $GITHUB_OUTPUT
-#          echo "dn_rpc_port=%dn_rpc_port%" >> $GITHUB_OUTPUT
-#          echo "dn_rpc_address=%dn_rpc_address%" >> $GITHUB_OUTPUT
-      - name: get netstat info
-        id: get-net-info
-        shell: bash
-        run: |
-          echo "get-net-info"
-          cd apache-iotdb-1.0.1-SNAPSHOT-all-bin
-          echo "cn_internal_port=$(cat conf/iotdb-confignode.properties | grep "^cn_internal_port" | cut -d '=' -f 2) >> $GITHUB_OUTPUT
-          echo "cn_internal_address=$(cat conf/iotdb-confignode.properties | grep "^cn_internal_address" | cut -d '=' -f 2) >> $GITHUB_OUTPUT
-          echo "dn_rpc_port=$(cat conf/iotdb-datanode.properties | grep "^dn_rpc_port" | cut -d '=' -f 2) >> $GITHUB_OUTPUT
-          echo "dn_rpc_address=$(cat conf/iotdb-datanode.properties | grep "^dn_rpc_address" | cut -d '=' -f 2) >> $GITHUB_OUTPUT
       - name: check para.
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
         run: |
           echo "iotdb_home: ${{ steps.build-iotdb.outputs.iotdb_home }}"
           echo "idb_home: ${{ steps.info-idb.outputs.idb_home }}"
-
           echo "copy start-scripts to <iotdb>/sbin..."
           cp ${{ steps.info-idb.outputs.idb_home }}/check_scripts/step_1_start_confignode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_1_start_confignode.vbs
           cp ${{ steps.info-idb.outputs.idb_home }}/check_scripts/step_3_start_datanode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_3_start_datanode.vbs
@@ -193,12 +165,8 @@ jobs:
       - name: echo pid.
         shell: cmd
         run: |
-          cd ${{ steps.build-iotdb.outputs.iotdb_home }}
-          echo "Use netstat check port binding about confignode.."
-          netstat -ano | findstr ${{ steps.get-net-info.outputs.cn_internal_address }}:${{ steps.get-net-info.outputs.cn_internal_port }} | findstr LISTENING
-          echo "Use netstat check port binding about datanode.."
-          netstat -ano | findstr ${{ steps.get-net-info.outputs.dn_rpc_address }}:${{ steps.get-net-info.outputs.dn_rpc_port }} | findstr LISTENING
-          echo "Both confignode and datanode start suceessed."
+          cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
+          step_0_get_path.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
       # stop datanode
       - name: stop datanode.
         shell: cmd
