@@ -282,33 +282,32 @@ jobs:
               exit 1
           fi
 
-#  push-commit-id:
-##    needs: [ check-in-linux,check-in-windows ]
-#    needs: [ check-in-windows ]
-#    runs-on: ubuntu-latest
-#    steps:
-#      # get time
-#      - name: collect common info
-#        shell: bash
-#        id: sys-info
-#        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
-#      # get cur-repository
-#      - name: Checkout iotdb-daily-build
-#        uses: actions/checkout@v2
-#        with:
-#          path: iotdb-daily-build
-#          repository: 'xiaoyekanren/iotdb-daily-build'
-#          ref: 'master'
-#          fetch-depth: 0
-#      # push commit id to repository
-#      - name: push commit
-#        env:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#        run: |
-#          cd ${{ github.workspace }}/iotdb-daily-build
-#          git config --local user.email "876670773+github-actions[bot]@qq.com"
-#          git config --local user.name "github-actions[bot]"
-#          echo ${{ needs.check-commit.outputs.commit_id }} >> .github/release_history.txt
-#          git add .github/release_history.txt
-#          git commit -m "${{ steps.sys-info.outputs.date }}-${{ needs.check-commit.outputs.commit_id_short }}"
-#          git push -u origin master
+  push-commit-id:
+    needs: [ check-in-linux,check-in-windows ]
+    runs-on: ubuntu-latest
+    steps:
+      # get time
+      - name: collect common info
+        shell: bash
+        id: sys-info
+        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
+      # get cur-repository
+      - name: Checkout iotdb-daily-build
+        uses: actions/checkout@v2
+        with:
+          path: iotdb-daily-build
+          repository: 'xiaoyekanren/iotdb-daily-build'
+          ref: 'master'
+          fetch-depth: 0
+      # push commit id to repository
+      - name: push commit
+        env:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ github.workspace }}/iotdb-daily-build
+          git config --local user.email "876670773+github-actions[bot]@qq.com"
+          git config --local user.name "github-actions[bot]"
+          echo ${{ needs.check-commit.outputs.commit_id }} >> .github/release_history.txt
+          git add .github/release_history.txt
+          git commit -m "${{ steps.sys-info.outputs.date }}-${{ needs.check-commit.outputs.commit_id_short }}"
+          git push -u origin master
