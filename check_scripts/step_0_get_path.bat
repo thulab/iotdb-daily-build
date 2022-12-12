@@ -16,7 +16,7 @@ for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_address" %super
 echo %dn_rpc_address%
 
 echo "Use netstat check port binding about confignode.."
-netstat -ano | findstr ${{ steps.get-net-info.outputs.cn_internal_address }}:${{ steps.get-net-info.outputs.cn_internal_port }} | findstr LISTENING
+netstat -ano | findstr %cn_internal_address%:%cn_internal_port% | findstr LISTENING
 echo "Use netstat check port binding about datanode.."
-netstat -ano | findstr ${{ steps.get-net-info.outputs.dn_rpc_address }}:${{ steps.get-net-info.outputs.dn_rpc_port }} | findstr LISTENING
+netstat -ano | findstr %dn_rpc_address%:%dn_rpc_port% | findstr LISTENING
 echo "Both confignode and datanode start suceessed."
