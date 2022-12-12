@@ -132,6 +132,7 @@ jobs:
           echo "get-net-info"
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
           step_0_get_path.bat ${{ steps.build-iotdb.outputs.iotdb_home }}
+          echo %cn_internal_port% %cn_internal_address% %dn_rpc_port% %dn_rpc_address%
           echo "::set-output name=cn_internal_port::$(echo %cn_internal_port%)"
           echo "::set-output name=cn_internal_address::$(echo %cn_internal_address%)"
           echo "::set-output name=dn_rpc_port::$(echo %dn_rpc_port%)"
