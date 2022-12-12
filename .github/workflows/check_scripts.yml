@@ -146,7 +146,7 @@ jobs:
         shell: bash
         run: |
           echo "get-net-info"
-          cd ${{ github.workspace }}/apache-iotdb-1.0.1-SNAPSHOT-all-bin
+          cd apache-iotdb-1.0.1-SNAPSHOT-all-bin
           echo "cn_internal_port=$(cat conf/iotdb-confignode.properties | grep "^cn_internal_port" | cut -d '=' -f 2) >> $GITHUB_OUTPUT
           echo "cn_internal_address=$(cat conf/iotdb-confignode.properties | grep "^cn_internal_address" | cut -d '=' -f 2) >> $GITHUB_OUTPUT
           echo "dn_rpc_port=$(cat conf/iotdb-datanode.properties | grep "^dn_rpc_port" | cut -d '=' -f 2) >> $GITHUB_OUTPUT
