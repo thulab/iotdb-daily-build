@@ -130,13 +130,13 @@ jobs:
         shell: cmd
         run: |
           echo "get-net-info"
-          cd ${{ github.workspace }}/${{ steps.build-iotdb.outputs.iotdb_home }}
+          cd ${{ steps.build-iotdb.outputs.iotdb_home }}
           echo 1
           for /f  "eol=; tokens=2,2 delims==" %i in ('findstr /i "^cn_internal_port" conf\iotdb-confignode.properties') do (  set cn_internal_port=%i )
           echo 2
-          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^cn_internal_address" conf\iotdb-confignode.properties') do (  set cn_internal_address=%%i )
-          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_port" conf\iotdb-datanode.properties') do (  set dn_rpc_port=%%i )
-          for /f  "eol=; tokens=2,2 delims==" %%i in ('findstr /i "^dn_rpc_address" conf\iotdb-datanode.properties') do (  set dn_rpc_address=%%i )
+          for /f  "eol=; tokens=2,2 delims==" %i in ('findstr /i "^cn_internal_address" conf\iotdb-confignode.properties') do (  set cn_internal_address=%i )
+          for /f  "eol=; tokens=2,2 delims==" %i in ('findstr /i "^dn_rpc_port" conf\iotdb-datanode.properties') do (  set dn_rpc_port=%i )
+          for /f  "eol=; tokens=2,2 delims==" %i in ('findstr /i "^dn_rpc_address" conf\iotdb-datanode.properties') do (  set dn_rpc_address=%i )
 
           echo %cn_internal_port% %cn_internal_address% %dn_rpc_port% %dn_rpc_address%
           echo "::set-output name=cn_internal_port::$(echo %cn_internal_port%)"
