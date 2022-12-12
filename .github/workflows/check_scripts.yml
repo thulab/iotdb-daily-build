@@ -127,7 +127,7 @@ jobs:
       # get para
       - name: get netstat info
         id: get-net-info
-        shell: pwsh
+        shell: cmd
         run: |
           echo "get-net-info"
           cd ${{ github.workspace }}/iotdb-daily-build/check_scripts
