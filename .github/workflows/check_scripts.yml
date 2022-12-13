@@ -235,11 +235,11 @@ jobs:
           nohup sbin/start-confignode.sh > /dev/null 2>&1 &
           cf_pid=$!
           echo "confignode pid is ${cf_pid}"
-          sleep 5
+          sleep 10
           nohup sbin/start-datanode.sh > /dev/null 2>&1 &
           df_pid=$!
           echo "datanode pid is ${df_pid}"
-          sleep 60
+          sleep 5
 
           ps_cf_pid=$(ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
           ps_df_pid=$(ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
@@ -260,24 +260,28 @@ jobs:
               echo "Check start-confignode Success. "
           fi
 
-          sbin/stop-datanode.sh && sleep 5
+          sbin/stop-datanode.sh
+          sleep 5
           ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}'
           ps_df_pid=$(ps -aux | grep $df_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
           if [ "${ps_df_pid}1" == "1" ]; then
               echo "Check stop-datanode Success. "
           else
               echo "Check stop-datanode failed. exit.."
+              ps -aux | grep $df_pid
               echo ------${ps_df_pid}1------
               exit 1
           fi
 
-          sbin/stop-confignode.sh && sleep 5
+          sbin/stop-confignode.sh
+          sleep 5
           ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}'
           ps_cf_pid=$(ps -aux | grep $cf_pid | grep -v 'grep --color=auto' | grep -v '[g]rep' | awk '{print $2}')
           if [ "${ps_cf_pid}1" == "1" ]; then
               echo "Check stop-confignode Success. "
           else
               echo "Check stop-confignode failed. exit.."
+              ps -aux | grep $cf_pid
               echo ------${ps_cf_pid}1------
               exit 1
           fi
