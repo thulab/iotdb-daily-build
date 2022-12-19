@@ -1,6 +1,6 @@
 # title  
-![daily-build](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/main.yml/badge.svg)
-![check-status](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/check_scripts.yml/badge.svg)
+![daily-build](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/main.yml/badge.svg)  
+![check-status](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/check_scripts.yml/badge.svg)  
 
 
 | 版本   | 打包项                                                                                   |
