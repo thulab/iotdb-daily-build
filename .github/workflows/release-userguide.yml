@@ -27,7 +27,7 @@ jobs:
       - name: checkout iotdb-daily-build
         uses: actions/checkout@v2
         with:
-          path: test_iotdb_pandoc
+          path: iotdb-daily-build
           repository: 'thulab/iotdb-daily-build'
           ref: master
           fetch-depth: 0
