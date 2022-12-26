@@ -42,7 +42,6 @@ jobs:
           cd ${{ github.workspace }}/iotdb-daily-build/program/UserGuide_Publish
           python3 startup.py ${doc_abs_path}
           
-          cd ${{ github.workspace }}
           zip result.zip result.docx
           mv result.zip ${{ github.workspace }}/result.zip
 #          cat include_format.txt
