@@ -2,55 +2,40 @@
 ![daily-build](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/main.yml/badge.svg)  
 ![check-status](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/check_scripts.yml/badge.svg)  
 
+## daily-build (main.yml)
+build iotdb's and iot-benchmark's package every day. 
+### iotdb
 
-| 版本   | 打包项                                                                                   |
-|------|---------------------------------------------------------------------------------------|
-| 0.12 | all, server, cli, grafana-connector, client-cpp                                       |
-| 0.13 | all, server, cli, grafana-connector, grafana-plugin, client-cpp                       |
-| 0.14 | all, server, cli, grafana-connector, grafana-plugin, datanode, confignode, client-cpp |
-
-
-
-| iotdb             | 0.11 | 0.12 | 0.13 | 0,14 |
-|-------------------|------|------|------|------|
-| all               |
-| server            |
-| cli               |
-| grafana-connector |
-| grafana-plugin    |
-| client-cpp        |
+| iotdb             | 0.12.x | 0.13.x | 1.0.x | master|
+|-------------------|--------|--------|-------|-------|
+| all               |✓|✓|✓|✓|
+| grafana-connector |✓|✓|-------|-------|
+| grafana-plugin    |--------|✓|-------|-------|
+| client-cpp        |✓|✓|✓|✓|
 | python            |
 | spark             |
 | hadoop            |
+| jdbc              |
+
+### iot-benchmark
 
 | iotdb-benchmark |
 |-----------------|
-| 0.11            |
-| 0.12            |
-| 0.13            |
-| 0.14            |
-| influxdb        |
-| kairosdb        |
+| iotdb-0.12      |
+| iotdb-0.13      |
+| iotdb-1.0.x     |
+| iotdb-master    |
+| influxdb-2.0    |
+| tdengine        |
+| tdengine-3.0    |
 | timescaledb     |
-| taosd           |
+| timescaledb-cluster|
 
-## 当前打包内容
-当前计划，分成3个
-1. 主
-   1. 打包all，server，这些
-2. windows打包client-cpp
-   1. 只打包windwos相关内容，当前只有client-cpp-win
-   2. 为了提速
-      1. 把mvn缓存拿过来用
-      2. 新建个仓库，寸一份打包完成的boost
-3. benchmark
-   1. 打包各个benchmark的包
+## start-stop-test (check_scripts.yml)
+Execute the start-stop test case of the iotdb rel/1.0 branch every day.  
 
-## tips
-### push到另外一个仓库
-不太好弄
-
-
+## release user-guide (release-userguide.yml)
+one short to release user-guidy, need to 
 
 ## test_upload
 据说github action屏蔽掉了 scp ssh 诸如此类命令，测试也已失败告终，所以要使用 marketplace 上封装好的方法。   
