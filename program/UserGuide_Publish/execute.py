@@ -11,7 +11,7 @@ def execute(list_format):
             for i in iii:
                 list_format = i
                 break
-    os.system('pandoc -f markdown -t docx -o result.docx --reference-doc Templates/template_timecho.docx --log=log.txt %s' % list_format)
+    os.system('pandoc -f markdown -t docx -o result.docx --reference-doc Templates/template_iotdb.docx --log=log.txt %s' % list_format)
     print('生成文件是result.docx')
 
 

@@ -41,6 +41,7 @@ jobs:
           doc_abs_path=`pwd`
           cd ${{ github.workspace }}/iotdb-daily-build/program/UserGuide_Publish
           python3 startup.py ${doc_abs_path}
+          ls
           
           zip result.zip result.docx
           mv result.zip ${{ github.workspace }}/result.zip
