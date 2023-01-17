@@ -40,9 +40,10 @@ if __name__ == '__main__':
     # 1、输入文档绝对路径，拷贝
     file_path = mkdir_tmp_folder(check_inputpath(sys.argv[1]))
     # 2、将文件路径下文件列出来，写入include.txt里
-    scan_directory(file_path)
+    # scan_directory(file_path)
     # 3、格式化列表，相对路径变为绝对路径，赋值字符串给format_list
-    format_list = format_file_list('include.txt')
+    # format_list = format_file_list('include.txt')
+    format_list = format_file_list('include_timecho.txt')
     # 4、修改文件路径下所有md文件的图片引用格式
     format_md_img(file_path)
     # 5、启动pandoc转格式
