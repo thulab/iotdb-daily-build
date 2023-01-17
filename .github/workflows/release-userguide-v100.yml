@@ -44,28 +44,6 @@ jobs:
           
           zip result.zip result.docx
           mv result.zip ${{ github.workspace }}/result.zip
-#          cat include_format.txt
-#          file_list=$(cat include_format.txt)
-#          pandoc -f markdown -t docx -o result.docx --reference-doc template.docx --log=log "$file_list"
-#          cd ${{ github.workspace }}
-#          find ./ -name "result.docx"
-
-## 上传iotdb包
-#      - name: copy file via ssh password
-#        uses: appleboy/scp-action@master
-#        with:
-#          host: ${{ secrets.FILE_SERVER_IP }}
-#          username: ${{ secrets.FILE_SERVER_IP_USER }}
-#          password: ${{ secrets.FILE_SERVER_IP_PASSWORD }}
-#          port: ${{ secrets.FILE_SERVER_IP_PORT }}
-#          timeout: 120s
-#          command_timeout: 60m
-##          source: "${{ github.workspace }}/test_iotdb_pandoc/pandoc/result.docx"
-#          source: "${{ github.workspace }}/test_iotdb_pandoc.tar.gz"
-#          target: "files"
-#          tar_tmp_path: "/tmp"
-#          # strip_components - remove the specified number of leading path elements.
-#          # strip_components: 3
 
       - name: collect common info
         shell: bash

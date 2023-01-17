@@ -18,7 +18,7 @@ python3 startup.py
 
 ## 四.pandoc使用方式 
 ```shell script
-pandoc -f markdown -t docx --reference-doc template.docx -o output.docx -N [file_list]
+pandoc -f markdown -t docx --reference-doc template_iotdb.docx -o output.docx -N [file_list]
 -f [str] 输入文件格式
 -t [str] 输出文件格式
 --reference-doc [file] 模板文件

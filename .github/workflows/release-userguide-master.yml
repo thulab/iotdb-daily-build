@@ -46,7 +46,7 @@ jobs:
           mv result.zip ${{ github.workspace }}/result.zip
 #          cat include_format.txt
 #          file_list=$(cat include_format.txt)
-#          pandoc -f markdown -t docx -o result.docx --reference-doc template.docx --log=log "$file_list"
+#          pandoc -f markdown -t docx -o result.docx --reference-doc template_iotdb.docx --log=log "$file_list"
 #          cd ${{ github.workspace }}
 #          find ./ -name "result.docx"
 
