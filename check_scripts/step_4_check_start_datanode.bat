@@ -19,4 +19,5 @@ exit /B
 )
 
 echo "start datanode failed."
+cat %superior_dir%\logs\log_datanode_all.log
 exit 1

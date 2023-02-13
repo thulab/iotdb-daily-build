@@ -19,4 +19,5 @@ exit /B
 )
 
 echo "start confignode failed."
+cat %superior_dir%\logs\log_confignode_all.log
 exit 1

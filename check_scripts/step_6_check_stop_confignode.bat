@@ -15,6 +15,7 @@ netstat -ano | findstr %cn_internal_address%:%cn_internal_port% | findstr /V TIM
 echo "check port" %ERRORLEVEL%
 for /f "tokens=5" %%a in ('netstat -ano ^| findstr %cn_internal_address%:%cn_internal_port% ^| findstr /V TIME_WAIT') do (
 echo "PID is %%a, stop confignode failed. exit."
+cat %superior_dir%\logs\log_confignode_all.log
 exit 1
 )
 echo "finally" %ERRORLEVEL%

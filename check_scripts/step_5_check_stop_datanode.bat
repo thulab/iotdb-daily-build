@@ -15,6 +15,7 @@ netstat -ano | findstr %dn_rpc_address%:%dn_rpc_port% | findstr LISTENING  & set
 echo "check port" %ERRORLEVEL%
 for /f "tokens=5" %%a in ('netstat -ano ^| findstr %dn_rpc_address%:%dn_rpc_port% ^| findstr LISTENING') do (
 echo "PID is %%a, stop datanode failed. exit."
+cat %superior_dir%\logs\log_datanode_all.log
 exit 1
 )
 echo "finally" %ERRORLEVEL%
