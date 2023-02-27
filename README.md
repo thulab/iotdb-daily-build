@@ -1,9 +1,9 @@
 # title  
 ![daily-build](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/main.yml/badge.svg)  
-![check-status](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/check_scripts.yml/badge.svg)  
+![check-status](https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/workflow-check-start_stop.yml/badge.svg)  
 
 <img src="https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/main.yml/badge.svg" width = "350" height = "50" />
-<img src="https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/check_scripts.yml/badge.svg" width = "350" height = "50" />
+<img src="https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/workflow-check-start_stop.yml/badge.svg" width = "350" height = "50" />
 
 
 
