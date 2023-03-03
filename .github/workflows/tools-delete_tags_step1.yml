@@ -22,7 +22,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build
-          bash shell/tag_delete.sh "${{ github.workspace }}/iotdb-daily-build"
+          bash action-tools-delete_tags/tag_delete.sh "${{ github.workspace }}/iotdb-daily-build"
 
 # git push commit
       - name: push commit
@@ -32,8 +32,7 @@ jobs:
           cd ${{ github.workspace }}/iotdb-daily-build
           git config --local user.email "876670773+github-actions[bot]@qq.com"
           git config --local user.name "github-actions[bot]"
-          cat tag_delete.txt >> history/deleted_tags.txt
-          git add history/deleted_tags.txt
+          cat tag_delete.txt >> action-tools-delete_tags/history/deleted_tags.txt
+          git add action-tools-delete_tags/history/deleted_tags.txt
           git commit -m "$(date +"%Y-%m-%d") delete more tags."
           git push -u origin master
-
