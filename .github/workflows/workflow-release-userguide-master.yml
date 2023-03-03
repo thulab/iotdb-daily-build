@@ -34,38 +34,16 @@ jobs:
 # generate
       - name: generate
         env:
-          PYTHONPATH: ${{ github.workspace }}/iotdb-daily-build/program/UserGuide_Publish
+          PYTHONPATH: ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/UserGuide_Publish
+          PATH: $PATH:${{ github.workspace }}/pandoc-2.19/bin
         run: |
-          export PATH=$PATH:${{ github.workspace }}/pandoc-2.19/bin
           cd ${{ github.workspace }}/iotdb/docs/zh/UserGuide
           doc_abs_path=`pwd`
-          cd ${{ github.workspace }}/iotdb-daily-build/program/UserGuide_Publish
+          cd ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/UserGuide_Publish
           python3 startup.py ${doc_abs_path}
           
           zip result.zip result.docx
           mv result.zip ${{ github.workspace }}/result.zip
-#          cat include_format.txt
-#          file_list=$(cat include_format.txt)
-#          pandoc -f markdown -t docx -o result.docx --reference-doc template_iotdb.docx --log=log "$file_list"
-#          cd ${{ github.workspace }}
-#          find ./ -name "result.docx"
-
-## 上传iotdb包
-#      - name: copy file via ssh password
-#        uses: appleboy/scp-action@master
-#        with:
-#          host: ${{ secrets.FILE_SERVER_IP }}
-#          username: ${{ secrets.FILE_SERVER_IP_USER }}
-#          password: ${{ secrets.FILE_SERVER_IP_PASSWORD }}
-#          port: ${{ secrets.FILE_SERVER_IP_PORT }}
-#          timeout: 120s
-#          command_timeout: 60m
-##          source: "${{ github.workspace }}/test_iotdb_pandoc/pandoc/result.docx"
-#          source: "${{ github.workspace }}/test_iotdb_pandoc.tar.gz"
-#          target: "files"
-#          tar_tmp_path: "/tmp"
-#          # strip_components - remove the specified number of leading path elements.
-#          # strip_components: 3
 
       - name: collect common info
         shell: bash
@@ -74,8 +52,8 @@ jobs:
           cd ${{ github.workspace }}/iotdb
           echo "date=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
           echo "commit_id=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-#          echo "::set-output name=date::$(date +"%Y-%m-%d")"
 
+# 创建release
       - name: Create UserGuide release
         id: create-release
         uses: actions/create-release@v1
@@ -88,6 +66,7 @@ jobs:
           draft: false
           prerelease: false
 
+# 上传docs.zip到release
       - name: Upload docs
         uses: actions/upload-release-asset@v1
         env:

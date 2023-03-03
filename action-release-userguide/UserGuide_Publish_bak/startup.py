@@ -13,14 +13,14 @@ def mkdir_tmp_folder(paht):  # 创建临时目录
     tmp_doc = os.path.join(os.getcwd(), 'iotdb')
     os.system('mkdir -p %s' % tmp_doc)
     os.system('cp -r %s/* %s/' % (paht, tmp_doc))
-    os.system('mkdir -p img')%
-#     return tmp_doc
-#
-#
-# # def rm_tmp_folder(paht):  # 删除临时目录
-# #     os.system('rm -rf %s' % paht)
-# #     os.system('rm -rf %s' % os.path.join(os.getcwd(), 'img'))
-# #     os.system('rm -rf %s'  os.path.join(os.getcwd(), 'include_format.txt'))
+    os.system('mkdir -p img')
+    return tmp_doc
+
+
+# def rm_tmp_folder(paht):  # 删除临时目录
+#     os.system('rm -rf %s' % paht)
+#     os.system('rm -rf %s' % os.path.join(os.getcwd(), 'img'))
+#     os.system('rm -rf %s' % os.path.join(os.getcwd(), 'include_format.txt'))
 
 
 def check_inputpath(paht):  # 判断输入的路径是否正确
