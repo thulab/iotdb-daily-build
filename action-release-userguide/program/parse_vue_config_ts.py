@@ -87,7 +87,7 @@ def get_json_config_list(iotdb_path):
     check_path(iotdb_path)  # 检查路径是否为真
     config_list = []
     for config_file in get_site_zh_ts_list(iotdb_path):
-        with open(config_file, 'r') as config:
+        with open(config_file, 'r', encoding='utf-8') as config:
             json_config = format_json(config.read())
         try:
             config_list.append(json.loads(json_config))
