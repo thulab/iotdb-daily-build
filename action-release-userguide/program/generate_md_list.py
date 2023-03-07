@@ -1,6 +1,7 @@
 # coding=utf-8
 import json
 import os
+import sys
 
 
 def get_site_zh_ts_list(iotdb_path):
@@ -74,7 +75,16 @@ def format_json(config):
     return config
 
 
+def check_path(path):
+    if os.path.isdir(path):
+        return
+    else:
+        print('error: %s 不是一个路径' % path)
+        exit()
+
+
 def get_json_config_list(iotdb_path):
+    check_path(iotdb_path)  # 检查路径是否为真
     config_list = []
     for config_file in get_site_zh_ts_list(iotdb_path):
         with open(config_file, 'r') as config:
@@ -90,4 +100,10 @@ def get_json_config_list(iotdb_path):
 
 if __name__ == '__main__':
     iotdb_home = '/Users/zhangzhengming/Src/Java/iotdb'
-    get_json_config_list(iotdb_home)
+    if len(sys.argv) == 1:
+        get_json_config_list(iotdb_home)
+    elif len(sys.argv) == 2:
+        get_json_config_list(sys.argv[1])
+    else:
+        print('error: 只可以提供一个参数或者不提供参数')
+        exit()
