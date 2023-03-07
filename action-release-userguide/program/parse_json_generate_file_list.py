@@ -54,6 +54,7 @@ def generate_different_version_md_dict(iotdb_path):
     # for i in md_dict.keys():
     #     print(i)
     #     print(md_dict.get(i))
+    return md_dict
 
 
 if __name__ == '__main__':

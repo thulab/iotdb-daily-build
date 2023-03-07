@@ -3,7 +3,6 @@ import sys
 
 from format_md_img import format_md_img
 from format_file_list import format_file_list
-from scan_directory import scan_directory
 from execute import execute
 
 import os
