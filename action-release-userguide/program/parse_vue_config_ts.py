@@ -91,9 +91,9 @@ def get_json_config_list(iotdb_path):
             json_config = format_json(config.read())
         try:
             config_list.append(json.loads(json_config))
-            print('info: 文件 %s 已加载' % config_file)
+            print('info: 文件 %s 转换json完成.' % config_file)
         except Exception as abc:
-            print('error: 文件 %s 有问题: %s\n' % (config_file, abc))
+            print('error: 文件 %s 有问题:\n%s\n' % (config_file, abc))
             print(json_config)
     return config_list
 
