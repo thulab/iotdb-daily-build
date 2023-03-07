@@ -1,5 +1,6 @@
 # coding=utf-8
 import parse_vue_config_ts
+import sys
 
 
 def generate_json_file_list(iotdb_path):
@@ -47,14 +48,20 @@ def generate_md_dict(json_file_list):  # json_file_list就是多个配置文件�
     return md_dict
 
 
-def main(iotdb_path):
+def generate_different_version_md_dict(iotdb_path):
     json_file_list = generate_json_file_list(iotdb_path)
     md_dict = generate_md_dict(json_file_list)
-    for i in md_dict.keys():
-        print(i)
-        print(md_dict.get(i))
+    # for i in md_dict.keys():
+    #     print(i)
+    #     print(md_dict.get(i))
 
 
 if __name__ == '__main__':
     iotdb_home = 'D:\\Src\\Java\\iotdb'
-    main(iotdb_home)
+    if len(sys.argv) == 1:
+        generate_different_version_md_dict(iotdb_home)
+    elif len(sys.argv) == 2:
+        generate_different_version_md_dict(sys.argv[1])
+    else:
+        print('error: 只可以提供一个参数或者不提供参数')
+        exit()
