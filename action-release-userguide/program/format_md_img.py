@@ -3,6 +3,7 @@ import os
 import sys
 import re
 import subprocess
+import shutil
 
 
 def update_file_by_line(file, line, new_line):
@@ -18,6 +19,7 @@ def update_file_by_line(file, line, new_line):
 
 
 def format_md_img(paht):
+    print(paht)
     """
     file_list_2: 包含全部格式不对链接的md文件
     file_name: file_list_2中的一条
@@ -121,21 +123,27 @@ def format_md_img(paht):
     print('一共下载并替换了%s个url为本地图片\n' % count_url)
 
 
-def generate_user_guide_abs_path(string):
-    return string + 'docs/zh/UserGuide'
+def get_cur_abs_path():
+    return os.path.dirname(os.path.abspath(sys.argv[0]))
 
 
-if __name__ == '__main__':
-    # iotdb_home = 'D:\\Src\\Java\\iotdb'
-    iotdb_home = '/Users/zhangzhengming/Src/Java/iotdb'
-    user_guide_abs_path = generate_user_guide_abs_path(iotdb_home)
-    if len(sys.argv) == 1:
-        format_md_img(user_guide_abs_path)
-    elif len(sys.argv) == 2:
-        format_md_img(sys.argv[1])
-    else:
-        print('error: 只可以提供一个参数或者不提供参数')
-        exit()
+def copy_user_guide_folder_to_cur_folder(user_guide_abs_path, cur_dir):
+    print('info: 准备复制 %s 到 %s' % (user_guide_abs_path, cur_dir))
+    shutil.copytree(user_guide_abs_path, cur_dir)
+
+
+def check_folder_is_exists(string):
+    if os.path.isdir(string):
+        print('info: %s 已经存在，执行删除操作' % string)
+        shutil.rmtree(string)
+    return string
+
+
+def main(user_guide_abs_path, md_list):
+    md_tmp_path = os.path.join(get_cur_abs_path(), 'tmp')
+    print('info: 复制 userguide 所在的目录下全部内容到当前目录下的tmp下')  # tmp下没有userguide文件夹了 cp userguide/* tmp/
+    copy_user_guide_folder_to_cur_folder(user_guide_abs_path, check_folder_is_exists(md_tmp_path))
+
 
 # 根据相对路径生成图片名称
 # relative_file_name = file_name[file_path.index(paht) + len(paht):]  # 取file_name这个路径里面，在paht之后的内容，=相对路径

@@ -56,14 +56,14 @@ def generate_different_version_md_dict(iotdb_path):
     #     print(md_dict.get(i))
     return md_dict
 
-
-if __name__ == '__main__':
-    # iotdb_home = 'D:\\Src\\Java\\iotdb'
-    iotdb_home = '/Users/zhangzhengming/Src/Java/iotdb'
-    if len(sys.argv) == 1:
-        generate_different_version_md_dict(iotdb_home)
-    elif len(sys.argv) == 2:
-        generate_different_version_md_dict(sys.argv[1])
-    else:
-        print('error: 只可以提供一个参数或者不提供参数')
-        exit()
+#
+# if __name__ == '__main__':
+#     # iotdb_home = 'D:\\Src\\Java\\iotdb'
+#     iotdb_home = '/Users/zhangzhengming/Src/Java/iotdb'
+#     if len(sys.argv) == 1:
+#         generate_different_version_md_dict(iotdb_home)
+#     elif len(sys.argv) == 2:
+#         generate_different_version_md_dict(sys.argv[1])
+#     else:
+#         print('error: 只可以提供一个参数或者不提供参数')
+#         exit()

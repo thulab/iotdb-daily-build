@@ -10,3 +10,6 @@ apache-iotdb-1.0.1-SNAPSHOT-all-bin
 # action-tools-delete_tags
 tag_list.txt
 tag_delete.txt
+
+# action-release-userguide
+tmp
