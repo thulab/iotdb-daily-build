@@ -1,5 +1,6 @@
 # coding=UTF-8
 import os
+import sys
 import re
 import subprocess
 
@@ -120,8 +121,21 @@ def format_md_img(paht):
     print('一共下载并替换了%s个url为本地图片\n' % count_url)
 
 
+def generate_user_guide_abs_path(string):
+    return string + 'docs/zh/UserGuide'
+
+
 if __name__ == '__main__':
-    format_md_img(input('输入存放md文件的路径：\n'))
+    # iotdb_home = 'D:\\Src\\Java\\iotdb'
+    iotdb_home = '/Users/zhangzhengming/Src/Java/iotdb'
+    user_guide_abs_path = generate_user_guide_abs_path(iotdb_home)
+    if len(sys.argv) == 1:
+        format_md_img(user_guide_abs_path)
+    elif len(sys.argv) == 2:
+        format_md_img(sys.argv[1])
+    else:
+        print('error: 只可以提供一个参数或者不提供参数')
+        exit()
 
 # 根据相对路径生成图片名称
 # relative_file_name = file_name[file_path.index(paht) + len(paht):]  # 取file_name这个路径里面，在paht之后的内容，=相对路径

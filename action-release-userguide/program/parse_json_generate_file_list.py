@@ -58,7 +58,8 @@ def generate_different_version_md_dict(iotdb_path):
 
 
 if __name__ == '__main__':
-    iotdb_home = 'D:\\Src\\Java\\iotdb'
+    # iotdb_home = 'D:\\Src\\Java\\iotdb'
+    iotdb_home = '/Users/zhangzhengming/Src/Java/iotdb'
     if len(sys.argv) == 1:
         generate_different_version_md_dict(iotdb_home)
     elif len(sys.argv) == 2:

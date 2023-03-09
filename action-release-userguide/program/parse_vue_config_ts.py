@@ -99,6 +99,7 @@ def get_json_config_list(iotdb_path):
 
 
 if __name__ == '__main__':
+    # iotdb_home = 'D:\\Src\\Java\\iotdb'
     iotdb_home = '/Users/zhangzhengming/Src/Java/iotdb'
     if len(sys.argv) == 1:
         get_json_config_list(iotdb_home)
