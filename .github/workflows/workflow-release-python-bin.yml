@@ -32,7 +32,7 @@ jobs:
         run: |                  
           cd Python-${{ matrix.python_version }}
           sudo ./configure --enable-optimizations --prefix=${{ github.workspace }}/python_${{ matrix.python_version }}
-          sudo make && make install
+          sudo make && sudo make install
 
 # compress python-binary
       - name: compress python bin
