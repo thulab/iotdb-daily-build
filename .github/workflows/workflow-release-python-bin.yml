@@ -1,0 +1,65 @@
+# 用于python 发布二进制包
+name: python 发布二进制包
+on:
+  workflow_dispatch:
+jobs:
+  #--------
+  release:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        python_version: [ 3.10.10 ]
+    steps:
+# apt-get install
+      - name: install dependences
+        run: |
+          apt-get install gcc g++ make libssl-dev openssl zlib1g zlib1g-dev libbz2-dev liblzma-dev sqlite3 libsqlite3-dev libsndfile1 build-essential libreadline-dev llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev python3-enchant
+
+# wget python-src
+      - name: get python src
+        run: |
+          wget https://www.python.org/ftp/python/${{ matrix.python_version }}/Python-${{ matrix.python_version }}.tgz
+
+# uncompress python-src
+      - name: uncompress python src
+        run: |        
+          tar zxvf Python-${{ matrix.python_version }}.tgz
+
+# compile python-src
+      - name: compile python src
+        run: |                  
+          cd Python-${{ matrix.python_version }}
+          ./configure --enable-optimizations --prefix=${{ github.workspace }}/python_${{ matrix.python_version }}
+          make && make install
+
+# compress python-binary
+      - name: compress python bin
+        run: |        
+          cd ${{ github.workspace }}
+          7z a  python_${{ matrix.python_version }}.zip python_${{ matrix.python_version }}
+
+# create release
+      - name: Create release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: python_${{ matrix.python_version }}
+          release_name: release python_${{ matrix.python_version }}
+          body: python_${{ matrix.python_version }}
+          draft: false
+          prerelease: false
+
+# upload python-binary
+      - name: Upload python bin
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/python_${{ matrix.python_version }}.zip
+          asset_name: python_${{ matrix.python_version }}.zip
+          asset_content_type: application/zip
