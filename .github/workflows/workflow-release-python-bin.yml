@@ -15,7 +15,7 @@ jobs:
 # apt-get install
       - name: install dependences
         run: |
-          apt-get install gcc g++ make libssl-dev openssl zlib1g zlib1g-dev libbz2-dev liblzma-dev sqlite3 libsqlite3-dev libsndfile1 build-essential libreadline-dev llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev python3-enchant
+          sudo apt-get install gcc g++ make libssl-dev openssl zlib1g zlib1g-dev libbz2-dev liblzma-dev sqlite3 libsqlite3-dev libsndfile1 build-essential libreadline-dev llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev python3-enchant
 
 # wget python-src
       - name: get python src
@@ -31,13 +31,14 @@ jobs:
       - name: compile python src
         run: |                  
           cd Python-${{ matrix.python_version }}
-          ./configure --enable-optimizations --prefix=${{ github.workspace }}/python_${{ matrix.python_version }}
-          make && make install
+          sudo ./configure --enable-optimizations --prefix=${{ github.workspace }}/python_${{ matrix.python_version }}
+          sudo make && make install
 
 # compress python-binary
       - name: compress python bin
         run: |        
           cd ${{ github.workspace }}
+          sudo chown -R $(whoami):$(whoami) python_${{ matrix.python_version }}
           7z a  python_${{ matrix.python_version }}.zip python_${{ matrix.python_version }}
 
 # create release
