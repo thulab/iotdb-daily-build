@@ -408,7 +408,7 @@ jobs:
           asset_name: iot-benchmark-influxdb-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---influxdb 2.0
-      - name: Upload benchmark-influxdb
+      - name: Upload benchmark-influxdb-2.0
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
@@ -418,7 +418,7 @@ jobs:
           asset_path: ${{ github.workspace }}/iot-benchmark/influxdb-2.0/target/iot-benchmark-influxdb-2.0.zip
           asset_name: iot-benchmark-influxdb-2.0-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
-      - name: Upload benchmark-influxdb
+      - name: Upload benchmark-influxdb-2.0
         if: ${{ matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
