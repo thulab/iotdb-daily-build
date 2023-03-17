@@ -7,7 +7,8 @@
 2. parse_json_generate_file_list.py
    > 联合1使用  
    > 将上一步的json list 逐个读取，生成不同版本的 dict，version: markdown列表  
-3. 
+3. format_md_img.py
+   > 给用户手册的绝对值路径，将该路径拷贝到当前目录，修改图片格式，下载图片放到当前目录，返回xxxx
 
 ## generate_md_list.py
 里面的判断行尾多出来的逗号和分号，可以在逐行读取的时候，判断当前行和上一行来做append
