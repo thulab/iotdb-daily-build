@@ -7,32 +7,48 @@ import shutil
 import common
 
 
-def update_file_by_line(file, line, new_line):
-    """
-    替代shell的sed
-    """
-    file = file.replace('\\', '')  # 这个地方不知道咋回事，转译空格就会报错
-    with open(file, 'r') as f:
-        all_neirong = f.readlines()
-    all_neirong[line-1] = new_line + '\n'  # 不加/n的话，下一行就会上来，就会少一行
-    with open(file, 'w') as f:
-        f.writelines(all_neirong)
+def return_re_list(re_type):
+    if re_type == 'file':
+        # 拿到两种格式的标签
+        # <img style="width:100%; max-width:800px; max-height:600px; margin-left:auto; margin-right:auto; display:block;" src="/img/github/69109512-f808bc80-0ab2-11ea-9e4d-b2b2f58fb474.png">
+        # ![avatar](/img/UserGuide/CLI/Command-Line-Interface/AdministrationConsole.png?raw=true)
+        file_res_list = ['<img.*>$', '![.*[(.png)(.jpg)(.jpeg)(.svg)].*].*']
+        return file_res_list
+    elif re_type == 'url':
+        # 三种格式
+        # <img style="width:100%; max-width:800px; max-height:600px; margin-left:auto; margin-right:auto; display:block;" src="https://github.com/apache/iotdb-bin-resources/blob/main/integration-test/pic/step.svg">
+        # ![iotdb_prometheus_grafana](https://raw.githubusercontent.com/apache/iotdb-bin-resources/main/docs/UserGuide/System%20Tools/Metrics/iotdb_prometheus_grafana.png)
+        # ![architecture-design](/img/UserGuide/API/IoTDB-InfluxDB/architecture-design.png?raw=true)
+        url_re_list = [r'(src=")(.*)(.png|.jpg|.jpeg|.svg)(.*)(")', r'(http[s])(://)(.*)(.png|.jpg|.jpeg|.svg)', r'(/.*)(/.*)(.png|.jpg|.jpeg|.svg)']
+        return url_re_list
+    else:
+        print('fatal: 不知所谓')
+        exit()
 
 
-def match_include_img_label_file_from_md_list(tmp_md_path, file_re):  # 捕获包含 img 标签的文件从 md_list
-    file_list = subprocess.getoutput('grep -rl \'%s\' --include=*.md %s' % (file_re, tmp_md_path)).split('\n')
-    format_file_list = common.replace_space_add_backslash(file_list)
-    return format_file_list
+def match_include_img_label_file_from_md_list(tmp_md_path, file_res):  # 捕获包含 img 标签的文件从 md_list
+    format_file_list = []
+    for file_re in file_res:
+        # print('grep -rl \'%s\' --include=*.md %s' % (file_re, tmp_md_path))
+        file_list = subprocess.getoutput('grep -rl \'%s\' --include=*.md %s' % (file_re, tmp_md_path)).split('\n')  # -r 递归搜索文件夹，-l 只显示匹配到的文件名
+        format_file_list += file_list
+    return common.replace_space_add_backslash(format_file_list)
 
 
-def match_line_from_md_file(file, file_re):  # 捕获包含 img 标签的文件从 md_file，返回 list
-    return subprocess.getoutput('grep -n \'%s\' %s' % (file_re, file)).split('\n')
+def match_line_from_md_file(file, file_res):  # 捕获包含 img 标签的文件从 md_file，返回 list
+    url_list = []
+    for file_re in file_res:
+        # print('grep -no \'%s\' %s' % (file_re, file))
+        file_list = subprocess.getoutput('grep -no \'%s\' %s' % (file_re, file)).split('\n')  # -n 显示行号， -o 只显示匹配到的内容
+        url_list += file_list
+    return common.replace_space_add_backslash(url_list)
 
 
 def format_link_or_path(line_url):  # 把通过正则表达式匹配到的字符串再次格式化一下，因为不太准确
     line_url = str(line_url)
     line_url = line_url.rstrip('"')  # 去除末尾双引号，如果有
     line_url = line_url.lstrip('src="')  # 去除前置 src="，如果有
+
     if ' alt=' in line_url:  # 这个 re 容易把 后面的 alt 标签也带过来。。
         line_url = line_url.split(' alt=')[0]
     if '?raw' in line_url:  # 带有raw的link会自动跳转到 raw.githubusercontent.com 上，因为后面做了这一步，所以这个地方就不做了
@@ -42,8 +58,8 @@ def format_link_or_path(line_url):  # 把通过正则表达式匹配到的字符
 
 def replace_local_path_to_link(url):  # 将本地图片格式改为网络链接，也就是统一图片的地址为http链接，用于在下一步进行下载
     url = str(url)
-    iotdb_img_raw_url = 'https://raw.githubusercontent.com/apache/iotdb/master/site/src/main/.vuepress/public'  # 加raw跳转之后的地址
     if url[0] == '/':  # 替换本地路径
+        iotdb_img_raw_url = 'https://raw.githubusercontent.com/apache/iotdb/master/site/src/main/.vuepress/public'  # 加raw跳转之后的地址
         return os.path.join(iotdb_img_raw_url, url[1:])  # 拼接的第二个字符串的第一个字符是 / 时会跳过之前的内容，所以要把 / 去掉
     elif 'github.com' in url:
         return url.replace('github.com', 'raw.githubusercontent.com').replace('blob/', '')  # blob在raw这个链接下是没有的，所以要删除
@@ -51,124 +67,91 @@ def replace_local_path_to_link(url):  # 将本地图片格式改为网络链接�
         return url
 
 
-def match_link_from_line_list(match_line_list, url_re):
+def use_python_re_return_match_url(url_res, line_content):
+    url_res = list(url_res)
+    line_content = str(line_content)
+    # print(line_content)
+    for url_re in url_res:
+        match_url = re.search(url_re, line_content)
+        if not match_url:
+            # print(f're {url_re} 没有匹配到')
+            continue
+        return match_url.group()  # group加到前面就会报错
+
+
+def match_link_from_line_list(match_line_list):
+    url_res = return_re_list('url')
     parse_link_from_line_list = []
     parse_link_from_line_list_raw = []
     for match_line in match_line_list:
+        # print(match_line)
         line_number = match_line.split(':')[0]
         line_content = match_line[len(line_number + ':'):]  # <img style="width:100%; max-width:800px; max-height:600px; margin-left:auto; margin-right:auto; display:block;" src="/img/github/69109512-f808bc80-0ab2-11ea-9e4d-b2b2f58fb474.png">
+        # print(f'line_content is {line_content}')
         parse_link_from_line_list_raw.append(line_content)  # 要整一个原始内容的列表用于替换
-        line_url = re.search(url_re, str(line_content)).group()  # src="/img/github/69109512-f808bc80-0ab2-11ea-9e4d-b2b2f58fb474.png"
-        line_url = format_link_or_path(line_url)  # 将正则表达式匹配到的不规整的地方去掉
+
+        match_content = use_python_re_return_match_url(url_res, line_content)  # 使用python的正则表达式去匹配
+        # print(f'match_content is {match_content}')
+
+        line_url = format_link_or_path(match_content)  # 将正则表达式匹配到的不规整的地方去掉
         line_url = replace_local_path_to_link(line_url)  # 如果是本地地址的话，将本地地址替换为github实际下载的地址
+
         parse_link_from_line_list.append(line_url)
-    return parse_link_from_line_list, parse_link_from_line_list_raw
+    return parse_link_from_line_list_raw, parse_link_from_line_list
 
 
-def format_md_img(md_tmp_path):
-    url_dict = {}
+def match_include_img_md_list(md_tmp_path):
+    file_res = return_re_list('file')
+    print('info: 开始匹配包含 img 的 md 文件列表')
+    include_img_label_md_list = match_include_img_label_file_from_md_list(md_tmp_path, file_res)  # 文件中包含图片的列表
+    print('info: 匹配完成')
+    # print(include_img_label_md_list)
+    return include_img_label_md_list
+
+
+def generate_raw_and_new_url_dict(include_img_label_md_list):
     url_dict_raw = {}
-    # 拿到包含 <img.*> 标签的 md 文件列表
-    file_re = '<img.*>$'
-    url_re = r'(src=")(.*)(.png|.jpg|.jpeg|.svg)(.*)(")'
-    count_url = 0
-    include_img_label_md_list = match_include_img_label_file_from_md_list(md_tmp_path, file_re)  # 文件中包含图片的列表
-
+    url_dict = {}
+    file_res = return_re_list('file')
     for file in include_img_label_md_list:
-        match_line_list = match_line_from_md_file(file, file_re)  # 当前文件的有图片的行列表
-        # print(match_line_list)
-        parse_link_from_line_list, parse_link_from_line_list_raw = match_link_from_line_list(match_line_list, url_re)  # 有图片的行列表，拿到了url，要用这个 url 拼真实地址
+        # print('info: 从文件 %s 里面匹配图片的 path or url' % file)
+        match_line_list = match_line_from_md_file(file, file_res)  # 当前文件的有图片的行列表
+        parse_link_from_line_list_raw, parse_link_from_line_list = match_link_from_line_list(match_line_list)  # 有图片的行列表，拿到了url，要用这个 url 拼真实地址
         # print(parse_link_from_line_list)
-        url_dict[file] = parse_link_from_line_list
         url_dict_raw[file] = parse_link_from_line_list_raw
-    return url_dict, url_dict_raw
+        url_dict[file] = parse_link_from_line_list
+    return url_dict_raw, url_dict
 
 
-def replace_a_to_b(file, a, b):
-    print('将 %s 替换为 %s ')
+def replace_str_a_to_str_b(file, raw_str, new_str):
+    print('info: 将 %s 替换为 %s ' % (raw_str, new_str))
+    with open(file, 'r') as f:
+        file_content = f.readlines()
+        for line in file_content:
+            if not line.replace('\n', ''):  # 如果有空行就跳过
+                continue
+            if raw_str in line:
+                file_content[file_content.index(line)] = line.replace(raw_str, new_str)
+            else:
+                continue
+    with open(file, 'w') as f:
+        f.writelines(file_content)
 
 
-def replace_link_from_list(md, raw_link, dest_link):
+def replace_path_to_link_from_list(md, raw_link, dest_link):
     dest_link = list(dest_link)
     raw_link = list(raw_link)
-    for link in raw_link:
-        print('当前文件是 %s' % md)
-        format_link = '![](%s){ width=50%% }' % link
-        replace_a_to_b(md, format_link, dest_link[raw_link.index(link)])    # 这里改range
-        # a = [1, 2, 3, 4, 5]
-        # for i in range(len(a)):
-        #     print(a[i])
-        print('\n\n\n\n\n')
+    for index in range(len(raw_link)):
+        format_link = '![](%s){ width=50%% }' % dest_link[index]
+        replace_str_a_to_str_b(md, raw_link[index], format_link)    # 这里改range
 
 
-def generate_link_to_local_path_dict(url_dict_raw, url_dict_dest):
+def replace_path_to_link_from_dict(url_dict_raw, url_dict_dest):
+    print('info: 将全部的非 url 地址统一为链接')
     for md in url_dict_raw.keys():
-        # print(md, url_dict.get(md))
-        replace_link_from_list(md, url_dict_raw.get(md), url_dict_dest.get(md))
-
-
-    #
-    #         url = line_url.group()
-    #         for i in "jpg", "png", "jpeg":
-    #             if i in url:
-    #                 url = url[0:url.find(i) + len(i)]
-    #
-    #         # print('url是%s' % url)
-    #
-    #         # 替换内容
-    #         new_line = '![](%s){ width=50%% }' % url
-    #         print('替换%s的%s行 为%s' % (file_name, line_number, new_line))
-    #         update_file_by_line(file_name, int(line_number), new_line)
-    #     # 输出
-    #     # print('在%s中修改了%s个链接' % (file_name, len(line_2)))
-    #     count_url += len(line_2)
-    # print('一共修改了%s个格式\n' % count_url)
-    #
-    # # 替换图片路径为本地路径
-    # count_url = 0
-    # new_file_re = '!\[.*[\)|\}]'  # 匹配![开头，)或者}结尾
-    # file_list = subprocess.getoutput('grep -rl \'%s\' --include=*.md %s' % (new_file_re, paht))
-    # file_list_2 = []
-    # for k in file_list.split('\n'):
-    #     file_list_2.append(k)
-    # for file_name in file_list_2:
-    #     file_name = file_name.replace(' ', '\ ')
-    #     line = subprocess.getoutput('grep  -n \'%s\' %s' % (new_file_re, file_name))
-    #     line_2 = []
-    #     for m in line.split('\n'):
-    #         line_2.append(m)
-    #     for alone_line in line_2:
-    #         line_number = alone_line.split(':')[0]
-    #         line_url_2 = re.search(url_re, str(alone_line))
-    #         # print('line_url_2=%s ' % line_url_2.group())
-    #         url = line_url_2.group()
-    #         relative_file_name = file_name[file_name.index(paht) + len(paht):].replace(' ', '_').replace('/', '-')[
-    #                              1:].replace('\\', '').replace('.md', '') + '--' + line_number + os.path.splitext(url)[
-    #                                  -1]
-    #         img_download_path = os.path.join(os.getcwd(), 'img', relative_file_name)
-    #         # a[a.find('zzm'):a.find('zzm') + len("zzm")]
-    #         for i in "jpg", "png", "jpeg":
-    #             if i in img_download_path:
-    #                 img_download_path = img_download_path[0:img_download_path.find(i) + len(i)]
-    #         # 下载图片
-    #         try:
-    #             # os.system('wget -O %s %s' % (img_download_path, url))
-    #             print(('wget -O %s %s' % (img_download_path, url)))
-    #             subprocess.getoutput('wget -O %s %s' % (img_download_path, url))
-    #             # print('wget -O %s %s' % (img_download_path, url))
-    #             print('download %s ok' % relative_file_name)
-    #         except Exception as e:
-    #             print('download failed,Exception:%s' % e)
-    #             exit()
-    #
-    #         new_line = '![](%s){ width=50%% }' % img_download_path
-    #         print('替换%s的%s行 为%s\n' % (file_name, line_number, new_line))
-    #         update_file_by_line(file_name, int(line_number), new_line)
-    #
-    #     # 输出
-    #     # print('在%s中修改了%s个链接' % (file_name, len(line_2)))
-    #     count_url += len(line_2)
-    # print('一共下载并替换了%s个url为本地图片\n' % count_url)
+        print('info: 当前文件是 %s' % md)
+        replace_path_to_link_from_list(md, url_dict_raw.get(md), url_dict_dest.get(md))
+        print('\n')
 
 
 def get_cur_abs_path():
@@ -180,29 +163,56 @@ def copy_user_guide_folder_to_cur_folder(user_guide_abs_path, cur_dir):
     shutil.copytree(user_guide_abs_path, cur_dir)  # tmp下没有userguide文件夹了 cp userguide/* tmp/
 
 
-def check_folder_is_exists(string):
+def check_folder_if_exists_then_rm(string):
     if os.path.isdir(string):
         print('info: %s 已经存在，执行删除操作' % string)
         shutil.rmtree(string)
     return string
 
 
+def download_img(url, dest_abs_path):
+    print(('wget -O %s %s' % (dest_abs_path, url)))
+    print(subprocess.getoutput('wget -O %s %s' % (dest_abs_path, url)))
+    exit()
+
+
+def join_local_name(url, img_tmp_path):
+    img_name = url.split('/')[-1]  # 图片的实际名称
+    before_name_three_path = '_'.join(url.split('/')[-4:-1])  # 取url里面的最后三节路径拼一个name
+    truth_name = os.path.join(img_tmp_path, (before_name_three_path + '_' + img_name).replace('-', '_'))
+    return truth_name
+
+
+def generate_local_name_lists_and_download_img(url_list, img_tmp_path):
+    dict_list = []
+    for url in url_list:
+        local_abs_img_name = join_local_name(url, img_tmp_path)
+        dict_list.append(local_abs_img_name)
+        # 下载图片
+        download_img(url, local_abs_img_name)
+    return dict_list
+
+
+def download_img_to_tmp_and_return_url_dict_local(url_md_dict, img_tmp_path):
+    url_dict_local = {}
+    for md in url_md_dict.keys():
+        # 本地字典
+        url_dict_local[md] = generate_local_name_lists_and_download_img(url_md_dict.get(md), img_tmp_path)
+    # print(url_dict_local)
+    return url_dict_local
+
+
 def main(user_guide_abs_path):
     md_tmp_path = os.path.join(get_cur_abs_path(), 'tmp/md')
-    img_tmp_paht = os.path.join(get_cur_abs_path(), 'tmp/img')
-    copy_user_guide_folder_to_cur_folder(user_guide_abs_path, check_folder_is_exists(md_tmp_path))  # tmp下没有userguide文件夹了 cp userguide/* tmp/
-
+    img_tmp_path = os.path.join(get_cur_abs_path(), 'tmp/img')
+    # 拷贝用户手册目录
+    copy_user_guide_folder_to_cur_folder(user_guide_abs_path, check_folder_if_exists_then_rm(md_tmp_path))  # tmp下没有userguide文件夹了 cp userguide/* tmp/
+    # 生成 新、旧 url的字典
     # print(md_list)
-    url_dict, url_dict_raw = format_md_img(md_tmp_path)
-    generate_link_to_local_path_dict(url_dict_raw, url_dict)
-
-
-# 根据相对路径生成图片名称
-# relative_file_name = file_name[file_path.index(paht) + len(paht):]  # 取file_name这个路径里面，在paht之后的内容，=相对路径
-# relative_file_name = relative_file_name.replace(' ', '_')  # 空格换成_
-# relative_file_name = relative_file_name.replace('/', '-')  # /换成-
-# relative_file_name = relative_file_name[1:]  # 去掉第一个字符-
-# relative_file_name = relative_file_name.replace('.md', '')  # 去掉扩展名
-# relative_file_name = relative_file_name + line_number  # 拼接行号
-# relative_file_name = relative_file_name + os.path.splitext(url)[-1]  # 加上扩展名
-# relative_file_name = relative_file_name.replace('\\', '')  # 去掉
+    include_img_label_md_list = match_include_img_md_list(md_tmp_path)
+    os.mkdir(img_tmp_path)
+    url_dict_raw, url_dict = generate_raw_and_new_url_dict(include_img_label_md_list)
+    # 下载图片到 img_tmp_paht
+    url_dict_local = download_img_to_tmp_and_return_url_dict_local(url_dict, img_tmp_path)
+    # 将文件夹内的全部的url统一成标准的url
+    # replace_path_to_link_from_dict(url_dict_raw, url_dict_local)
