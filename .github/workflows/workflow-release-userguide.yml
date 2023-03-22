@@ -45,7 +45,7 @@ jobs:
           echo ${PYTHONPATH}
           cd ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program
           python3 main.py ${iotdb_home}
-          zip -r result.zip  ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program/tmp
+          zip -r result.zip result.docx tmp
           mv result.zip ${{ github.workspace }}/result.zip
 #          zip result.zip result.docx
 # collect time

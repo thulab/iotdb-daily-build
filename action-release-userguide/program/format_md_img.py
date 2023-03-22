@@ -178,8 +178,8 @@ def check_folder_if_not_exists_then_mkdir(string):
 
 
 def download_img(url, dest_abs_path):
-    print(('wget -O %s %s' % (dest_abs_path, url)))
-    print(subprocess.getoutput('wget -O %s %s' % (dest_abs_path, url)))
+    # print(('wget -O %s %s' % (dest_abs_path, url)))
+    # print(subprocess.getoutput('wget -O %s %s' % (dest_abs_path, url)))
     pass
 
 
@@ -187,6 +187,7 @@ def join_local_name(url, img_tmp_path):
     img_name = url.split('/')[-1]  # 图片的实际名称
     before_name_three_path = '_'.join(url.split('/')[-4:-1])  # 取url里面的最后三节路径拼一个name
     truth_name = os.path.join(img_tmp_path, (before_name_three_path + '_' + img_name).replace('-', '_'))
+    truth_name = truth_name.replace(' ', '_')  # 将 path 里面的空格替换为下划线
     return truth_name
 
 
