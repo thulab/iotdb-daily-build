@@ -178,9 +178,9 @@ def check_folder_if_not_exists_then_mkdir(string):
 
 
 def download_img(url, dest_abs_path):
-    # print(('wget -O %s %s' % (dest_abs_path, url)))
-    # print(subprocess.getoutput('wget -O %s %s' % (dest_abs_path, url)))
-    pass
+    print(('wget -O %s %s' % (dest_abs_path, url)))
+    print(subprocess.getoutput('wget -O %s %s' % (dest_abs_path, url)))
+    # pass
 
 
 def join_local_name(url, img_tmp_path):
