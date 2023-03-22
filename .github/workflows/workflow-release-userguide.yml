@@ -35,13 +35,13 @@ jobs:
       - name: generate
         env:
           PYTHONPATH: $PYTHONPATH:${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program
-          PATH: $PATH:${{ github.workspace }}/pandoc-2.19/bin
+#          PATH: $PATH:${{ github.workspace }}/pandoc-2.19/bin
         run: |
           cd ${{ github.workspace }}/iotdb-master
           iotdb_home=`pwd`
           cd ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program
           ls -l /usr/bin/python*
-          python test_release_master.py ${iotdb_home}
+          python3 test_release_master.py ${iotdb_home}
           zip result.zip result.docx
           mv result.zip ${{ github.workspace }}/result.zip
 # collect time
