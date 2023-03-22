@@ -43,8 +43,10 @@ jobs:
           iotdb_home=$(pwd)
           export PATH=$PATH:${{ steps.get-pandoc.outputs.pandoc_bin }}
           echo ${PYTHONPATH}
+          
           cd ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program
-          /usr/bin/python3 test_release_master.py ${iotdb_home}
+          python3 main.py ${iotdb_home}
+          
           zip result.zip result.docx
           mv result.zip ${{ github.workspace }}/result.zip
 # collect time

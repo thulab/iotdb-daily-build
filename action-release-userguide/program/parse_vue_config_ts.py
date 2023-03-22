@@ -96,15 +96,3 @@ def get_json_config_list(iotdb_path):
             print('error: 文件 %s 有问题:\n%s\n' % (config_file, abc))
             print(json_config)
     return config_list
-
-#
-# if __name__ == '__main__':
-#     # iotdb_home = 'D:\\Src\\Java\\iotdb'
-#     iotdb_home = '/Users/zhangzhengming/Src/Java/iotdb'
-#     if len(sys.argv) == 1:
-#         get_json_config_list(iotdb_home)
-#     elif len(sys.argv) == 2:
-#         get_json_config_list(sys.argv[1])
-#     else:
-#         print('error: 只可以提供一个参数或者不提供参数')
-#         exit()
