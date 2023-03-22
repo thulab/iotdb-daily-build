@@ -53,7 +53,7 @@ jobs:
         shell: bash
         id: sys-info
         run: |
-          cd ${{ github.workspace }}/iotdb
+          cd ${{ github.workspace }}/iotdb-master
           echo "date=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
           echo "commit_id=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
