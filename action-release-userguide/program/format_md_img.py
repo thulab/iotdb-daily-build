@@ -226,4 +226,4 @@ def main(user_guide_abs_path):
     url_dict_local = download_img_to_tmp_and_return_url_dict_local(url_dict, img_tmp_path)
     # 将文件夹内的全部的url统一成标准的url
     replace_path_to_link_from_dict(url_dict_raw, url_dict_local)
-    return md_tmp_path
+    return 'tmp/md'
