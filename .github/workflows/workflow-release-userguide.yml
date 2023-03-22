@@ -46,8 +46,8 @@ jobs:
           
           cd ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program
           python3 main.py ${iotdb_home}
-          
-          zip result.zip result.docx
+          zip -r result.zip
+#          zip result.zip result.docx ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program/tmp
           mv result.zip ${{ github.workspace }}/result.zip
 # collect time
       - name: collect common info
