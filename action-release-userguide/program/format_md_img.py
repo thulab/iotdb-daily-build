@@ -12,14 +12,21 @@ def return_re_list(re_type):
         # 拿到两种格式的标签
         # <img style="width:100%; max-width:800px; max-height:600px; margin-left:auto; margin-right:auto; display:block;" src="/img/github/69109512-f808bc80-0ab2-11ea-9e4d-b2b2f58fb474.png">
         # ![avatar](/img/UserGuide/CLI/Command-Line-Interface/AdministrationConsole.png?raw=true)
-        file_res_list = ['<img.*>$', '![.*[(.png)(.jpg)(.jpeg)(.svg)].*].*']
+        file_res_list = [
+            '<img.*>$',
+            '![.*[(.png)(.jpg)(.jpeg)(.svg)].*].*'
+        ]
         return file_res_list
     elif re_type == 'url':
         # 三种格式
         # <img style="width:100%; max-width:800px; max-height:600px; margin-left:auto; margin-right:auto; display:block;" src="https://github.com/apache/iotdb-bin-resources/blob/main/integration-test/pic/step.svg">
         # ![iotdb_prometheus_grafana](https://raw.githubusercontent.com/apache/iotdb-bin-resources/main/docs/UserGuide/System%20Tools/Metrics/iotdb_prometheus_grafana.png)
         # ![architecture-design](/img/UserGuide/API/IoTDB-InfluxDB/architecture-design.png?raw=true)
-        url_re_list = [r'(src=")(.*)(.png|.jpg|.jpeg|.svg)(.*)(")', r'(http[s])(://)(.*)(.png|.jpg|.jpeg|.svg)', r'(/.*)(/.*)(.png|.jpg|.jpeg|.svg)']
+        url_re_list = [
+            r'(src=")(.*)(.png|.jpg|.jpeg|.svg)(.*)(")',
+            r'(http[s])(://)(.*)(.png|.jpg|.jpeg|.svg)',
+            r'(/img.*)(/.*)(.png|.jpg|.jpeg|.svg)'
+        ]
         return url_re_list
     else:
         print('fatal: 不知所谓')
@@ -78,6 +85,10 @@ def use_python_re_return_match_url(url_res, line_content):
         if not match_url:
             # print(f're {url_re} 没有匹配到')
             continue
+    # if '106251411-e5aa1700-624f-11eb-8ca8-00c0627b1e96' in line_content:
+    #     print(line_content)
+    #     print(match_url.group())
+    #     exit()
         return match_url.group()  # group加到前面就会报错
 
 
