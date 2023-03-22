@@ -40,8 +40,6 @@ jobs:
           cd ${{ github.workspace }}/iotdb-master
           iotdb_home=`pwd`
           cd ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program
-          whereis python
-          whereis python3
           ls -l /usr/bin/python*
           python test_release_master.py ${iotdb_home}
           zip result.zip result.docx
