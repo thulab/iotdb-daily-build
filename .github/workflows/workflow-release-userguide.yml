@@ -12,9 +12,12 @@ jobs:
     steps:
 # get pandoc
       - name: get pandoc
+        id: get-pandoc
         run: |
           wget https://github.com/jgm/pandoc/releases/download/2.19/pandoc-2.19-linux-amd64.tar.gz
           tar -zxf pandoc-2.19-linux-amd64.tar.gz
+          cd pandoc-2.19/bin
+          echo  "::set-output name=pandoc_bin::$(echo $(pwd))"
 # clone iotdb
       - name: checkout apache/iotdb
         uses: actions/checkout@v2
@@ -35,13 +38,13 @@ jobs:
       - name: generate
         env:
           PYTHONPATH: $PYTHONPATH:${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program
-#          PATH: $PATH:${{ github.workspace }}/pandoc-2.19/bin
         run: |
           cd ${{ github.workspace }}/iotdb-master
-          iotdb_home=`pwd`
+          iotdb_home=$(pwd)
+          export PATH=$PATH:${{ steps.get-pandoc.outputs.pandoc_bin }}
+          echo ${PYTHONPATH}
           cd ${{ github.workspace }}/iotdb-daily-build/action-release-userguide/program
-          ls -l /usr/bin/python*
-          python3 test_release_master.py ${iotdb_home}
+          /usr/bin/python3 test_release_master.py ${iotdb_home}
           zip result.zip result.docx
           mv result.zip ${{ github.workspace }}/result.zip
 # collect time

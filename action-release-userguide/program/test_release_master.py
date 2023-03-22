@@ -28,7 +28,7 @@ def generate_user_guide_abs_path(string):
 
 def main(iotdb_path):
     title, master_md_list = get_master_md_list(iotdb_path)  # 拿到master分支的标题，markdown文件列表
-    user_guide_abs_path = generate_user_guide_abs_path(iotdb_home)  # 拼接出来userguide的绝对值路径
+    user_guide_abs_path = generate_user_guide_abs_path(iotdb_path)  # 拼接出来userguide的绝对值路径
     format_md_img.main(user_guide_abs_path)  # 执行下一个文件的操作
     subprocess.getoutput('pandoc -f markdown -t docx -o result.docx --reference-doc Templates/template_iotdb.docx --log=log.txt %s' % ','.join(master_md_list))
 
