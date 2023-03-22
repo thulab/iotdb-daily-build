@@ -187,7 +187,7 @@ def join_local_name(url, img_tmp_path):
     img_name = url.split('/')[-1]  # 图片的实际名称
     before_name_three_path = '_'.join(url.split('/')[-4:-1])  # 取url里面的最后三节路径拼一个name
     truth_name = os.path.join(img_tmp_path, (before_name_three_path + '_' + img_name).replace('-', '_'))
-    truth_name = truth_name.replace(' ', '_')  # 将 path 里面的空格替换为下划线
+    truth_name = truth_name.replace('%20', '_')  # 有的url里面有空格，github在拼url的时候就会将空格替换为%20，这个地方将%20替换为下划线
     return truth_name
 
 
