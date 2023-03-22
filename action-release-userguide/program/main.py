@@ -29,7 +29,7 @@ def generate_user_guide_abs_path(string):
 
 def get_md_list_to_str(iotdb_home, md_tmp_path):
     title, master_md_list = get_master_md_list(iotdb_home)  # 拿到master分支的标题，md 文件按顺序排列的 list
-    new_md_list = []
+    new_md_list = [os.path.abspath('Templates/page.md')]  # 目录页
     for md in master_md_list:
         new_md_list.append(os.path.join(md_tmp_path, md))
     return ' '.join(new_md_list)
