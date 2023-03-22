@@ -165,15 +165,22 @@ def copy_user_guide_folder_to_cur_folder(user_guide_abs_path, cur_dir):
 
 def check_folder_if_exists_then_rm(string):
     if os.path.isdir(string):
-        print('info: %s 已经存在，执行删除操作' % string)
+        print('info: %s 存在，删除' % string)
         shutil.rmtree(string)
+    return string
+
+
+def check_folder_if_not_exists_then_mkdir(string):
+    if not os.path.isdir(string):
+        print('info: %s 不存在，创建' % string)
+        os.mkdir(string)
     return string
 
 
 def download_img(url, dest_abs_path):
     print(('wget -O %s %s' % (dest_abs_path, url)))
     print(subprocess.getoutput('wget -O %s %s' % (dest_abs_path, url)))
-    exit()
+    pass
 
 
 def join_local_name(url, img_tmp_path):
@@ -195,6 +202,10 @@ def generate_local_name_lists_and_download_img(url_list, img_tmp_path):
 
 def download_img_to_tmp_and_return_url_dict_local(url_md_dict, img_tmp_path):
     url_dict_local = {}
+
+    check_folder_if_exists_then_rm(img_tmp_path)  # 删除再创建 img 的临时路径
+    check_folder_if_not_exists_then_mkdir(img_tmp_path)
+
     for md in url_md_dict.keys():
         # 本地字典
         url_dict_local[md] = generate_local_name_lists_and_download_img(url_md_dict.get(md), img_tmp_path)
@@ -210,9 +221,8 @@ def main(user_guide_abs_path):
     # 生成 新、旧 url的字典
     # print(md_list)
     include_img_label_md_list = match_include_img_md_list(md_tmp_path)
-    os.mkdir(img_tmp_path)
     url_dict_raw, url_dict = generate_raw_and_new_url_dict(include_img_label_md_list)
     # 下载图片到 img_tmp_paht
     url_dict_local = download_img_to_tmp_and_return_url_dict_local(url_dict, img_tmp_path)
     # 将文件夹内的全部的url统一成标准的url
-    # replace_path_to_link_from_dict(url_dict_raw, url_dict_local)
+    replace_path_to_link_from_dict(url_dict_raw, url_dict_local)
