@@ -53,6 +53,8 @@ def format_link_or_path(line_url):  # 把通过正则表达式匹配到的字符
         line_url = line_url.split(' alt=')[0]
     if '?raw' in line_url:  # 带有raw的link会自动跳转到 raw.githubusercontent.com 上，因为后面做了这一步，所以这个地方就不做了
         line_url = line_url.split('?raw')[0]
+
+    line_url = line_url.rstrip('"')  # 去除末尾双引号，如果有
     return line_url
 
 
