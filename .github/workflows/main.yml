@@ -228,8 +228,7 @@ jobs:
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
-          mvn package -pl jdbc,distribution -am -DskipTests -P get-jar-with-dependencies,compile-grafana-plugin
-          # mvn clean package -DskipTests
+          mvn clean package -DskipTests -am -pl distribution
 #---all
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.tmp_branch }}.zip
         if: ${{ matrix.java_version == '8' }}
@@ -293,6 +292,11 @@ jobs:
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
+      - name: Build Apache IoTDB binaries
+        shell: bash
+        run: |
+          cd ${{ github.workspace }}/iotdb
+          mvn clean package -pl jdbc -am -DskipTests -P get-jar-with-dependencies
 #---iotdb-jdbc-*-jar-with-dependencies.jar
       - name: Upload iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
         if: ${{ matrix.java_version == '8' }}
