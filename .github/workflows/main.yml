@@ -114,11 +114,11 @@ jobs:
           # To distinguish master and rel/1.0 branches, add temporary variables
           echo "::set-output name=tmp_branch::$(echo ${{ matrix.iotdb_version }} | sed "s:/::")"
           if [ "${{ matrix.iotdb_version }}" = "master" ]; then
-            echo "server_dir=${{ github.workspace }}/iotdb/iotdb-core/datanode" >> "$GITHUB_OUTPUT"
-            echo "cpp_dir=${{ github.workspace }}/iotdb/iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
+            echo "server_dir=iotdb-core/datanode" >> "$GITHUB_OUTPUT"
+            echo "cpp_dir=iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
           else
-            echo "server_dir=${{ github.workspace }}/iotdb/server" >> "$GITHUB_OUTPUT"
-            echo "cpp_dir=${{ github.workspace }}/iotdb/client-cpp" >> "$GITHUB_OUTPUT"
+            echo "server_dir=server" >> "$GITHUB_OUTPUT"
+            echo "cpp_dir=client-cpp" >> "$GITHUB_OUTPUT"
           fi
 
 #      - name: compile client-cpp
@@ -156,7 +156,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ steps.iotdb-info.outputs.cpp_dir }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
+          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-client-cpp-${{ steps.iotdb-info.outputs.tmp_branch }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
       - name: Upload apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.tmp_branch }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
@@ -166,7 +166,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ steps.iotdb-info.outputs.cpp_dir }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
+          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-client-cpp-${{ steps.iotdb-info.outputs.tmp_branch }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}-x86_64.zip
           asset_content_type: application/zip
 #---client-cpp-example
