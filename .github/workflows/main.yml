@@ -328,7 +328,7 @@ jobs:
         shell: bash
         id: compile-py-client
         run: |
-          apt-get install python3-pip
+          sudo apt-get install python3-pip
           pip3 install setuptools 
           pip3 install wheel
           
@@ -346,7 +346,7 @@ jobs:
           python3 setup.py bdist_wheel --universal
           cd dist
           echo "client_py_whl_name=$(ls apache_iotdb-*.whl)" >> "$GITHUB_OUTPUT"
-      - name: Upload iotdb-client-py-${{ steps.iotdb-info.outputs.version }}.whl
+      - name: Upload iotdb-client-py-${{ steps.iotdb-info.outputs.branch }}.whl
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
         env:
@@ -356,7 +356,7 @@ jobs:
           asset_path: ${{ github.workspace }}/iotdb/${{ steps.compile-py-client.outputs.client_py_module }}/dist/${{ steps.compile-py-client.outputs.client_py_whl_name }}
           asset_name: apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
           asset_content_type: application/zip
-      - name: Upload iotdb-client-py-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
+      - name: Upload iotdb-client-py-${{ steps.iotdb-info.outputs.branch }}.whl
         if: ${{ matrix.java_version == '11' }}
         uses: actions/upload-release-asset@v1
         env:
