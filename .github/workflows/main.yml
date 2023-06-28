@@ -140,7 +140,14 @@ jobs:
           cd ${{ github.workspace }}\iotdb
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
           set Path
-          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl server,client-cpp,example/client-cpp-example -am -DskipTests -Dboost.include.dir="%boost-include-dir%" -Dboost.library.dir="%boost-library.dir%" -Dcmake.url="%cmake-url%" -Dcmake.root.dir="%cmake-root-dir%"
+          
+          if "${{ matrix.iotdb_version }}"=="master" (
+            echo "cpp_pl=iotdb-core/datanode,iotdb-client/client-cpp,example/client-cpp-example" >> "$GITHUB_ENV"
+          ) else (
+            echo "cpp_pl=server,client-cpp,example/client-cpp-example" >> "$GITHUB_ENV"
+          )
+          
+          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl %cpp_pl% -am -DskipTests -Dboost.include.dir="%boost-include-dir%" -Dboost.library.dir="%boost-library.dir%" -Dcmake.url="%cmake-url%" -Dcmake.root.dir="%cmake-root-dir%"
 #---client-cpp
       - name: Upload apache-iotdb-client-cpp-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.tmp_branch }}-${{ steps.iotdb-info.outputs.commit }}-${{ matrix.os }}.zip
         if: ${{ matrix.java_version == '8' }}
@@ -213,7 +220,7 @@ jobs:
           repository: 'apache/iotdb'
           ref: ${{ matrix.iotdb_version }}
           fetch-depth: 0
-
+#compile-iotdb
       - name: Collect IoTDB info
         id: iotdb-info
         run: |
@@ -229,7 +236,8 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iotdb
           mvn clean package -pl distribution -am -DskipTests -P compile-grafana-plugin
-#---all
+#
+#upload-all
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.tmp_branch }}.zip
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
@@ -250,28 +258,30 @@ jobs:
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin-${{ steps.iotdb-info.outputs.tmp_branch }}-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
-#---grafana-connector (only rel/0.13 support grafana-connector)
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
-        if: ${{ matrix.iotdb_version == 'rel/0.13' && matrix.java_version == '8' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
-        if: ${{ matrix.iotdb_version == 'rel/0.13' && matrix.java_version == '11' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
-          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-#---grafana-plugin  #  && matrix.iotdb_version != 'rel/1.0'
+#
+#grafana-connector (only rel/0.13 support grafana-connector)
+#      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
+#        if: ${{ matrix.iotdb_version == 'rel/0.13' && matrix.java_version == '8' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
+#          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+#      - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
+#        if: ${{ matrix.iotdb_version == 'rel/0.13' && matrix.java_version == '11' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+#          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin.zip
+#          asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-connector-bin-${{ steps.iotdb-info.outputs.commit }}.zip
+#          asset_content_type: application/zip
+#
+#grafana-plugin  #  && matrix.iotdb_version != 'rel/1.0'
       - name: Upload apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
@@ -292,12 +302,20 @@ jobs:
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
           asset_name: apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
-      - name: Build Apache IoTDB binaries
+#
+#iotdb-jdbc-*-jar-with-dependencies.jar
+      - name: Build Apache IoTDB jdbc in ${{ matrix.iotdb_version }} using ${{ matrix.java_version }}
         shell: bash
+        id: compile-jdbc
         run: |
           cd ${{ github.workspace }}/iotdb
-          mvn clean package -pl jdbc -am -DskipTests -P get-jar-with-dependencies
-#---iotdb-jdbc-*-jar-with-dependencies.jar
+          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
+            mvn clean package -DskipTests -am -pl iotdb-client/jdbc -P get-jar-with-dependencies
+            echo "jdbc_abs_dir=${{ github.workspace }}/iotdb/iotdb-client/jdbc/target" >> "$GITHUB_OUTPUT"
+          else
+            mvn clean package -DskipTests -am -pl jdbc -P get-jar-with-dependencies
+            echo "jdbc_abs_dir=${{ github.workspace }}/iotdb/jdbc/target" >> "$GITHUB_OUTPUT"
+          fi
       - name: Upload iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
         if: ${{ matrix.java_version == '8' }}
         uses: actions/upload-release-asset@v1
@@ -305,7 +323,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/jdbc/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
+          asset_path: ${{ steps.compile-jdbc.outputs.jdbc_abs_dir }}/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
           asset_name: iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
           asset_content_type: application/zip
       - name: Upload iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
@@ -315,10 +333,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/jdbc/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
+          asset_path: ${{ steps.compile-jdbc.outputs.jdbc_abs_dir }}/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
           asset_name: iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
           asset_content_type: application/zip
-#--------
+#
+
   build-benchmark:
     needs: [ collect,create-release-java8,create-release-java11 ]
     strategy:
@@ -367,7 +386,7 @@ jobs:
         id: compile-benchmark
         run: |
           cd ${{ github.workspace }}/iot-benchmark
-          mvn clean package -DskipTests -am -pl core,iotdb-0.13,iotdb-1.0,influxdb,influxdb-2.0,timescaledb,timescaledb-cluster,tdengine-3.0
+          mvn clean package -DskipTests -am -pl core,iotdb-0.13,iotdb-1.0,iotdb-1.1,influxdb,influxdb-2.0,timescaledb,timescaledb-cluster,tdengine-3.0
 #          mssqlserver,sqlite,kairosdb,questdb,influxdb,opentsdb,tdengine
 #---0.13
       - name: Upload benchmark-iotdb-0.13
@@ -410,6 +429,27 @@ jobs:
           upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-1.0/target/iot-benchmark-iotdb-1.0.zip
           asset_name: iot-benchmark-iotdb-1.0-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_content_type: application/zip
+#---1.1
+      - name: Upload benchmark-iotdb-1.1
+        if: ${{ matrix.java_version == '8' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-1.1/target/iot-benchmark-iotdb-1.1.zip
+          asset_name: iot-benchmark-iotdb-1.1-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_content_type: application/zip
+      - name: Upload benchmark-iotdb-1.1
+        if: ${{ matrix.java_version == '11' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release-java11.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iot-benchmark/iotdb-1.1/target/iot-benchmark-iotdb-1.1.zip
+          asset_name: iot-benchmark-iotdb-1.1-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #---influxdb
       - name: Upload benchmark-influxdb
