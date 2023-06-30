@@ -356,17 +356,17 @@ jobs:
       - name: Build benchmark
         run: |
           cd ${{ github.workspace }}/iot-benchmark
-          mvn clean package -DskipTests -am -pl core,{{ matrix.release_db }}
+          mvn clean package -DskipTests -am -pl core,${{ matrix.release_db }}
 #
 #---upload
-      - name: Upload benchmark-{{ matrix.release_db }}
+      - name: Upload benchmark-${{ matrix.release_db }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iot-benchmark/{{ matrix.release_db }}/target/iot-benchmark-{{ matrix.release_db }}.zip
-          asset_name: iot-benchmark-{{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_path: ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip
+          asset_name: iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
 #
 #----end----
