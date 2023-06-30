@@ -207,7 +207,7 @@ jobs:
           repository: 'apache/iotdb'
           ref: ${{ matrix.iotdb_version }}
           fetch-depth: 0
-#build-iotdb
+#collect-iotdb
       - name: Collect IoTDB info
         id: iotdb-info
         run: |
@@ -227,18 +227,20 @@ jobs:
             exit 1
           fi
 #
+#build-iotdb
       - name: Build iotdb
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
           mvn clean package -pl distribution -am -DskipTests -P compile-grafana-plugin
+#
 #upload-all
       - name: Upload apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip using ${{ matrix.java_version }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
           asset_name: apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
@@ -249,7 +251,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
           asset_name: apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
           asset_content_type: application/zip
@@ -272,7 +274,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
           asset_path: ${{ steps.build-jdbc.outputs.jdbc_abs_target_dir }}/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
           asset_name: apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
           asset_content_type: application/zip
@@ -305,7 +307,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iotdb/${{ steps.build-py-client.outputs.client_py_module }}/dist/${{ steps.build-py-client.outputs.client_py_whl_name }}
           asset_name: apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
           asset_content_type: application/zip
@@ -355,6 +357,15 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iot-benchmark
           echo "::set-output name=commit::$(git rev-parse --short HEAD)"
+          
+          if [ "${{ matrix.java_version }}" = "8" ]; then
+            echo "upload_url=${{ needs.create-release-java8.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ matrix.java_version }}" = "11" ]; then
+            echo "upload_url=${{ needs.create-release-java11.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "Found unknown jdk version. exit."
+            exit 1
+          fi
 #
 # build iot-benchmark
       - name: Build benchmark
@@ -368,7 +379,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.create-release-java8.outputs.upload_url }}
+          upload_url: ${{ steps.benchmark-info.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip
           asset_name: iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
           asset_content_type: application/zip
