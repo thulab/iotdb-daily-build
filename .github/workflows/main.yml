@@ -226,13 +226,21 @@ jobs:
             echo "Found unknown jdk version. exit."
             exit 1
           fi
+          
+          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
+            echo "jdbc_asset_path=iotdb-client/jdbc" >> "$GITHUB_OUTPUT"
+          elif [ "${{ matrix.iotdb_version }}" = "rel/1.2" ]; then
+            echo "jdbc_asset_path=iotdb-client/jdbc" >> "$GITHUB_OUTPUT"
+          else
+            echo "jdbc_asset_path=jdbc" >> "$GITHUB_OUTPUT"
+          fi
 #
 #build-iotdb
       - name: Build iotdb
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
-          mvn clean package -pl distribution -am -DskipTests -P compile-grafana-plugin
+          mvn clean package -DskipTests -am -pl -P compile-grafana-plugin,get-jar-with-dependencies
 #
 #upload-all
       - name: Upload apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip using ${{ matrix.java_version }}
@@ -257,25 +265,26 @@ jobs:
           asset_content_type: application/zip
 #
 #iotdb-jdbc-*-jar-with-dependencies.jar
-      - name: Build Apache IoTDB jdbc in ${{ matrix.iotdb_version }} using ${{ matrix.java_version }}
-        shell: bash
-        id: build-jdbc
-        run: |
-          cd ${{ github.workspace }}/iotdb
-          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
-            mvn clean package -DskipTests -am -pl iotdb-client/jdbc -P get-jar-with-dependencies
-            echo "jdbc_abs_target_dir=${{ github.workspace }}/iotdb/iotdb-client/jdbc/target" >> "$GITHUB_OUTPUT"
-          else
-            mvn clean package -DskipTests -am -pl jdbc -P get-jar-with-dependencies
-            echo "jdbc_abs_target_dir=${{ github.workspace }}/iotdb/jdbc/target" >> "$GITHUB_OUTPUT"
-          fi
+#      - name: Build Apache IoTDB jdbc in ${{ matrix.iotdb_version }} using ${{ matrix.java_version }}
+#        shell: bash
+#        id: build-jdbc
+#        run: |
+#          cd ${{ github.workspace }}/iotdb
+#          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
+#            mvn clean package -DskipTests -am -pl iotdb-client/jdbc -P get-jar-with-dependencies
+#            echo "jdbc_abs_target_dir=${{ github.workspace }}/iotdb/iotdb-client/jdbc/target" >> "$GITHUB_OUTPUT"
+#          else
+#            mvn clean package -DskipTests -am -pl jdbc -P get-jar-with-dependencies
+#            echo "jdbc_abs_target_dir=${{ github.workspace }}/iotdb/jdbc/target" >> "$GITHUB_OUTPUT"
+#          fi
+#        asset_path: ${{ steps.build-jdbc.outputs.jdbc_abs_target_dir }}/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
       - name: Upload apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar using ${{ matrix.java_version }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
-          asset_path: ${{ steps.build-jdbc.outputs.jdbc_abs_target_dir }}/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
+          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.jdbc_asset_path }}/jdbc/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar"
           asset_name: apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
           asset_content_type: application/zip
 #
