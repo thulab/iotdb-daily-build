@@ -240,7 +240,8 @@ jobs:
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
-          mvn clean package -DskipTests -am -pl jdbc,distribution -P compile-grafana-plugin,get-jar-with-dependencies
+          mvn clean package -DskipTests -am -pl distribution -P compile-grafana-plugin
+          mvn package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.jdbc_asset_path }} -P get-jar-with-dependencies
 #
 #upload-all
       - name: Upload apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip using ${{ matrix.java_version }}
@@ -265,19 +266,6 @@ jobs:
           asset_content_type: application/zip
 #
 #iotdb-jdbc-*-jar-with-dependencies.jar
-#      - name: Build Apache IoTDB jdbc in ${{ matrix.iotdb_version }} using ${{ matrix.java_version }}
-#        shell: bash
-#        id: build-jdbc
-#        run: |
-#          cd ${{ github.workspace }}/iotdb
-#          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
-#            mvn clean package -DskipTests -am -pl iotdb-client/jdbc -P get-jar-with-dependencies
-#            echo "jdbc_abs_target_dir=${{ github.workspace }}/iotdb/iotdb-client/jdbc/target" >> "$GITHUB_OUTPUT"
-#          else
-#            mvn clean package -DskipTests -am -pl jdbc -P get-jar-with-dependencies
-#            echo "jdbc_abs_target_dir=${{ github.workspace }}/iotdb/jdbc/target" >> "$GITHUB_OUTPUT"
-#          fi
-#        asset_path: ${{ steps.build-jdbc.outputs.jdbc_abs_target_dir }}/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
       - name: Upload apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar using ${{ matrix.java_version }}
         uses: actions/upload-release-asset@v1
         env:
