@@ -284,7 +284,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.jdbc_asset_path }}/jdbc/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar"
+          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.jdbc_asset_path }}/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar"
           asset_name: apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
           asset_content_type: application/zip
 #
