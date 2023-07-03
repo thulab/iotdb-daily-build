@@ -247,7 +247,7 @@ jobs:
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
-          mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.$client_py_module }},distribution -P get-jar-with-dependencies,compile-grafana-plugin
+          mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies,compile-grafana-plugin
 #
 #upload-all
       - name: Upload apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip using ${{ matrix.java_version }}
@@ -287,7 +287,7 @@ jobs:
         shell: bash
         id: build-py-client
         run: |
-          cd ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.$client_py_module }}
+          cd ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}
           rm -rf dist
           python3 setup.py bdist_wheel --universal
           cd dist
@@ -298,7 +298,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/${{ steps.build-py-client.outputs.client_py_module }}/dist/${{ steps.build-py-client.outputs.client_py_whl_name }}
+          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${{ steps.build-py-client.outputs.client_py_whl_name }}
           asset_name: apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
           asset_content_type: application/zip
 #
