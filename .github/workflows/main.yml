@@ -127,12 +127,8 @@ jobs:
             exit 1
           fi
 
-          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
+          if [ "${{ matrix.iotdb_version }}" = "master" && "${{ matrix.iotdb_version }}" = "rel/1.2" ]; then
             echo "server_dir=iotdb-core/datanode" >> "$GITHUB_OUTPUT"
-            echo "cpp_dir=iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
-            echo "cmake_root_dir=${{ github.workspace }}\iotdb\iotdb-client\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64" >> "$GITHUB_OUTPUT"
-          elif [ "${{ matrix.iotdb_version }}" = "rel/1.2" ]; then
-            echo "server_dir=server" >> "$GITHUB_OUTPUT"
             echo "cpp_dir=iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
             echo "cmake_root_dir=${{ github.workspace }}\iotdb\iotdb-client\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64" >> "$GITHUB_OUTPUT"
           else
