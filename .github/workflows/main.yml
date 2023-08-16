@@ -161,8 +161,10 @@ jobs:
         run: |
           cd ${{ github.workspace }}\iotdb
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
+          set BOOST_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
+          set BOOST_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_library_dir }}"
           set Path
-          .\mvnw.cmd package -P with-tools,with-cpp -pl example/client-cpp-example -am -DskipTests -- -Dcmake.generator="Visual Studio 17 2022" -Dboost.include.dir="${{ steps.iotdb-info.outputs.boost_include_dir }}" -Dboost.library.dir="${{ steps.iotdb-info.outputs.boost_library_dir }}"
+          .\mvnw.cmd package -P with-tools,with-cpp -pl example/client-cpp-example -am -DskipTests -Dcmake.generator="Visual Studio 17 2022"
 #
 # upload client-cpp
       - name: apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
