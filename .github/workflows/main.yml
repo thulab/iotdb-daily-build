@@ -142,7 +142,7 @@ jobs:
           fi
 # build client-cpp
       - name: Build client-cpp
-        if: ${{ matrix.os == 'windows-2022' || matrix.iotdb_version != 'master'  }}
+        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'master'  }}
         shell: cmd
         env:
           boost-include-dir: ${{ github.workspace }}\boost_1_78_0\boost_1_78_0
@@ -154,7 +154,7 @@ jobs:
           set Path
            mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl ${{ steps.iotdb-info.outputs.server_dir }},${{ steps.iotdb-info.outputs.cpp_dir }},example/client-cpp-example -am -DskipTests -Dboost.include.dir="%boost-include-dir%" -Dboost.library.dir="%boost-library.dir%" -Dcmake.url="%cmake-url%" -Dcmake.root.dir="${{ steps.iotdb-info.outputs.cmake_root_dir }}"
       - name: Build client-cpp on master branch
-        if: ${{ matrix.os == 'windows-2022' || matrix.iotdb_version == 'master' }}
+        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
         shell: cmd
         env:
           boost-include-dir: ${{ github.workspace }}\boost_1_78_0\boost_1_78_0
