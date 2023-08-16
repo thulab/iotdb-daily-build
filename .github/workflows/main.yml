@@ -112,18 +112,18 @@ jobs:
         shell: bash
         run: |
           cd iotdb
-          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
-          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2)"
-          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "branch=$(git branch |grep ^*|cut -d ' ' -f 2)" >> "$GITHUB_OUTPUT"
+          echo "version=$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')" >> "$GITHUB_OUTPUT"
           # To distinguish master and rel/1.0 branches, add temporary variables
-          echo "::set-output name=matrix_version::$(echo ${{ matrix.iotdb_version }} | sed "s:/::")"
-          # 
-          echo "::set-output name=boost_include_dir::$(echo ${{ github.workspace }}\boost_1_78_0\boost_1_78_0)"
-          echo "::set-output name=boost_library_dir::$(echo ${{ github.workspace }}\boost_1_78_0\boost_1_78_0\stage\lib)"
-          # 
-          echo "::set-output name=cmake_url::$(echo https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip)"
-          
+          echo "matrix_version=$(echo ${{ matrix.iotdb_version }} | sed "s:/::")" >> "$GITHUB_OUTPUT"
 
+          # boost
+          echo "boost_include_dir=${{ github.workspace }}\boost_1_78_0\boost_1_78_0" >> "$GITHUB_OUTPUT"
+          echo "boost_library_dir=${{ github.workspace }}\boost_1_78_0\boost_1_78_0\stage\lib" >> "$GITHUB_OUTPUT"
+          # 
+          echo "cmake_url=https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip" >> "$GITHUB_OUTPUT"
+          
           if [ "${{ matrix.java_version }}" = "8" ]; then
             echo "upload_url=${{ needs.create-release-java8.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ matrix.java_version }}" = "11" ]; then
