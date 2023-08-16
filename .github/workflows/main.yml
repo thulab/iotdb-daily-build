@@ -95,6 +95,12 @@ jobs:
           C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/win_flex_bison-latest.zip https://jaist.dl.sourceforge.net/project/winflexbison/win_flex_bison-latest.zip
           7z x ${{ github.workspace }}/win_flex_bison-latest.zip -o${{ github.workspace }}/win_flex_bison-latest
 
+      - name: download & unpack mvn3.9.x
+        shell: cmd
+        run: |
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/apache-maven-3.9.4-bin.zip https://dlcdn.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.zip
+          7z x ${{ github.workspace }}/apache-maven-3.9.4-bin.zip -o${{ github.workspace }}/apache-maven-3.9.4-bin
+
       - name: install openssl
         run: |
           choco install openssl
@@ -161,16 +167,17 @@ jobs:
         run: |
           cd ${{ github.workspace }}\iotdb
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
-          set BOOST_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
-          set BOOST_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_library_dir }}"
-          set Boost_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
-          set Boost_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
-          setx BOOST_INCLUDE_DIR "${{ steps.iotdb-info.outputs.boost_include_dir }}"
-          setx BOOST_LIBRARY_DIR "${{ steps.iotdb-info.outputs.boost_library_dir }}"
-          setx Boost_INCLUDE_DIR "${{ steps.iotdb-info.outputs.boost_include_dir }}"
-          setx Boost_LIBRARY_DIR "${{ steps.iotdb-info.outputs.boost_include_dir }}"
+          set Path=${{ github.workspace }}\apache-maven-3.9.4-bin\apache-maven-3.9.4\bin;%Path%
+#          set BOOST_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
+#          set BOOST_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_library_dir }}"
+#          set Boost_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
+#          set Boost_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
+#          setx BOOST_INCLUDE_DIR "${{ steps.iotdb-info.outputs.boost_include_dir }}"
+#          setx BOOST_LIBRARY_DIR "${{ steps.iotdb-info.outputs.boost_library_dir }}"
+#          setx Boost_INCLUDE_DIR "${{ steps.iotdb-info.outputs.boost_include_dir }}"
+#          setx Boost_LIBRARY_DIR "${{ steps.iotdb-info.outputs.boost_include_dir }}"
           set Path
-          .\mvnw.cmd package -P with-tools,with-cpp -pl example/client-cpp-example -am -DskipTests -Dcmake.generator="Visual Studio 17 2022"
+          mvn clean package -P with-tools,with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests -Dcmake.generator="Visual Studio 17 2022" -Dboost.library.dir="${{ steps.iotdb-info.outputs.boost_library_dir }}" -Dboost.include.dir="${{ steps.iotdb-info.outputs.boost_include_dir }}"
 #
 # upload client-cpp
       - name: apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
