@@ -165,6 +165,10 @@ jobs:
           set BOOST_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_library_dir }}"
           set Boost_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
           set Boost_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
+          setx BOOST_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
+          setx BOOST_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_library_dir }}"
+          setx Boost_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
+          setx Boost_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
           set Path
           .\mvnw.cmd package -P with-tools,with-cpp -pl example/client-cpp-example -am -DskipTests -Dcmake.generator="Visual Studio 17 2022"
 #
