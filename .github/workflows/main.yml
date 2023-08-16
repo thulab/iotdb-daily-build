@@ -168,15 +168,19 @@ jobs:
           cd ${{ github.workspace }}\iotdb
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
           set Path=${{ github.workspace }}\apache-maven-3.9.4-bin\apache-maven-3.9.4\bin;%Path%
-          set BOOST_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
-          set BOOST_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_library_dir }}"
-          set Boost_INCLUDE_DIR="${{ steps.iotdb-info.outputs.boost_include_dir }}"
-          set Boost_LIBRARY_DIR="${{ steps.iotdb-info.outputs.boost_library_dir }}"
-          setx BOOST_INCLUDE_DIR "${{ steps.iotdb-info.outputs.boost_include_dir }}"
-          setx BOOST_LIBRARY_DIR "${{ steps.iotdb-info.outputs.boost_library_dir }}"
-          setx Boost_INCLUDE_DIR "${{ steps.iotdb-info.outputs.boost_include_dir }}"
-          setx Boost_LIBRARY_DIR "${{ steps.iotdb-info.outputs.boost_library_dir }}"
-          set Path
+          
+          set CPPFLAGS=/I"${{ steps.iotdb-info.outputs.boost_include_dir }}" %CPPFLAGS%
+          set LDFLAGS=/L"${{ steps.iotdb-info.outputs.boost_library_dir }}" %LDFLAGS%
+
+          set BOOST_INCLUDE_DIR=${{ steps.iotdb-info.outputs.boost_include_dir }}
+          set BOOST_LIBRARY_DIR=${{ steps.iotdb-info.outputs.boost_library_dir }}
+          set Boost_INCLUDE_DIR=${{ steps.iotdb-info.outputs.boost_include_dir }}
+          set Boost_LIBRARY_DIR=${{ steps.iotdb-info.outputs.boost_library_dir }}
+          setx BOOST_INCLUDE_DIR ${{ steps.iotdb-info.outputs.boost_include_dir }}
+          setx BOOST_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
+          setx Boost_INCLUDE_DIR ${{ steps.iotdb-info.outputs.boost_include_dir }}
+          setx Boost_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
+          set
           mvn clean package -P with-tools,with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests -Dcmake.generator="Visual Studio 17 2022" -Dboost.library.dir="${{ steps.iotdb-info.outputs.boost_library_dir }}" -Dboost.include.dir="${{ steps.iotdb-info.outputs.boost_include_dir }}"
 
 #
