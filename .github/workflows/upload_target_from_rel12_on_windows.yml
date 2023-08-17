@@ -109,7 +109,7 @@ jobs:
       - name: compress client-cpp-example
         shell: bash
         run: |
-          cd ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}
+          cd iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}
           7z a client-cpp-target.zip target
 
 # upload client-cpp
@@ -127,7 +127,7 @@ jobs:
       - name: compress client-cpp-example
         shell: bash
         run: |
-          cd ${{ github.workspace }}/iotdb/example/client-cpp-example
+          cd iotdb/example/client-cpp-example
           7z a  client-cpp-example-target.zip target
 #
 # upload client-cpp-example
