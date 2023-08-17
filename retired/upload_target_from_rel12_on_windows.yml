@@ -1,0 +1,142 @@
+# Build iotdb-rel/0.13, iotdb-rel/1.0, master, iot-benchmark
+# Everyday
+name: upload target from rel/1.2 branch onwindows
+on:
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create-release.outputs.upload_url }}
+    steps:
+      - name: Create release about client-cpp
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: rel12_client_cpp_target
+          release_name: rel12 client cpp target
+          body: no content
+          draft: false
+          prerelease: false
+
+
+  build-in-win:
+    needs: [ create-release ]
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        iotdb_version: [ rel/1.2 ]
+        java_version: [ 8 ]
+        os: [ windows-2022 ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set java ${{ matrix.java }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java_version }}
+
+      - name: download & unpack & install -> boost
+        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'master' }}
+        shell: cmd
+        run: |
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0-bin.7z https://github.com/xiaoyekanren/iotdb-daily-build-dependence/releases/download/release-depend-bin/boost_1_78_0-bin.7z
+          7z x ${{ github.workspace }}/boost_1_78_0-bin.7z -o${{ github.workspace }}/boost_1_78_0
+
+      - name: download & unpack flex&bison
+        shell: cmd
+        run: |
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/win_flex_bison-latest.zip https://jaist.dl.sourceforge.net/project/winflexbison/win_flex_bison-latest.zip
+          7z x ${{ github.workspace }}/win_flex_bison-latest.zip -o${{ github.workspace }}/win_flex_bison-latest
+
+      - name: install openssl
+        run: |
+          choco install openssl
+
+      - name: Checkout apache/iotdb
+        uses: actions/checkout@v2
+        with:
+          path: iotdb
+          repository: 'apache/iotdb'
+          ref: ${{ matrix.iotdb_version }}
+          fetch-depth: 0
+
+      - name: Collect IoTDB info
+        id: iotdb-info
+        shell: bash
+        run: |
+          cd iotdb
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "branch=$(git branch |grep ^*|cut -d ' ' -f 2)" >> "$GITHUB_OUTPUT"
+          echo "version=$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')" >> "$GITHUB_OUTPUT"
+          # To distinguish master and rel/1.0 branches, add temporary variables
+          echo "matrix_version=$(echo ${{ matrix.iotdb_version }} | sed "s:/::")" >> "$GITHUB_OUTPUT"
+
+          # boost
+          echo "boost_include_dir=${{ github.workspace }}\boost_1_78_0\boost_1_78_0" >> "$GITHUB_OUTPUT"
+          echo "boost_library_dir=${{ github.workspace }}\boost_1_78_0\boost_1_78_0\stage\lib" >> "$GITHUB_OUTPUT"
+          # 
+          echo "cmake_url=https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
+            echo "server_dir=iotdb-core/datanode" >> "$GITHUB_OUTPUT"
+            echo "cpp_dir=iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
+            echo "cmake_root_dir=${{ github.workspace }}\iotdb\iotdb-client\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64" >> "$GITHUB_OUTPUT"
+          elif [ "${{ matrix.iotdb_version }}" = "rel/1.2" ]; then
+            echo "server_dir=iotdb-core/datanode" >> "$GITHUB_OUTPUT"
+            echo "cpp_dir=iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
+            echo "cmake_root_dir=${{ github.workspace }}\iotdb\iotdb-client\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64" >> "$GITHUB_OUTPUT"
+          else
+            echo "server_dir=server" >> "$GITHUB_OUTPUT"
+            echo "cpp_dir=client-cpp" >> "$GITHUB_OUTPUT"
+            echo "cmake_root_dir=${{ github.workspace }}\iotdb\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64" >> "$GITHUB_OUTPUT"
+          fi
+
+# build client-cpp
+      - name: Build client-cpp
+        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'master'  }}
+        shell: cmd
+        run: |
+          cd ${{ github.workspace }}\iotdb
+          set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
+          set Path
+          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl ${{ steps.iotdb-info.outputs.server_dir }},${{ steps.iotdb-info.outputs.cpp_dir }},example/client-cpp-example -am -DskipTests -Dboost.include.dir="${{ steps.iotdb-info.outputs.boost_include_dir }}" -Dboost.library.dir="${{ steps.iotdb-info.outputs.boost_library_dir }}" -Dcmake.url="${{ steps.iotdb-info.outputs.cmake_url }}" -Dcmake.root.dir="${{ steps.iotdb-info.outputs.cmake_root_dir }}"
+
+# compress client-cpp
+      - name: compress client-cpp-example
+        shell: bash
+        run: |
+          cd iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}
+          7z a client-cpp-target.zip target
+
+# upload client-cpp
+      - name: Upload client-cpp-target.zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}/client-cpp-target.zip
+          asset_name: client-cpp-target.zip
+          asset_content_type: application/zip
+#
+# build client-cpp-example
+      - name: compress client-cpp-example
+        shell: bash
+        run: |
+          cd iotdb/example/client-cpp-example
+          7z a  client-cpp-example-target.zip target
+#
+# upload client-cpp-example
+      - name: Upload client-cpp-example-target.zip
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb/example/client-cpp-example/client-cpp-example-target.zip
+          asset_name: client-cpp-example-target.zip
+          asset_content_type: application/zip

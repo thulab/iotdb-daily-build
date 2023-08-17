@@ -1,0 +1,68 @@
+name: test iotdb pr 10891
+on:
+  workflow_dispatch:
+
+jobs:
+  build-in-win:
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        iotdb_version: [ master ]
+        java_version: [ 8 ]
+        os: [ windows-2022 ]
+        with_tools: [ yes,no ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set java ${{ matrix.java }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java_version }}
+
+      - name: download & unpack & install -> boost
+        shell: cmd
+        run: choco install boost-msvc-14.3 --version=1.78.0
+
+      - name: download & unpack flex&bison
+        shell: cmd
+        run: |
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/win_flex_bison-latest.zip https://jaist.dl.sourceforge.net/project/winflexbison/win_flex_bison-latest.zip
+          7z x ${{ github.workspace }}/win_flex_bison-latest.zip -o${{ github.workspace }}/win_flex_bison-latest
+
+      - name: download & unpack mvn3.9.x
+        shell: cmd
+        run: |
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/apache-maven-3.9.4-bin.zip https://dlcdn.apache.org/maven/maven-3/3.9.4/binaries/apache-maven-3.9.4-bin.zip
+          7z x ${{ github.workspace }}/apache-maven-3.9.4-bin.zip -o${{ github.workspace }}/apache-maven-3.9.4-bin
+
+      - name: install openssl
+        run: |
+          choco install openssl
+
+      - name: Checkout apache/iotdb
+        uses: actions/checkout@v2
+        with:
+          path: iotdb
+          repository: 'chrisdutz/iotdb'
+          ref: ${{ matrix.iotdb_version }}
+          fetch-depth: 0
+
+      - name: Build client-cpp on master branch with_tools
+        if: ${{ matrix.with_tools == 'yes' }}
+        shell: cmd
+        run: |
+          cd ${{ github.workspace }}\iotdb
+          set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
+          set Path=${{ github.workspace }}\apache-maven-3.9.4-bin\apache-maven-3.9.4\bin;%Path%
+          set
+          mvn clean package -P with-tools,with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
+
+      - name: Build client-cpp on master branch no with_tools
+        if: ${{ matrix.with_tools == 'no' }}
+        shell: cmd
+        run: |
+          cd ${{ github.workspace }}\iotdb
+          set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
+          set Path=${{ github.workspace }}\apache-maven-3.9.4-bin\apache-maven-3.9.4\bin;%Path%
+          set
+          mvn clean package -P with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
