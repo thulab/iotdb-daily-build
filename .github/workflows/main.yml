@@ -175,7 +175,9 @@ jobs:
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
           set Path=${{ github.workspace }}\apache-maven-3.9.4-bin\apache-maven-3.9.4\bin;%Path%
           set
-          mvn clean package -P with-tools,with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
+          mvn clean package -P with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
+#          # compile all without cache
+#          mvn clean package -P with-tools,with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
 #          set CPPFLAGS=/I"${{ steps.iotdb-info.outputs.boost_include_dir }}" %CPPFLAGS%
 #          set LDFLAGS=/L"${{ steps.iotdb-info.outputs.boost_library_dir }}" %LDFLAGS%
 #          set BOOST_INCLUDE_DIR=${{ steps.iotdb-info.outputs.boost_include_dir }}
