@@ -55,7 +55,7 @@ jobs:
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
           set Path=${{ github.workspace }}\apache-maven-3.9.4-bin\apache-maven-3.9.4\bin;%Path%
           set
-          mvn clean package -P with-tools,with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
+          mvn install package -P with-tools,with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
 
       - name: Build client-cpp on master branch no with_tools
         if: ${{ matrix.with_tools == 'no' }}
@@ -65,4 +65,4 @@ jobs:
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
           set Path=${{ github.workspace }}\apache-maven-3.9.4-bin\apache-maven-3.9.4\bin;%Path%
           set
-          mvn clean package -P with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
+          mvn install package -P with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
