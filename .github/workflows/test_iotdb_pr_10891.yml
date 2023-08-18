@@ -44,7 +44,7 @@ jobs:
         with:
           path: iotdb
           repository: 'chrisdutz/iotdb'
-          ref: ${{ matrix.iotdb_version }}
+          ref: feature/test-externalized-iotdb-tools-thrift
           fetch-depth: 0
 
       - name: Build client-cpp on master branch with_tools
