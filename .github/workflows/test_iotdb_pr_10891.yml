@@ -43,8 +43,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: iotdb
-          repository: 'chrisdutz/iotdb'
-          ref: feature/test-externalized-iotdb-tools-thrift
+          repository: 'apache/iotdb'
+          ref: master
           fetch-depth: 0
 
       - name: Build client-cpp on master branch with_tools
