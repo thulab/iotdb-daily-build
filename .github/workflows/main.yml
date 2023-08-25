@@ -28,7 +28,7 @@ jobs:
     steps:
       - name: Create release java-8
         id: create-release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: Create release java-11
         id: create-release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -72,9 +72,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set java ${{ matrix.java }}
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java_version }}
+          distribution: 'temurin'
 
       - name: download & unpack & install -> boost
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'master' }}
@@ -112,7 +113,7 @@ jobs:
           choco install openssl
 
       - name: Checkout apache/iotdb
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: iotdb
           repository: 'apache/iotdb'
@@ -231,12 +232,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set java ${{ matrix.java }}
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java_version }}
+          distribution: 'temurin'
 
       - name: Checkout apache/iotdb
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: iotdb
           repository: 'apache/iotdb'
@@ -358,9 +360,10 @@ jobs:
     steps:
 # set java
       - name: Set java ${{ matrix.java }}
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java_version }}
+          distribution: 'temurin'
 #
 ## build iotdb
 #      - name: Checkout iotdb
@@ -378,7 +381,7 @@ jobs:
 ##
 # clone iot-benchmark
       - name: Checkout iot-benchmark
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: iot-benchmark
           repository: 'thulab/iot-benchmark'
