@@ -11,7 +11,6 @@ jobs:
         iotdb_version: [ master ]
         java_version: [ 8 ]
         os: [ windows-2022 ]
-        with_tools: [ yes,no ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set java ${{ matrix.java }}
@@ -48,7 +47,6 @@ jobs:
           fetch-depth: 0
 
       - name: Build client-cpp on master branch
-        if: ${{ matrix.with_tools == 'no' }}
         shell: cmd
         run: |
           cd ${{ github.workspace }}\iotdb
