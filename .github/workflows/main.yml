@@ -18,7 +18,7 @@ jobs:
       - name: collect common info
         shell: bash
         id: sys-info
-        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
+        run: echo "date=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
 #----start----
   create-release-java8:
     needs: collect
@@ -83,13 +83,6 @@ jobs:
         run: |
           C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0-bin.7z https://github.com/xiaoyekanren/iotdb-daily-build-dependence/releases/download/release-depend-bin/boost_1_78_0-bin.7z
           7z x ${{ github.workspace }}/boost_1_78_0-bin.7z -o${{ github.workspace }}/boost_1_78_0
-#          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/boost_1_78_0.zip https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.zip
-#          7z x ${{ github.workspace }}/boost_1_78_0.zip -o${{ github.workspace }}/boost_1_78_0
-#          cd ${{ github.workspace }}/boost_1_78_0/boost_1_78_0
-#          .\bootstrap.bat
-#          .\b2
-#          echo "::set-output name=include::$(git branch |grep ^*|cut -d ' ' -f 2)"
-#          echo "::set-output name=library::$(git branch |grep ^*|cut -d ' ' -f 2)"
       - name: download & unpack & install -> boost
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
         shell: cmd
@@ -253,11 +246,11 @@ jobs:
           pip3 install wheel
           
           cd ${{ github.workspace }}/iotdb
-          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
-          echo "::set-output name=branch::$(git branch |grep ^*|cut -d ' ' -f 2|sed "s:/:-:")"
-          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
+          echo "commit=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "branch=$(git branch |grep ^*|cut -d ' ' -f 2|sed "s:/:-:")" >> $GITHUB_OUTPUT
+          echo "version=$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')" >> $GITHUB_OUTPUT
           # To distinguish master and rel/1.0 branches, add temporary variables
-          echo "::set-output name=matrix_version::$(echo ${{ matrix.iotdb_version }} | sed "s:/::")"
+          echo "matrix_version=$(echo ${{ matrix.iotdb_version }} | sed "s:/::")" >> $GITHUB_OUTPUT
           
           if [ "${{ matrix.java_version }}" = "8" ]; then
             echo "upload_url=${{ needs.create-release-java8.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
@@ -391,7 +384,7 @@ jobs:
         id: benchmark-info
         run: |
           cd ${{ github.workspace }}/iot-benchmark
-          echo "::set-output name=commit::$(git rev-parse --short HEAD)"
+          echo "commit=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           
           if [ "${{ matrix.java_version }}" = "8" ]; then
             echo "upload_url=${{ needs.create-release-java8.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
