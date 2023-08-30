@@ -189,6 +189,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
           files: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
           name: apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
 #
@@ -205,6 +206,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
           files: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
           name: apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip
 #
@@ -288,6 +290,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
           files: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
           name: apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
 #
@@ -297,6 +300,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
           files: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
           name: apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
 #
@@ -306,6 +310,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
           files: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_jdbc_module }}/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
           name: apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
 #
@@ -324,6 +329,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
           files: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${{ steps.build-py-client.outputs.client_py_whl_name }}
           name: apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
 #
@@ -395,6 +401,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
           files: ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip
           name: iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
 #
