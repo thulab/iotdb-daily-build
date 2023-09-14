@@ -190,7 +190,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
+          files: ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\*.zip
 #
 # build client-cpp-example
       - name: compress client-cpp-example
@@ -206,7 +206,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}\iotdb\example\client-cpp-example\target\client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
+          files: ${{ github.workspace }}\iotdb\example\client-cpp-example\target\*.zip
 #
 #----end----
 #----start----
