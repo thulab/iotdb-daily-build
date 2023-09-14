@@ -141,11 +141,11 @@ jobs:
 
           if [ "${{ matrix.iotdb_version }}" = "master" ]; then
             echo "server_dir=iotdb-core/datanode" >> "$GITHUB_OUTPUT"
-            echo "cpp_dir=iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
+            echo "cpp_dir=iotdb-client\client-cpp" >> "$GITHUB_OUTPUT"
             echo "cmake_root_dir=${{ github.workspace }}\iotdb\iotdb-client\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64" >> "$GITHUB_OUTPUT"
           elif [ "${{ matrix.iotdb_version }}" = "rel/1.2" ]; then
             echo "server_dir=iotdb-core/datanode" >> "$GITHUB_OUTPUT"
-            echo "cpp_dir=iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
+            echo "cpp_dir=iotdb-client\client-cpp" >> "$GITHUB_OUTPUT"
             echo "cmake_root_dir=${{ github.workspace }}\iotdb\iotdb-client\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64" >> "$GITHUB_OUTPUT"
           else
             echo "server_dir=server" >> "$GITHUB_OUTPUT"
@@ -190,7 +190,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
+          files: ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
 #
 # build client-cpp-example
       - name: compress client-cpp-example
@@ -206,7 +206,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
+          files: ${{ github.workspace }}\iotdb\example\client-cpp-example\target\client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
 #
 #----end----
 #----start----
