@@ -17,7 +17,7 @@ Execute the start-stop test case of the iotdb rel/1.0 branch every day.
 
 ----------
 * iotdb 用户手册发布  
-one short to release user-guidy, need to select pages by hand before relase.  
+one short to release user-guide, need to select pages by hand before release.  
 * test build rel/0.12  
 * test self-hosted  
 * test upload  
