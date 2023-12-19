@@ -93,7 +93,7 @@ jobs:
       # collect i-d-b information
       - name: iotdb-daily-build info
         id: info-idb
-        shell: bash
+        shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build
           echo "idb_home=$(pwd)" >> $GITHUB_OUTPUT
@@ -108,7 +108,7 @@ jobs:
       # build iotdb
       - name: build iotdb
         id: build-iotdb
-        shell: bash
+        shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-src
           mvn clean package -DskipTests -am -pl distribution
@@ -121,11 +121,11 @@ jobs:
 #          echo "::set-output name=iotdb_home::$(pwd)"
       - name: check para.
         if: ${{ matrix.os == 'windows-latest' }}
-        shell: bash
+        shell: pwsh
         run: |
           echo "iotdb_home: ${{ steps.build-iotdb.outputs.iotdb_home }}"
           echo "idb_home: ${{ steps.info-idb.outputs.idb_home }}"
-          echo "copy start-scripts to <iotdb_home>/sbin."
+          echo "copy start-scripts to <iotdb>/sbin..."
           cp ${{ steps.info-idb.outputs.idb_home }}/action-workflow-check-start_stop/check_scripts/step_1_start_confignode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_1_start_confignode.vbs
           cp ${{ steps.info-idb.outputs.idb_home }}/action-workflow-check-start_stop/check_scripts/step_3_start_datanode.vbs ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin/step_3_start_datanode.vbs
       # start test...
@@ -135,7 +135,7 @@ jobs:
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           step_1_start_confignode.vbs
       - name: sleep 10.
-        shell: bash
+        shell: pwsh
         run: |
           sleep 10
       - name: check start confignode.
@@ -149,7 +149,7 @@ jobs:
           cd ${{ steps.build-iotdb.outputs.iotdb_home }}/sbin
           step_3_start_datanode.vbs
       - name: sleep 10.
-        shell: bash
+        shell: pwsh
         run: |
           sleep 10
       - name: check start datanode
@@ -169,7 +169,7 @@ jobs:
           echo "stop datanode."
           stop-datanode.bat
       - name: sleep 3.
-        shell: bash
+        shell: pwsh
         run: |
           sleep 3
       - name: check stop datanode.
@@ -184,7 +184,7 @@ jobs:
           echo "stop confignode."
           stop-confignode.bat
       - name: sleep 3.
-        shell: bash
+        shell: pwsh
         run: |
           sleep 3
       - name: check stop confignode.
