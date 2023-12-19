@@ -96,7 +96,7 @@ jobs:
         shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build
-          echo "idb_home=$(pwd)" >> ${{ env.GITHUB_OUTPUT }}
+          echo "idb_home=$(pwd)" >> $env:GITHUB_OUTPUT
       # get iotdb
       - name: Checkout apache/iotdb
         uses: actions/checkout@v2
@@ -114,7 +114,7 @@ jobs:
           mvn clean package -DskipTests -am -pl distribution
           mv ${{ github.workspace }}/iotdb-src/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-bin
           cd ${{ github.workspace }}/iotdb-bin
-          echo "iotdb_home=$(pwd)" >> ${{ env.GITHUB_OUTPUT }}
+          echo "iotdb_home=$(pwd)" >> $env:GITHUB_OUTPUT
 #          C:\msys64\usr\bin\wget.exe -O${{ github.workspace }}/apache-iotdb-1.0.1-SNAPSHOT-all-bin-master-e68f560463.zip  https://github.com/xiaoyekanren/iotdb-daily-build/releases/download/2022-12-12-java8-apache-iotdb/apache-iotdb-1.0.1-SNAPSHOT-all-bin-master-e68f560463.zip
 #          7z x apache-iotdb-1.0.1-SNAPSHOT-all-bin-master-e68f560463.zip
 #          cd apache-iotdb-1.0.1-SNAPSHOT-all-bin
