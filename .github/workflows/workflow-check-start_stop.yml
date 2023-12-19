@@ -284,7 +284,7 @@ jobs:
           fi
 
   push-commit-id:
-    needs: [ check-in-linux,check-in-windows ]
+    needs: [ check-commit,check-in-linux,check-in-windows ]
     runs-on: ubuntu-latest
     steps:
       # get time
