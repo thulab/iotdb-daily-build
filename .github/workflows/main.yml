@@ -184,12 +184,14 @@ jobs:
 #
 # upload client-cpp
       - name: apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
-        uses: softprops/action-gh-release@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\*.zip
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
+          asset_name: apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          asset_content_type: application/zip
 #
 # build client-cpp-example
       - name: compress client-cpp-example
@@ -200,12 +202,14 @@ jobs:
 #
 # upload client-cpp-example
       - name: Upload apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip using ${{ matrix.java_version }}
-        uses: softprops/action-gh-release@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}\iotdb\example\client-cpp-example\target\*.zip
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip
+          asset_name: apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          asset_content_type: application/zip
 #
 #----end----
 #----start----
@@ -282,30 +286,36 @@ jobs:
 #
 #upload-all
       - name: Upload apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip using ${{ matrix.java_version }}
-        uses: softprops/action-gh-release@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
+          asset_name: apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          asset_content_type: application/zip
 #
 #grafana-plugin
       - name: Upload apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip using ${{ matrix.java_version }}
-        uses: softprops/action-gh-release@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
+          asset_name: apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          asset_content_type: application/zip
 #
 #iotdb-jdbc-*-jar-with-dependencies.jar
       - name: Upload apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar using ${{ matrix.java_version }}
-        uses: softprops/action-gh-release@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_jdbc_module }}/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_jdbc_module }}/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
+          asset_name: apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
+          asset_content_type: application/zip
 #
 #client-py
       - name: Build Apache IoTDB client-py in ${{ matrix.iotdb_version }} using ${{ matrix.java_version }}
@@ -318,12 +328,14 @@ jobs:
           cd dist
           echo "client_py_whl_name=$(ls apache_iotdb-*.whl)" >> "$GITHUB_OUTPUT"
       - name: Upload apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl using ${{ matrix.java_version }}
-        uses: softprops/action-gh-release@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${{ steps.build-py-client.outputs.client_py_whl_name }}
+          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${{ steps.build-py-client.outputs.client_py_whl_name }}
+          asset_name: apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
+          asset_content_type: application/zip
 #
 #----end----
 #----start----
@@ -388,11 +400,13 @@ jobs:
 #
 #---upload
       - name: Upload iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip using ${{ matrix.java_version }}
-        uses: softprops/action-gh-release@v1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
-          files: ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip
+          upload_url: ${{ steps.benchmark-info.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip
+          asset_name: iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
+          asset_content_type: application/zip
 #
 #----end----
