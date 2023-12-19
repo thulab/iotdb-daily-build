@@ -39,18 +39,18 @@ jobs:
         id: check-cur-status
         run: |
           cd ${{ github.workspace }}/iotdb
-          echo "::set-output name=commit_id::$( git rev-parse HEAD )"
-          echo "::set-output name=commit_id_short::$( git rev-parse --short HEAD )"
-          echo "::set-output name=commit_time::$(git log -n1 --pretty='format:%cd' --date=iso)"
-          echo "::set-output name=commit_user::$(git log | head -n 2 | tail -n 1 | cut -d ' ' -f 2)"
-          echo "::set-output name=version::$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')"
+          echo "commit_id=$( git rev-parse HEAD )" >> $GITHUB_OUTPUT
+          echo "commit_id_short=$( git rev-parse --short HEAD )" >> $GITHUB_OUTPUT
+          echo "commit_time=$(git log -n1 --pretty='format:%cd' --date=iso)" >> $GITHUB_OUTPUT
+          echo "commit_user=$(git log | head -n 2 | tail -n 1 | cut -d ' ' -f 2)" >> $GITHUB_OUTPUT
+          echo "version=$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')" >> $GITHUB_OUTPUT
           echo $(git rev-parse HEAD)
       # check update
       - name: check
         id: check-old-commit
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build
-          echo "::set-output name=last_commit::$(cat .github/release_history.txt | tail -n 1)"
+          echo "last_commit=$(cat .github/release_history.txt | tail -n 1)" >> $GITHUB_OUTPUT
           echo $(cat .github/release_history.txt | tail -n 1)
       # compare
       - name: check check's results
@@ -96,7 +96,7 @@ jobs:
         shell: pwsh
         run: |
           cd ${{ github.workspace }}/iotdb-daily-build
-          echo "::set-output name=idb_home::$(pwd)"
+          echo "idb_home=$(pwd)" >> $GITHUB_OUTPUT
       # get iotdb
       - name: Checkout apache/iotdb
         uses: actions/checkout@v2
@@ -114,7 +114,7 @@ jobs:
           mvn clean package -DskipTests -am -pl distribution
           mv ${{ github.workspace }}/iotdb-src/distribution/target/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin/apache-iotdb-${{ needs.check-commit.outputs.version }}-all-bin ${{ github.workspace }}/iotdb-bin
           cd ${{ github.workspace }}/iotdb-bin
-          echo "::set-output name=iotdb_home::$(pwd)"
+          echo "iotdb_home=$(pwd)" >> $GITHUB_OUTPUT
 #          C:\msys64\usr\bin\wget.exe -O${{ github.workspace }}/apache-iotdb-1.0.1-SNAPSHOT-all-bin-master-e68f560463.zip  https://github.com/xiaoyekanren/iotdb-daily-build/releases/download/2022-12-12-java8-apache-iotdb/apache-iotdb-1.0.1-SNAPSHOT-all-bin-master-e68f560463.zip
 #          7z x apache-iotdb-1.0.1-SNAPSHOT-all-bin-master-e68f560463.zip
 #          cd apache-iotdb-1.0.1-SNAPSHOT-all-bin
@@ -291,7 +291,8 @@ jobs:
       - name: collect common info
         shell: bash
         id: sys-info
-        run: echo "::set-output name=date::$(date +"%Y-%m-%d")"
+        run: |
+          echo "date=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
       # get cur-repository
       - name: Checkout iotdb-daily-build
         uses: actions/checkout@v2
