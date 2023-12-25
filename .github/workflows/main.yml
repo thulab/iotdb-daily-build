@@ -273,18 +273,16 @@ jobs:
           fi
 #
 #build-iotdb
-      - name: Build iotdb
+      - name: Build iotdb in ${{ matrix.iotdb_version }}
         if: ${{ matrix.iotdb_version != 'master' }}
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
-          mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies,compile-grafana-plugin
-      - name: Build iotdb master branch
-        if: ${{ matrix.iotdb_version == 'master' }}
-        shell: bash
-        run: |
-          cd ${{ github.workspace }}/iotdb
-          mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies
+          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
+            mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies
+          else
+            mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies,compile-grafana-plugin
+          fi
 # 20231219,compile grafana module will fail, so it will no longer be compiled
 # mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies,with-grafana-plugin
 #
