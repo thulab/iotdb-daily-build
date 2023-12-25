@@ -274,7 +274,6 @@ jobs:
 #
 #build-iotdb
       - name: Build iotdb in ${{ matrix.iotdb_version }}
-        if: ${{ matrix.iotdb_version != 'master' }}
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
