@@ -394,7 +394,9 @@ jobs:
           cd ${{ github.workspace }}/iot-benchmark
           mvn clean package -DskipTests -am -pl core,${{ matrix.release_db }}
           mv ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
-
+          pwd ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
+          ls -l ${{ github.workspace }}
+          du -sh ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
 #---upload
       - name: Upload iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip using ${{ matrix.java_version }}
         uses: ncipollo/release-action@v1.13.0
@@ -408,5 +410,6 @@ jobs:
           body: java 8
           name: ${{ needs.collect.outputs.date }} java8 apache iotdb
           allowUpdates: true
+          artifactErrorsFailBuild: true
           artifacts: "${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip"
 #----end----
