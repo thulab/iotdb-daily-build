@@ -112,6 +112,9 @@ jobs:
         id: iotdb-info
         shell: bash
         run: |
+          echo "mkdir upload"
+          mkdir upload
+          
           cd iotdb
           echo $(pwd)
           echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
@@ -179,33 +182,28 @@ jobs:
 #          setx BOOST_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
 #          setx Boost_INCLUDE_DIR ${{ steps.iotdb-info.outputs.boost_include_dir }}
 #          setx Boost_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
-# move zip to upload folder
-      - name: Move zip to upload folder
+# Comcpress client-cpp-example
+      - name: Comcpress client-cpp-example
         shell: bash
         run: |
-          cpp_dir=${{ steps.iotdb-info.outputs.cpp_dir }}
-          cpp_dir=${cpp_dir//\\//}
-          workspace=${{ github.workspace }}
-          workspace=${workspace//\\//}
-          
-          echo "ls -l iotdb/${cpp_dir}/target"
-          ls -l iotdb/${cpp_dir}/target
-          echo "ls -l iotdb/example/client-cpp-example/target/"
-          ls -l iotdb/example/client-cpp-example/target/
-          
           cd iotdb/example/client-cpp-example/target/
           echo $(pwd)
           echo "7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp"
           7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
-          cd ${workspace}
-          
-          echo "mkdir upload."
-          mkdir upload
-          echo "move file to upload folder."
-          mv iotdb/${cpp_dir}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip upload/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
-          mv iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip upload/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip
-          echo "ls -l upload"
-          ls -l upload
+# move zip to upload folder
+      - name: Move zip to upload folder
+        shell: cmd
+        run: |
+          echo "dir iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target"
+          dir iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target
+          echo "dir iotdb\example\client-cpp-example\target"
+          dir iotdb\example\client-cpp-example\target
+
+          echo "move file to upload folder"
+          move iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip upload\apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          move iotdb\example\client-cpp-example\target\client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip upload\apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          echo "dir upload"
+          dir upload
 # upload
       - name: Upload cliet-cpp on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }} on ${{ matrix.os }}
         uses: ncipollo/release-action@v1.13.0
