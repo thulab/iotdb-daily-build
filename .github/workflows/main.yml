@@ -185,12 +185,11 @@ jobs:
 #
 # build client-cpp-example
       - name: compress client-cpp-example
-        shell: bash
+        shell: cmd
         run: |
-          cd iotdb/example/client-cpp-example/target
-          7z a  client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
-          mv ${{ github.workspace }}/iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip ${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip
-
+          cd iotdb\example\client-cpp-example\target
+          7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
+          mv ${{ github.workspace }}\iotdb\example\client-cpp-example\target\client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip ${{ github.workspace }}\apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip
 # upload
       - name: apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
         uses: ncipollo/release-action@v1.13.0
