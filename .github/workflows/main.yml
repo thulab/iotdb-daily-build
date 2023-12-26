@@ -276,63 +276,55 @@ jobs:
             mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies
           else
             mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies,compile-grafana-plugin
+            mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip ${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+            ls -l ${{ github.workspace }}
+            pwd ${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+            du -s ${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
           fi
+          
+          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_jdbc_module }}/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar ${{ github.workspace }}/apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
+          mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${{ steps.build-py-client.outputs.client_py_whl_name }} ${{ github.workspace }}/apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
+          
+          ls -l ${{ github.workspace }}
+          pwd ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          du -s ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          pwd ${{ github.workspace }}/apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
+          du -s ${{ github.workspace }}/apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
+          pwd ${{ github.workspace }}/apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
+          du -s ${{ github.workspace }}/apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
 # 20231219,compile grafana module will fail, so it will no longer be compiled
 # mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies,with-grafana-plugin
 #
-#upload-all
-      - name: Upload apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip using ${{ matrix.java_version }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#upload on master
+      - name: Upload distrubution on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }}
+        if: ${{ matrix.iotdb_version == 'master' }}
+        uses: ncipollo/release-action@v1.13.0
         with:
-          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip
-          asset_name: apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-#
-#grafana-plugin
-      - name: Upload apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip using ${{ matrix.java_version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
+          prerelease: false
+          draft: false
+          body: java ${{ matrix.java_version }}
+          name: ${{ needs.collect.outputs.date }} java${{ matrix.java_version }} apache iotdb
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip,${{ github.workspace }}/apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar,${{ github.workspace }}/apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl"
+#upload on other branch
+      - name: Upload distrubution on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }}
         if: ${{ matrix.iotdb_version != 'master' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1.13.0
         with:
-          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip
-          asset_name: apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
-          asset_content_type: application/zip
-#
-#iotdb-jdbc-*-jar-with-dependencies.jar
-      - name: Upload apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar using ${{ matrix.java_version }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_jdbc_module }}/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar
-          asset_name: apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
-          asset_content_type: application/zip
-#
-#client-py
-      - name: Build Apache IoTDB client-py in ${{ matrix.iotdb_version }} using ${{ matrix.java_version }}
-        shell: bash
-        id: build-py-client
-        run: |
-          cd ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}
-          rm -rf dist
-          python3 setup.py bdist_wheel --universal
-          cd dist
-          echo "client_py_whl_name=$(ls apache_iotdb-*.whl)" >> "$GITHUB_OUTPUT"
-      - name: Upload apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl using ${{ matrix.java_version }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.iotdb-info.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${{ steps.build-py-client.outputs.client_py_whl_name }}
-          asset_name: apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
-          asset_content_type: application/zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
+          prerelease: false
+          draft: false
+          body: java ${{ matrix.java_version }}
+          name: ${{ needs.collect.outputs.date }} java${{ matrix.java_version }} apache iotdb
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip,${{ github.workspace }}/apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar,${{ github.workspace }}/apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl,${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip"
+
 #----end----
 
 #----start----
@@ -394,21 +386,19 @@ jobs:
           cd ${{ github.workspace }}/iot-benchmark
           mvn clean package -DskipTests -am -pl core,${{ matrix.release_db }}
           mv ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
-          pwd ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
           ls -l ${{ github.workspace }}
-          du -sh ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
+          pwd ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
+          du -s ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip
 #---upload
       - name: Upload iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip using ${{ matrix.java_version }}
         uses: ncipollo/release-action@v1.13.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.collect.outputs.date }}-java8-apache-iotdb
+          tag: ${{ needs.collect.outputs.date }}-java${{ matrix.java_version }}-apache-iotdb
           prerelease: false
           draft: false
-          body: java 8
-          name: ${{ needs.collect.outputs.date }} java8 apache iotdb
+          body: java ${{ matrix.java_version }}
+          name: ${{ needs.collect.outputs.date }} java${{ matrix.java_version }} apache iotdb
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifacts: "${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip"
