@@ -282,15 +282,24 @@ jobs:
             du -s ${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
           fi
           
+          cd ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}
+          rm -rf dist
+          python3 setup.py bdist_wheel --universal
+          cd dist
+          export client_py_whl_name=$(ls apache_iotdb-*.whl)
+          
           mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
           mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_jdbc_module }}/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar ${{ github.workspace }}/apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
-          mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${{ steps.build-py-client.outputs.client_py_whl_name }} ${{ github.workspace }}/apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
+          mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${client_py_whl_name} ${{ github.workspace }}/apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
           
           ls -l ${{ github.workspace }}
+          
           pwd ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
           du -s ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          
           pwd ${{ github.workspace }}/apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
           du -s ${{ github.workspace }}/apache-iotdb-jdbc-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-jar-with-dependencies.jar
+          
           pwd ${{ github.workspace }}/apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
           du -s ${{ github.workspace }}/apache_iotdb-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-py2.py3-none-any.whl
 # 20231219,compile grafana module will fail, so it will no longer be compiled
