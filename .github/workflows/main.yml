@@ -166,9 +166,6 @@ jobs:
           set Path=${{ github.workspace }}\apache-maven-3.9.4-bin\apache-maven-3.9.4\bin;%Path%
           set
           mvn clean package -P with-cpp -pl iotdb-client\client-cpp,example\client-cpp-example -am -DskipTests
-          
-          cd ${{ github.workspace }}\iotdb\example\client-cpp-example\target
-          7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
 #          # compile all without cache
 #          mvn clean package -P with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
 #          set CPPFLAGS=/I"${{ steps.iotdb-info.outputs.boost_include_dir }}" %CPPFLAGS%
@@ -190,7 +187,13 @@ jobs:
           echo "ls -l iotdb/example/client-cpp-example/target/"
           ls -l iotdb/example/client-cpp-example/target/
           
+          cd iotdb/example/client-cpp-example/target/
+          echo "7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp"
+          7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp
+          
+          echo "mkdir upload."
           mkdir upload
+          echo "move file to upload folder."
           mv iotdb/${{ steps.iotdb-info.outputs.cpp_dir }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip upload/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
           mv iotdb/example/client-cpp-example/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip upload/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip
           echo "ls -l ${{ github.workspace }}/upload"
