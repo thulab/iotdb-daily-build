@@ -28,15 +28,14 @@ jobs:
     steps:
       - name: Create release java-8
         id: create-release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1.13.0
         with:
-          tag_name: ${{ needs.collect.outputs.date }}-java8-apache-iotdb
-          release_name: ${{ needs.collect.outputs.date }} java8 apache iotdb
-          body: java 8
-          draft: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.collect.outputs.date }}-java8-apache-iotdb
           prerelease: false
+          draft: false
+          body: java 8
+          name: ${{ needs.collect.outputs.date }} java8 apache iotdb
 #----end----
 
 #----start----
