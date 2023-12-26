@@ -42,7 +42,7 @@ jobs:
     outputs:
       upload_url: ${{ steps.create-release.outputs.upload_url }}
     steps:
-      - name: Create release java-8
+      - name: Create release java-11
         id: create-release
         uses: ncipollo/release-action@v1.13.0
         with:
@@ -50,7 +50,7 @@ jobs:
           tag: ${{ needs.collect.outputs.date }}-java11-apache-iotdb
           prerelease: false
           draft: false
-          body: java 8
+          body: java 11
           name: ${{ needs.collect.outputs.date }} java11 apache iotdb
 #----end----
 
@@ -201,7 +201,7 @@ jobs:
           name: ${{ needs.collect.outputs.date }} java${{ matrix.java_version }} apache iotdb
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: "${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip,${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip"
+          artifacts: "apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip,apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip"
 #
 #----end----
 #----start----
