@@ -188,7 +188,7 @@ jobs:
         run: |
           cd iotdb/example/client-cpp-example/target/
           echo $(pwd)
-          echo "7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip client CMakeLists.txt SessionExample.cpp"
+          echo "7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip *"
           7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip *
 # move zip to upload folder
       - name: Move zip to upload folder
