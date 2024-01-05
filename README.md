@@ -12,7 +12,7 @@ Execute the start-stop test case of the iotdb rel/1.0 branch every day.
 <img src="https://github.com/xiaoyekanren/iotdb-daily-build/actions/workflows/.github/workflows/main.yml/badge.svg" width = "350" height = "50" />  
 
 ### 关于client-cpp  
-windows使用的是windows-2022，Visual Studio Enterprise 2022，工具集版本是VC.v141  
+windows使用的是windows-2022，Visual Studio Enterprise 2022，工具集版本是VC.v141。  
 
 linux使用的是ubuntu-22.04，gcc使用的是11.2.0，以下为ubuntu20+安装gcc11的方式：  
 ```shell
