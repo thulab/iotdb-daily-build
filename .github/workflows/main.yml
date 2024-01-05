@@ -238,7 +238,7 @@ jobs:
           java-version: ${{ matrix.java_version }}
           distribution: 'zulu'
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@< version >
+        uses: s4u/setup-maven-action@3.9.6
 
       - name: Checkout apache/iotdb
         uses: actions/checkout@v4
