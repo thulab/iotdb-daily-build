@@ -151,7 +151,7 @@ jobs:
 #            exit 1
 #          fi
 # build client-cpp
-      - name: Build client-cpp on master branch
+      - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
         shell: cmd
         run: |
@@ -160,8 +160,6 @@ jobs:
           set Path=${{ github.workspace }}\apache-maven-3.9.4-bin\apache-maven-3.9.4\bin;%Path%
           set
           mvn clean package -P with-cpp -pl ${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests
-          move ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip ${{ github.workspace }}\apache-iotdb-client-cpp-windows-x86_64-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
-          dir ${{ github.workspace }}
 #          # compile all without cache
 #          mvn clean package -P with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
 #          set CPPFLAGS=/I"${{ steps.iotdb-info.outputs.boost_include_dir }}" %CPPFLAGS%
@@ -174,15 +172,23 @@ jobs:
 #          setx BOOST_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
 #          setx Boost_INCLUDE_DIR ${{ steps.iotdb-info.outputs.boost_include_dir }}
 #          setx Boost_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
-      - name: Build client-cpp
+      - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'master'  }}
         shell: cmd
         run: |
           cd ${{ github.workspace }}\iotdb
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
-          set Path
+          set
           mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl ${{ steps.iotdb-info.outputs.server_dir }},${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests -Dboost.include.dir="${{ steps.iotdb-info.outputs.boost_include_dir }}" -Dboost.library.dir="${{ steps.iotdb-info.outputs.boost_library_dir }}" -Dcmake.url="${{ steps.iotdb-info.outputs.cmake_url }}" -Dcmake.root.dir="${{ steps.iotdb-info.outputs.cmake_root_dir }}"
+# move client-cpp file to workspace
+      - name: Move client-cpp file to workspace
+        shell: cmd
+        run: |
+          echo "dir ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target"
+          dir ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target
+          echo "move ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip ${{ github.workspace }}\apache-iotdb-client-cpp-windows-x86_64-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip"
           move ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip ${{ github.workspace }}\apache-iotdb-client-cpp-windows-x86_64-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          echo "dir ${{ github.workspace }}"
           dir ${{ github.workspace }}
 # Comcpress client-cpp-example
       - name: Comcpress client-cpp-example
@@ -201,8 +207,9 @@ jobs:
           echo "dir iotdb\example\client-cpp-example\target"
           dir iotdb\example\client-cpp-example\target
 
-          echo "move file to upload folder"
+          echo "move client-cpp to upload folder"
           move ${{ github.workspace }}\apache-iotdb-client-cpp-windows-x86_64-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip upload\apache-iotdb-client-cpp-windows-x86_64-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          echo "move client-cpp-example to upload folder"
           move iotdb\example\client-cpp-example\target\client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip upload\apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.matrix_version }}-${{ steps.iotdb-info.outputs.commit }}.zip
           echo "dir upload"
           dir upload
