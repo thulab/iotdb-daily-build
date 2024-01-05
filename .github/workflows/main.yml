@@ -230,6 +230,7 @@ jobs:
       matrix:
         iotdb_version: [ rel/0.13,rel/1.1,rel/1.2,master ]
         java_version: [ 8,11 ]
+        maven_version: [ '3.9.5' ]
     runs-on: ubuntu-latest
     steps:
       - name: Set java ${{ matrix.java }}
@@ -238,7 +239,10 @@ jobs:
           java-version: ${{ matrix.java_version }}
           distribution: 'zulu'
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@3.9.5
+        uses: s4u/setup-maven-action@< version >
+        with:
+          java-version: ${{ matrix.java_version }}
+          maven-version: ${{ matrix.maven_version }}
       - name: Checkout apache/iotdb
         uses: actions/checkout@v4
         with:
