@@ -237,7 +237,7 @@ jobs:
       matrix:
         iotdb_version: [ rel/0.13,rel/1.1,rel/1.2,master ]
         java_version: [ 8,11 ]
-        maven_version: [ '3.9.5' ]
+        maven_version: [ '3.9.6' ]
         os: [ ubuntu-22.04 ]
     runs-on: ${{ matrix.os }}
     steps:
