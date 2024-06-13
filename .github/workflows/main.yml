@@ -1,4 +1,4 @@
-# Build iotdb-rel/0.13, iotdb-rel/1.0, master, iot-benchmark
+# Build iotdb-rel/1.0, master, iot-benchmark
 # Everyday
 name: iotdb 每日发布
 on:
@@ -61,7 +61,7 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        iotdb_version: [ rel/0.13,rel/1.1,rel/1.2,master ]
+        iotdb_version: [ rel/1.1,rel/1.2,master ]
         java_version: [ 8,11 ]
         os: [ windows-2022 ]
     runs-on: ${{ matrix.os }}
@@ -235,7 +235,7 @@ jobs:
       fail-fast: false
       max-parallel: 20
       matrix:
-        iotdb_version: [ rel/0.13,rel/1.1,rel/1.2,master ]
+        iotdb_version: [ rel/1.1,rel/1.2,master ]
         java_version: [ 8,11 ]
         maven_version: [ '3.9.6' ]
         os: [ ubuntu-22.04 ]
@@ -387,7 +387,7 @@ jobs:
       max-parallel: 20
       matrix:
         java_version: [ 8,11 ]
-        release_db: [ iotdb-0.13,iotdb-1.0,iotdb-1.1,influxdb,influxdb-2.0,timescaledb,timescaledb-cluster,tdengine-3.0 ]
+        release_db: [ iotdb-1.0,iotdb-1.1,influxdb,influxdb-2.0,timescaledb,timescaledb-cluster,tdengine-3.0 ]
     runs-on: ubuntu-latest
     steps:
 # set java
