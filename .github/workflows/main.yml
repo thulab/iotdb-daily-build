@@ -23,10 +23,8 @@ jobs:
   create-release-java17:
     needs: collect
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create-release.outputs.upload_url }}
     steps:
-      - name: Create release java-8
+      - name: Create release java-17
         id: create-release
         uses: ncipollo/release-action@v1.13.0
         with:
@@ -34,13 +32,11 @@ jobs:
           tag: ${{ needs.collect.outputs.date }}-java17-apache-iotdb
           prerelease: false
           draft: false
-          body: java 8
+          body: java 17
           name: ${{ needs.collect.outputs.date }} java17 apache iotdb
   create-release-java11:
     needs: collect
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - name: Create release java-11
         id: create-release
@@ -142,14 +138,6 @@ jobs:
             # echo "cpp_dir=client-cpp" >> "$GITHUB_OUTPUT"
             # echo "cmake_root_dir=${{ github.workspace }}\iotdb\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64" >> "$GITHUB_OUTPUT"
           fi
-#          if [ "${{ matrix.java_version }}" = "8" ]; then
-#            echo "upload_url=${{ needs.create-release-java8.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
-#          elif [ "${{ matrix.java_version }}" = "11" ]; then
-#            echo "upload_url=${{ needs.create-release-java11.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
-#          else
-#            echo "Found unknown jdk version. exit."
-#            exit 1
-#          fi
 # build client-cpp
       - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
@@ -160,18 +148,18 @@ jobs:
           set Path=${{ github.workspace }}\apache-maven-3.9.6-bin\apache-maven-3.9.6\bin;%Path%
           set
           mvn clean package -P with-cpp -pl ${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests
-#          # compile all without cache
-#          mvn clean package -P with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
-#          set CPPFLAGS=/I"${{ steps.iotdb-info.outputs.boost_include_dir }}" %CPPFLAGS%
-#          set LDFLAGS=/L"${{ steps.iotdb-info.outputs.boost_library_dir }}" %LDFLAGS%
-#          set BOOST_INCLUDE_DIR=${{ steps.iotdb-info.outputs.boost_include_dir }}
-#          set BOOST_LIBRARY_DIR=${{ steps.iotdb-info.outputs.boost_library_dir }}
-#          set Boost_INCLUDE_DIR=${{ steps.iotdb-info.outputs.boost_include_dir }}
-#          set Boost_LIBRARY_DIR=${{ steps.iotdb-info.outputs.boost_library_dir }}
-#          setx BOOST_INCLUDE_DIR ${{ steps.iotdb-info.outputs.boost_include_dir }}
-#          setx BOOST_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
-#          setx Boost_INCLUDE_DIR ${{ steps.iotdb-info.outputs.boost_include_dir }}
-#          setx Boost_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
+          # # compile all without cache
+          # mvn clean package -P with-cpp -pl iotdb-client/client-cpp,example/client-cpp-example -am -DskipTests
+          # set CPPFLAGS=/I"${{ steps.iotdb-info.outputs.boost_include_dir }}" %CPPFLAGS%
+          # set LDFLAGS=/L"${{ steps.iotdb-info.outputs.boost_library_dir }}" %LDFLAGS%
+          # set BOOST_INCLUDE_DIR=${{ steps.iotdb-info.outputs.boost_include_dir }}
+          # set BOOST_LIBRARY_DIR=${{ steps.iotdb-info.outputs.boost_library_dir }}
+          # set Boost_INCLUDE_DIR=${{ steps.iotdb-info.outputs.boost_include_dir }}
+          # set Boost_LIBRARY_DIR=${{ steps.iotdb-info.outputs.boost_library_dir }}
+          # setx BOOST_INCLUDE_DIR ${{ steps.iotdb-info.outputs.boost_include_dir }}
+          # setx BOOST_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
+          # setx Boost_INCLUDE_DIR ${{ steps.iotdb-info.outputs.boost_include_dir }}
+          # setx Boost_LIBRARY_DIR ${{ steps.iotdb-info.outputs.boost_library_dir }}
       - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'master'  }}
         shell: cmd
@@ -241,7 +229,7 @@ jobs:
         os: [ ubuntu-22.04 ]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Set java ${{ matrix.java }}
+      - name: Set java ${{ matrix.java_version }}
         uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java_version }}
@@ -287,16 +275,6 @@ jobs:
             # echo "client_cpp_module=client-cpp" >> "$GITHUB_OUTPUT"
           fi
             echo "client_cpp_example_module=example/client-cpp-example" >> "$GITHUB_OUTPUT"
-
-
-#          if [ "${{ matrix.java_version }}" = "8" ]; then
-#            echo "upload_url=${{ needs.create-release-java8.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
-#          elif [ "${{ matrix.java_version }}" = "11" ]; then
-#            echo "upload_url=${{ needs.create-release-java11.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
-#          else
-#            echo "Found unknown jdk version. exit."
-#            exit 1
-#          fi
 #
 #build-iotdb
       - name: Build iotdb in ${{ matrix.iotdb_version }}
@@ -393,7 +371,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 # set java
-      - name: Set java ${{ matrix.java }}
+      - name: Set java ${{ matrix.java_version }}
         uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java_version }}
@@ -411,14 +389,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iot-benchmark
           echo "commit=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          # if [ "${{ matrix.java_version }}" = "8" ]; then
-            # echo "upload_url=${{ needs.create-release-java8.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
-          # elif [ "${{ matrix.java_version }}" = "11" ]; then
-            # echo "upload_url=${{ needs.create-release-java11.outputs.upload_url }}" >> "$GITHUB_OUTPUT"
-          # else
-            # echo "Found unknown jdk version. exit."
-            # exit 1
-          # fi
+#
 # build iot-benchmark
       - name: Build benchmark
         run: |
