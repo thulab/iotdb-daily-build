@@ -120,14 +120,14 @@ jobs:
           set Path=${{ github.workspace }}\apache-maven-3.9.6-bin\apache-maven-3.9.6\bin;%Path%
           set
           mvn clean package -P with-cpp -pl ${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests
-      - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
-        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'master'  }}
-        shell: cmd
-        run: |
-          cd ${{ github.workspace }}\iotdb
-          set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
-          set
-          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl ${{ steps.iotdb-info.outputs.server_dir }},${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests -Dboost.include.dir="${{ steps.iotdb-info.outputs.boost_include_dir }}" -Dboost.library.dir="${{ steps.iotdb-info.outputs.boost_library_dir }}" -Dcmake.url="${{ steps.iotdb-info.outputs.cmake_url }}" -Dcmake.root.dir="${{ steps.iotdb-info.outputs.cmake_root_dir }}"
+#      - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
+#        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'master'  }}
+#        shell: cmd
+#        run: |
+#          cd ${{ github.workspace }}\iotdb
+#          set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
+#          set
+#          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl ${{ steps.iotdb-info.outputs.server_dir }},${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests -Dboost.include.dir="${{ steps.iotdb-info.outputs.boost_include_dir }}" -Dboost.library.dir="${{ steps.iotdb-info.outputs.boost_library_dir }}" -Dcmake.url="${{ steps.iotdb-info.outputs.cmake_url }}" -Dcmake.root.dir="${{ steps.iotdb-info.outputs.cmake_root_dir }}"
 # move client-cpp file to workspace
       - name: Move client-cpp file to workspace
         shell: cmd
@@ -173,7 +173,7 @@ jobs:
           name: ${{ needs.collect.outputs.date }} apache iotdb
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: "upload/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip ,upload/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
+          artifacts: "upload/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,upload/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
 #
 #----end----
 #----start----
