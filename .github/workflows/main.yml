@@ -253,6 +253,7 @@ jobs:
           sudo apt-get install python3-pip libboost-all-dev
           pip3 install setuptools 
           pip3 install wheel
+          pip3 install build
           
           cd ${{ github.workspace }}/iotdb
           echo "commit=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
