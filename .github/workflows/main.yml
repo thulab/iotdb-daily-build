@@ -57,7 +57,7 @@ jobs:
       - name: download & unpack & install -> boost
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
         shell: cmd
-        run: choco install boost-msvc-14.3 --version=1.78.0
+        run: choco install boost-msvc-14.3 --version=1.85.0
 
       - name: download & unpack flex&bison
         shell: cmd
@@ -100,8 +100,8 @@ jobs:
           echo "matrix_version=$(echo ${{ matrix.iotdb_version }} | sed "s:/::")" >> "$GITHUB_OUTPUT"
 
           # boost
-          echo "boost_include_dir=${{ github.workspace }}\boost_1_78_0\boost_1_78_0" >> "$GITHUB_OUTPUT"
-          echo "boost_library_dir=${{ github.workspace }}\boost_1_78_0\boost_1_78_0\stage\lib" >> "$GITHUB_OUTPUT"
+          echo "boost_include_dir=${{ github.workspace }}\boost_1_85_0\boost_1_85_0" >> "$GITHUB_OUTPUT"
+          echo "boost_library_dir=${{ github.workspace }}\boost_1_85_0\boost_1_85_0\stage\lib" >> "$GITHUB_OUTPUT"
           #
           echo "cmake_url=https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip" >> "$GITHUB_OUTPUT"
 
