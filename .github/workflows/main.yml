@@ -258,11 +258,14 @@ jobs:
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
+          mvn clean
+          mvn install -pl iotdb-api/udf-api -DskipTests -P get-jar-with-dependencies
+
           if [ "${{ matrix.iotdb_version }}" = "master" ]; then
-            echo "mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},${{ steps.iotdb-info.outputs.client_cpp_module }},${{ steps.iotdb-info.outputs.client_cpp_example_module }},distribution -P get-jar-with-dependencies,with-cpp"
-            mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},${{ steps.iotdb-info.outputs.client_cpp_module }},${{ steps.iotdb-info.outputs.client_cpp_example_module }},distribution -P get-jar-with-dependencies,with-cpp
+            echo "mvn package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},${{ steps.iotdb-info.outputs.client_cpp_module }},${{ steps.iotdb-info.outputs.client_cpp_example_module }},distribution -P get-jar-with-dependencies,with-cpp"
+            mvn package -DskipTests -am -pl library-udf,${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},${{ steps.iotdb-info.outputs.client_cpp_module }},${{ steps.iotdb-info.outputs.client_cpp_example_module }},distribution -P get-jar-with-dependencies,with-cpp
           # else
-            # mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},${{ steps.iotdb-info.outputs.client_cpp_module }},${{ steps.iotdb-info.outputs.client_cpp_example_module }},distribution -P get-jar-with-dependencies,compile-grafana-plugin,compile-cpp
+            # mvn package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},${{ steps.iotdb-info.outputs.client_cpp_module }},${{ steps.iotdb-info.outputs.client_cpp_example_module }},distribution -P get-jar-with-dependencies,compile-grafana-plugin,compile-cpp
             # mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip ${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
             # ls -l ${{ github.workspace }}
             # pwd ${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
@@ -282,6 +285,7 @@ jobs:
           7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-${{ matrix.os }}-x86_64.zip *
           cd ${{ github.workspace }}
 
+          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-library-udf-bin.zip ${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
           mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
           mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_jdbc_module }}/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar ${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.jar
           mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${client_py_whl_name} ${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.whl
@@ -289,6 +293,9 @@ jobs:
           mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_cpp_example_module }}/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-${{ matrix.os }}-x86_64.zip ${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
 
           ls -l ${{ github.workspace }}
+          
+          pwd ${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
+          du -sh ${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
           
           pwd ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
           du -s ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
@@ -319,7 +326,7 @@ jobs:
           name: ${{ needs.collect.outputs.date }} apache iotdb
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: "${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.jar,${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.whl,${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
+          artifacts: "${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.jar,${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.whl,${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
       - name: Only upload iotdb-client-cpp on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }}
         if: ${{ matrix.os == 'ubuntu-20.04' && matrix.iotdb_version == 'master' }}
         uses: ncipollo/release-action@v1.13.0
