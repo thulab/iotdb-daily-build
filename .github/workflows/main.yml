@@ -86,7 +86,6 @@ jobs:
 
       - name: Collect IoTDB info
         id: iotdb-info
-        shell: bash
         run: |
           echo "mkdir upload"
           mkdir upload
