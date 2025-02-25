@@ -59,6 +59,11 @@ jobs:
         shell: cmd
         run: choco install boost-msvc-14.3 --version=1.87.0
 
+      - name: add boost to path
+        run: |
+          $boost_path = (Get-ChildItem -Path 'C:\local\' -Filter 'boost_*').FullName
+          echo $boost_path >> $env:GITHUB_PATH
+
       - name: download & unpack flex&bison
         shell: cmd
         run: |
@@ -86,6 +91,7 @@ jobs:
 
       - name: Collect IoTDB info
         id: iotdb-info
+        shell: bash
         run: |
           echo "mkdir upload"
           mkdir upload
@@ -101,9 +107,7 @@ jobs:
           # boost
           # echo "boost_include_dir=${{ github.workspace }}\boost_1_87_0\boost_1_87_0" >> "$GITHUB_OUTPUT"
           # echo "boost_library_dir=${{ github.workspace }}\boost_1_87_0\boost_1_87_0\stage\lib" >> "$GITHUB_OUTPUT"
-          $boost_path = (Get-ChildItem -Path 'C:\local\' -Filter 'boost_*').FullName
-          echo $boost_path >> $env:GITHUB_PATH
-          #
+
           echo "cmake_url=https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip" >> "$GITHUB_OUTPUT"
 
           if [ "${{ matrix.iotdb_version }}" = "master" ]; then
