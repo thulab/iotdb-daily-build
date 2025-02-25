@@ -54,10 +54,10 @@ jobs:
           java-version: ${{ matrix.java_version }}
           distribution: 'zulu'
 
-      - name: download & unpack & install -> boost
-        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
-        shell: cmd
-        run: choco install boost-msvc-14.3 --version=1.85.0
+      # - name: download & unpack & install -> boost
+      #   if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
+      #   shell: cmd
+      #   run: choco install boost-msvc-14.3 --version=1.85.0
 
       - name: download & unpack flex&bison
         shell: cmd
