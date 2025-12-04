@@ -46,6 +46,7 @@ jobs:
         iotdb_version: [ master ]
         java_version: [ 11,17 ]
         os: [ windows-2022 ]
+        maven_version: [ '3.9.11' ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set java ${{ matrix.java }}
@@ -70,12 +71,12 @@ jobs:
           C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/win_flex_bison-latest.zip https://jaist.dl.sourceforge.net/project/winflexbison/win_flex_bison-latest.zip
           7z x ${{ github.workspace }}/win_flex_bison-latest.zip -o${{ github.workspace }}/win_flex_bison-latest
 
-      - name: download & unpack mvn3.9.x
+      - name: download & unpack mvn
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
         shell: cmd
         run: |
-          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/apache-maven-3.9.11-bin.zip https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.zip
-          7z x ${{ github.workspace }}/apache-maven-3.9.11-bin.zip -o${{ github.workspace }}/apache-maven-3.9.11-bin
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/apache-maven-${{ matrix.maven_version }}-bin.zip https://dlcdn.apache.org/maven/maven-3/${{ matrix.maven_version }}/binaries/apache-maven-${{ matrix.maven_version }}-bin.zip
+          7z x ${{ github.workspace }}/apache-maven-${{ matrix.maven_version }}-bin.zip -o${{ github.workspace }}/apache-maven-${{ matrix.maven_version }}-bin
 
       - name: install openssl
         run: |
@@ -122,7 +123,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}\iotdb
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
-          set Path=${{ github.workspace }}\apache-maven-3.9.11-bin\apache-maven-3.9.11\bin;%Path%
+          set Path=${{ github.workspace }}\apache-maven-${{ matrix.maven_version }}-bin\apache-maven-${{ matrix.maven_version }}\bin;%Path%
           set
           mvn clean package -P with-cpp -pl ${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests
 #      - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
@@ -190,7 +191,7 @@ jobs:
       matrix:
         iotdb_version: [ master ]
         java_version: [ 11,17 ]
-        maven_version: [ '3.9.6' ]
+        maven_version: [ '3.9.11' ]
         os: [ ubuntu-22.04,ubuntu-20.04 ]
     runs-on: ${{ matrix.os }}
     steps:
