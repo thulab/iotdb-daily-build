@@ -49,7 +49,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set java ${{ matrix.java }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java_version }}
           distribution: 'zulu'
@@ -74,15 +74,15 @@ jobs:
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
         shell: cmd
         run: |
-          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/apache-maven-3.9.6-bin.zip https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.zip
-          7z x ${{ github.workspace }}/apache-maven-3.9.6-bin.zip -o${{ github.workspace }}/apache-maven-3.9.6-bin
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/apache-maven-3.9.11-bin.zip https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.zip
+          7z x ${{ github.workspace }}/apache-maven-3.9.11-bin.zip -o${{ github.workspace }}/apache-maven-3.9.11-bin
 
       - name: install openssl
         run: |
           choco install openssl
 
       - name: Checkout apache/iotdb
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: iotdb
           repository: 'apache/iotdb'
@@ -122,7 +122,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}\iotdb
           set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
-          set Path=${{ github.workspace }}\apache-maven-3.9.6-bin\apache-maven-3.9.6\bin;%Path%
+          set Path=${{ github.workspace }}\apache-maven-3.9.11-bin\apache-maven-3.9.11\bin;%Path%
           set
           mvn clean package -P with-cpp -pl ${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests
 #      - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
@@ -402,3 +402,4 @@ jobs:
           artifactErrorsFailBuild: true
           artifacts: "${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
 #----end----
+
