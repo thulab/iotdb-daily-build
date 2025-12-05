@@ -192,7 +192,7 @@ jobs:
         iotdb_version: [ master ]
         java_version: [ 11,17 ]
         maven_version: [ '3.9.11' ]
-        os: [ ubuntu-22.04,ubuntu-20.04 ]
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set java ${{ matrix.java_version }}
@@ -245,7 +245,7 @@ jobs:
 #
 #build-iotdb
       - name: Only build iotdb-client-cpp in ${{ matrix.iotdb_version }} on ${{ matrix.os }}
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
@@ -260,7 +260,7 @@ jobs:
           pwd ${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
 
       - name: Build iotdb in ${{ matrix.iotdb_version }} on ${{ matrix.os }}
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
@@ -321,7 +321,7 @@ jobs:
 #
 #upload on master
       - name: Upload distribution on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }}
-        if: ${{ matrix.os == 'ubuntu-22.04' && matrix.iotdb_version == 'master' }}
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.iotdb_version == 'master' }}
         uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -334,7 +334,7 @@ jobs:
           artifactErrorsFailBuild: true
           artifacts: "${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.jar,${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.whl,${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
       - name: Only upload iotdb-client-cpp on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }}
-        if: ${{ matrix.os == 'ubuntu-20.04' && matrix.iotdb_version == 'master' }}
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.iotdb_version == 'master' }}
         uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
