@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Create release
         id: create-release
-        uses: ncipollo/release-action@v1.13.0
+        uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.collect.outputs.date }}-apache-iotdb
@@ -169,7 +169,7 @@ jobs:
           dir upload
 # upload
       - name: Upload cliet-cpp on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }} on ${{ matrix.os }}
-        uses: ncipollo/release-action@v1.13.0
+        uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.collect.outputs.date }}-apache-iotdb
@@ -322,7 +322,7 @@ jobs:
 #upload on master
       - name: Upload distribution on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }}
         if: ${{ matrix.os == 'ubuntu-22.04' && matrix.iotdb_version == 'master' }}
-        uses: ncipollo/release-action@v1.13.0
+        uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.collect.outputs.date }}-apache-iotdb
@@ -335,7 +335,7 @@ jobs:
           artifacts: "${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.jar,${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.whl,${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
       - name: Only upload iotdb-client-cpp on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }}
         if: ${{ matrix.os == 'ubuntu-20.04' && matrix.iotdb_version == 'master' }}
-        uses: ncipollo/release-action@v1.13.0
+        uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.collect.outputs.date }}-apache-iotdb
@@ -379,19 +379,23 @@ jobs:
         run: |
           cd ${{ github.workspace }}/iot-benchmark
           echo "commit=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-#
+          echo "release_db_space=$(echo iotdb-1.3 influxdb influxdb-2.0 timescaledb timescaledb-cluster tdengine-3.0 iotdb-2.0)"
+          echo "release_db_comma=$(echo iotdb-1.3,influxdb,influxdb-2.0,timescaledb,timescaledb-cluster,tdengine-3.0,iotdb-2.0)"
+
+      #
 # build iot-benchmark
       - name: Build benchmark
         run: |
           cd ${{ github.workspace }}/iot-benchmark
-          mvn clean package -DskipTests -am -pl core,${{ matrix.release_db }}
-          mv ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip
+          mvn clean package -DskipTests -am -pl core,${{ steps.benchmark-info.outputs.release_db_comma }}
+          for i in ${{ steps.benchmark-info.outputs.release_db_space }}; do mv ${{ github.workspace }}/iot-benchmark/${i}/target/iot-benchmark-$i.zip ${{ github.workspace }}/iot-benchmark-$i-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip; done
           ls -l ${{ github.workspace }}
-          pwd ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          du -s ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip
+#          mv ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip
+#          pwd ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip
+#          du -s ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip
 #---upload
-      - name: Upload iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}.zip using ${{ matrix.java_version }}
-        uses: ncipollo/release-action@v1.13.0
+      - name: Upload iot-benchmark-*.zip using ${{ matrix.java_version }}
+        uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.collect.outputs.date }}-apache-iotdb
@@ -401,6 +405,6 @@ jobs:
           name: ${{ needs.collect.outputs.date }} apache iotdb
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: "${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
+          artifacts: "${{ github.workspace }}/iot-benchmark-*-java${{ matrix.java_version }}.zip"
 #----end----
 
