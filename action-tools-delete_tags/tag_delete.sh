@@ -10,7 +10,7 @@ git tag > tag_list.txt
 all_line=$(cat tag_list.txt | wc -l)
 
 # reserved_rows --> 要保留的tag数量
-reserved_rows=20
+reserved_rows=90
 # 如果tag太少就报错推出
 if [ ${reserved_rows} -gt ${all_line} ]; then
      echo "tag共$all_line个，要删除$reserved_rows个，删除失败"
