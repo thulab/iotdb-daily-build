@@ -4,14 +4,14 @@
 name: tools 删除过早的tag 步骤2
 on:
   workflow_dispatch:
-
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Delete drafts
-        uses: hugo19941994/delete-draft-releases@v1
-        with:
-          threshold: 10d
+        uses: hugo19941994/delete-draft-releases@v2.0.0
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
