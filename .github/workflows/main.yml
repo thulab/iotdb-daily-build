@@ -68,8 +68,8 @@ jobs:
       - name: download & unpack flex&bison
         shell: cmd
         run: |
-          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/win_flex_bison-latest.zip https://jaist.dl.sourceforge.net/project/winflexbison/win_flex_bison-latest.zip
-          7z x ${{ github.workspace }}/win_flex_bison-latest.zip -o${{ github.workspace }}/win_flex_bison-latest
+          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/win_flex_bison.zip https://github.com/lexxmark/winflexbison/releases/download/v2.5.25/win_flex_bison-2.5.25.zip
+          7z x ${{ github.workspace }}/win_flex_bison.zip -o${{ github.workspace }}/win_flex_bison
 
       - name: download & unpack mvn
         if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
@@ -122,7 +122,7 @@ jobs:
         shell: cmd
         run: |
           cd ${{ github.workspace }}\iotdb
-          set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
+          set Path=%Path%;${{ github.workspace }}\win_flex_bison
           set Path=${{ github.workspace }}\apache-maven-${{ matrix.maven_version }}-bin\apache-maven-${{ matrix.maven_version }}\bin;%Path%
           set
           mvn clean package -P with-cpp -pl ${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests
@@ -131,7 +131,7 @@ jobs:
 #        shell: cmd
 #        run: |
 #          cd ${{ github.workspace }}\iotdb
-#          set Path=%Path%;${{ github.workspace }}\win_flex_bison-latest
+#          set Path=%Path%;${{ github.workspace }}\win_flex_bison
 #          set
 #          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl ${{ steps.iotdb-info.outputs.server_dir }},${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests -Dboost.include.dir="${{ steps.iotdb-info.outputs.boost_include_dir }}" -Dboost.library.dir="${{ steps.iotdb-info.outputs.boost_library_dir }}" -Dcmake.url="${{ steps.iotdb-info.outputs.cmake_url }}" -Dcmake.root.dir="${{ steps.iotdb-info.outputs.cmake_root_dir }}"
 # move client-cpp file to workspace
