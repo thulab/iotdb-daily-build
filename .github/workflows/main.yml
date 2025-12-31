@@ -46,7 +46,7 @@ jobs:
         iotdb_version: [ master ]
         java_version: [ 11,17 ]
         os: [ windows-2022 ]
-        maven_version: [ '3.9.11' ]
+        maven_version: [ '3.9.12' ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Set java ${{ matrix.java }}
