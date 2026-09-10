@@ -37,138 +37,87 @@ jobs:
 #----end----
 
 #----start----
+# master 分支的 c++ iotdb-session windows 客户端。
+# 依赖安装和构建命令对齐 apache/iotdb 官方 .github/workflows/client-cpp-package.yml
+# (windows-vs2022 变体)。
   build-in-win:
     needs: [ collect,create-release ]
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        iotdb_version: [ master ]
-        java_version: [ 11,17 ]
-        os: [ windows-2022 ]
-        maven_version: [ '3.9.12' ]
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-2022
     steps:
-      - name: Set java ${{ matrix.java }}
+      - name: Set java 17
         uses: actions/setup-java@v5
         with:
-          java-version: ${{ matrix.java_version }}
-          distribution: 'zulu'
+          java-version: 17
+          distribution: 'temurin'
 
-      - name: download & unpack & install -> boost
-        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
-        shell: cmd
-        run: choco install boost-msvc-14.3 --version=1.87.0
-
-      - name: add boost to path
+      - name: Install C++ dependencies (Windows)
+        shell: pwsh
         run: |
-          $boost_path = (Get-ChildItem -Path 'C:\local\' -Filter 'boost_*').FullName
-          echo $boost_path >> $env:GITHUB_PATH
-
-      - name: download & unpack flex&bison
-        shell: cmd
-        run: |
-          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/win_flex_bison.zip https://github.com/lexxmark/winflexbison/releases/download/v2.5.25/win_flex_bison-2.5.25.zip
-          7z x ${{ github.workspace }}/win_flex_bison.zip -o${{ github.workspace }}/win_flex_bison
-
-      - name: download & unpack mvn
-        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
-        shell: cmd
-        run: |
-          C:\msys64\usr\bin\wget.exe -O ${{ github.workspace }}/apache-maven-${{ matrix.maven_version }}-bin.zip https://dlcdn.apache.org/maven/maven-3/${{ matrix.maven_version }}/binaries/apache-maven-${{ matrix.maven_version }}-bin.zip
-          7z x ${{ github.workspace }}/apache-maven-${{ matrix.maven_version }}-bin.zip -o${{ github.workspace }}/apache-maven-${{ matrix.maven_version }}-bin
-
-      - name: install openssl
-        run: |
-          choco install openssl
+          choco install winflexbison3 -y --no-progress
+          choco install boost-msvc-14.3 -y --no-progress
+          if (-not (Test-Path 'C:\local')) {
+            New-Item -ItemType Directory -Path 'C:\local' -Force | Out-Null
+          }
+          $boostDir = Get-ChildItem -Path 'C:\local\' -Filter 'boost_*' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $boostDir) {
+            throw "Boost not found under C:\local after installing boost-msvc-14.3"
+          }
+          echo $boostDir.FullName >> $env:GITHUB_PATH
+          # 固定 OpenSSL 3.x：choco 的 openssl 现在是 4.0，会删掉 thrift 仍在使用的
+          # legacy TLS-method API，导致链接失败。
+          $sslZip = "$env:RUNNER_TEMP\openssl-3.5.3.zip"
+          $sslDir = "$env:RUNNER_TEMP\openssl-3"
+          curl.exe -L --fail --retry 3 -o $sslZip 'https://download.firedaemon.com/FireDaemon-OpenSSL/openssl-3.5.3.zip'
+          Expand-Archive -Path $sslZip -DestinationPath $sslDir -Force
+          $sslPath = (Get-ChildItem $sslDir -Recurse -Directory -Filter 'x64' | Select-Object -First 1).FullName
+          if (-not $sslPath) { throw "OpenSSL x64 dir not found under $sslDir" }
+          echo "$sslPath\bin" >> $env:GITHUB_PATH
+          echo "OPENSSL_ROOT_DIR=$sslPath" >> $env:GITHUB_ENV
 
       - name: Checkout apache/iotdb
         uses: actions/checkout@v5
         with:
           path: iotdb
           repository: 'apache/iotdb'
-          ref: ${{ matrix.iotdb_version }}
+          ref: master
           fetch-depth: 0
 
       - name: Collect IoTDB info
         id: iotdb-info
         shell: bash
         run: |
-          echo "mkdir upload"
-          mkdir upload
-          
+          mkdir -p upload
           cd iotdb
-          echo $(pwd)
           echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
-          echo "branch=$(git branch |grep ^*|cut -d ' ' -f 2|sed "s:/:-:")" >> $GITHUB_OUTPUT
+          echo "branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo master)" >> "$GITHUB_OUTPUT"
           echo "version=$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')" >> "$GITHUB_OUTPUT"
-          # To distinguish master and rel/1.0 branches, add temporary variables
-          echo "matrix_version=$(echo ${{ matrix.iotdb_version }} | sed "s:/::")" >> "$GITHUB_OUTPUT"
 
-          # boost
-          # echo "boost_include_dir=${{ github.workspace }}\boost_1_87_0\boost_1_87_0" >> "$GITHUB_OUTPUT"
-          # echo "boost_library_dir=${{ github.workspace }}\boost_1_87_0\boost_1_87_0\stage\lib" >> "$GITHUB_OUTPUT"
-
-          echo "cmake_url=https://github.com/Kitware/CMake/releases/download/v3.23.1/cmake-3.23.1-windows-x86_64.zip" >> "$GITHUB_OUTPUT"
-
-          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
-            echo "server_dir=iotdb-core/datanode" >> "$GITHUB_OUTPUT"
-            echo "cpp_dir=iotdb-client\client-cpp" >> "$GITHUB_OUTPUT"
-            echo "cmake_root_dir=${{ github.workspace }}\iotdb\iotdb-client\compile-tools\thrift\target\cmake-3.23.1-windows-x86_64" >> "$GITHUB_OUTPUT"
-          fi
-# build client-cpp
-      - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
-        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version == 'master' }}
-        shell: cmd
-        run: |
-          cd ${{ github.workspace }}\iotdb
-          set Path=%Path%;${{ github.workspace }}\win_flex_bison
-          set Path=${{ github.workspace }}\apache-maven-${{ matrix.maven_version }}-bin\apache-maven-${{ matrix.maven_version }}\bin;%Path%
-          set
-          mvn clean package -P with-cpp -pl ${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests
-#      - name: Build client-cpp on ${{ matrix.iotdb_version }} branch
-#        if: ${{ matrix.os == 'windows-2022' && matrix.iotdb_version != 'master'  }}
-#        shell: cmd
-#        run: |
-#          cd ${{ github.workspace }}\iotdb
-#          set Path=%Path%;${{ github.workspace }}\win_flex_bison
-#          set
-#          mvn package -Dcmake.generator="Visual Studio 17 2022" -P compile-cpp -pl ${{ steps.iotdb-info.outputs.server_dir }},${{ steps.iotdb-info.outputs.cpp_dir }},example\client-cpp-example -am -DskipTests -Dboost.include.dir="${{ steps.iotdb-info.outputs.boost_include_dir }}" -Dboost.library.dir="${{ steps.iotdb-info.outputs.boost_library_dir }}" -Dcmake.url="${{ steps.iotdb-info.outputs.cmake_url }}" -Dcmake.root.dir="${{ steps.iotdb-info.outputs.cmake_root_dir }}"
-# move client-cpp file to workspace
-      - name: Move client-cpp file to workspace
-        shell: cmd
-        run: |
-          echo "dir ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target"
-          dir ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target
-          echo "move ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip ${{ github.workspace }}\apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
-          move ${{ github.workspace }}\iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target\client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-windows-x86_64.zip ${{ github.workspace }}\apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          echo "dir ${{ github.workspace }}"
-          dir ${{ github.workspace }}
-# Comcpress client-cpp-example
-      - name: Comcpress client-cpp-example
+      - name: Build client-cpp on master branch
         shell: bash
         run: |
-          cd iotdb/example/client-cpp-example/target/
-          echo $(pwd)
-          echo "7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-${{ matrix.os }}-x86_64.zip *"
-          7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-${{ matrix.os }}-x86_64.zip *
-# move zip to upload folder
-      - name: Move zip to upload folder
-        shell: cmd
-        run: |
-          echo "dir iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target"
-          dir iotdb\${{ steps.iotdb-info.outputs.cpp_dir }}\target
-          echo "dir iotdb\example\client-cpp-example\target"
-          dir iotdb\example\client-cpp-example\target
+          cd "$GITHUB_WORKSPACE/iotdb"
+          ./mvnw clean package -P with-cpp -pl iotdb-client/client-cpp -am -DskipTests \
+            -Dspotless.skip=true \
+            -Dclient.cpp.package.classifier=windows-x86_64-msvc14.3
 
-          echo "move client-cpp to upload folder"
-          move ${{ github.workspace }}\apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip upload\apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip 
-          echo "move client-cpp-example to upload folder"
-          move iotdb\example\client-cpp-example\target\client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-${{ matrix.os }}-x86_64.zip upload\apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          echo "dir upload"
-          dir upload
-# upload
-      - name: Upload cliet-cpp on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }} on ${{ matrix.os }}
+      - name: Move client-cpp file to upload folder
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE/iotdb"
+          shopt -s nullglob
+          zips=(iotdb-client/client-cpp/target/iotdb-session-cpp-*-windows-x86_64-msvc14.3.zip)
+          if [ "${#zips[@]}" -ne 1 ]; then
+            echo "expected exactly one package zip, got: ${zips[*]:-(none)}"
+            exit 1
+          fi
+          base="apache-iotdb-session-cpp-x86_64-windows-2022-master-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17"
+          mv "${zips[0]}" "$GITHUB_WORKSPACE/upload/${base}.zip"
+          if [ -f "${zips[0]}.sha512" ]; then
+            mv "${zips[0]}.sha512" "$GITHUB_WORKSPACE/upload/${base}.zip.sha512"
+          fi
+          ls -l "$GITHUB_WORKSPACE/upload"
+
+      - name: Upload client-cpp on master branch using 17 on windows-2022
         uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -179,149 +128,205 @@ jobs:
           name: ${{ needs.collect.outputs.date }} apache iotdb
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: "upload/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,upload/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
+          artifacts: "upload/apache-iotdb-session-cpp-x86_64-windows-2022-master-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.zip,upload/apache-iotdb-session-cpp-x86_64-windows-2022-master-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.zip.sha512"
 #
 #----end----
+
 #----start----
-  build-in-linux:
+# 每天用 apache/iotdb 最新的 release tag（v* 稳定版本）打包一份
+# c++ iotdb-session windows 客户端。
+  build-latest-tag-win:
     needs: [ collect,create-release ]
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        iotdb_version: [ master ]
-        java_version: [ 11,17 ]
-        maven_version: [ '3.9.11' ]
-        os: [ ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-2022
     steps:
-      - name: Set java ${{ matrix.java_version }}
-        uses: actions/setup-java@v3
+      - name: Resolve latest stable release tag
+        id: resolve-tag
+        shell: bash
+        run: |
+          latest_tag=$(git ls-remote --tags --refs https://github.com/apache/iotdb.git \
+            | awk -F/ '{print $NF}' \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -V | tail -n1)
+          if [ -z "${latest_tag}" ]; then
+            echo "no stable v* tag found" >&2
+            exit 1
+          fi
+          echo "latest_tag=${latest_tag}"
+          echo "latest_tag=${latest_tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Set java 17
+        uses: actions/setup-java@v5
         with:
-          java-version: ${{ matrix.java_version }}
-          distribution: 'zulu'
-      - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.11.0
-        with:
-          java-version: ${{ matrix.java_version }}
-          maven-version: ${{ matrix.maven_version }}
-      - name: Checkout apache/iotdb
-        uses: actions/checkout@v4
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: Install C++ dependencies (Windows)
+        shell: pwsh
+        run: |
+          choco install winflexbison3 -y --no-progress
+          choco install boost-msvc-14.3 -y --no-progress
+          if (-not (Test-Path 'C:\local')) {
+            New-Item -ItemType Directory -Path 'C:\local' -Force | Out-Null
+          }
+          $boostDir = Get-ChildItem -Path 'C:\local\' -Filter 'boost_*' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $boostDir) {
+            throw "Boost not found under C:\local after installing boost-msvc-14.3"
+          }
+          echo $boostDir.FullName >> $env:GITHUB_PATH
+          # 固定 OpenSSL 3.x：choco 的 openssl 现在是 4.0，会删掉 thrift 仍在使用的
+          # legacy TLS-method API，导致链接失败。
+          $sslZip = "$env:RUNNER_TEMP\openssl-3.5.3.zip"
+          $sslDir = "$env:RUNNER_TEMP\openssl-3"
+          curl.exe -L --fail --retry 3 -o $sslZip 'https://download.firedaemon.com/FireDaemon-OpenSSL/openssl-3.5.3.zip'
+          Expand-Archive -Path $sslZip -DestinationPath $sslDir -Force
+          $sslPath = (Get-ChildItem $sslDir -Recurse -Directory -Filter 'x64' | Select-Object -First 1).FullName
+          if (-not $sslPath) { throw "OpenSSL x64 dir not found under $sslDir" }
+          echo "$sslPath\bin" >> $env:GITHUB_PATH
+          echo "OPENSSL_ROOT_DIR=$sslPath" >> $env:GITHUB_ENV
+
+      - name: Checkout apache/iotdb at latest tag
+        uses: actions/checkout@v5
         with:
           path: iotdb
           repository: 'apache/iotdb'
-          ref: ${{ matrix.iotdb_version }}
+          ref: ${{ steps.resolve-tag.outputs.latest_tag }}
+          fetch-depth: 0
+
+      - name: Collect IoTDB info
+        id: iotdb-info
+        shell: bash
+        run: |
+          mkdir -p upload
+          cd iotdb
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')" >> "$GITHUB_OUTPUT"
+
+      - name: Build client-cpp on ${{ steps.resolve-tag.outputs.latest_tag }} tag
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE/iotdb"
+          ./mvnw clean package -P with-cpp -pl iotdb-client/client-cpp -am -DskipTests \
+            -Dspotless.skip=true \
+            -Dclient.cpp.package.classifier=windows-x86_64-msvc14.3
+
+      - name: Move client-cpp file to upload folder
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE/iotdb"
+          shopt -s nullglob
+          zips=(iotdb-client/client-cpp/target/iotdb-session-cpp-*-windows-x86_64-msvc14.3.zip)
+          if [ "${#zips[@]}" -ne 1 ]; then
+            echo "expected exactly one package zip, got: ${zips[*]:-(none)}"
+            exit 1
+          fi
+          base="apache-iotdb-session-cpp-x86_64-windows-2022-${{ steps.resolve-tag.outputs.latest_tag }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17"
+          mv "${zips[0]}" "$GITHUB_WORKSPACE/upload/${base}.zip"
+          if [ -f "${zips[0]}.sha512" ]; then
+            mv "${zips[0]}.sha512" "$GITHUB_WORKSPACE/upload/${base}.zip.sha512"
+          fi
+          ls -l "$GITHUB_WORKSPACE/upload"
+
+      - name: Upload client-cpp on ${{ steps.resolve-tag.outputs.latest_tag }} tag using 17 on windows-2022
+        uses: ncipollo/release-action@v1.20.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.collect.outputs.date }}-apache-iotdb
+          prerelease: false
+          draft: false
+          body: ${{ needs.collect.outputs.date }} apache iotdb
+          name: ${{ needs.collect.outputs.date }} apache iotdb
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "upload/apache-iotdb-session-cpp-x86_64-windows-2022-${{ steps.resolve-tag.outputs.latest_tag }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.zip,upload/apache-iotdb-session-cpp-x86_64-windows-2022-${{ steps.resolve-tag.outputs.latest_tag }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.zip.sha512"
+#----end----
+
+#----start----
+  build-in-linux:
+    needs: [ collect,create-release ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set java 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: 'temurin'
+      - name: Checkout apache/iotdb
+        uses: actions/checkout@v5
+        with:
+          path: iotdb
+          repository: 'apache/iotdb'
+          ref: master
           fetch-depth: 0
 #collect-iotdb
       - name: Collect IoTDB info
         id: iotdb-info
         run: |
-          sudo apt-get install python3-pip libboost-all-dev
-          pip3 install setuptools 
+          sudo apt-get install -y python3-pip libboost-all-dev
+          pip3 install setuptools
           pip3 install wheel
           pip3 install build
-          
+
           cd ${{ github.workspace }}/iotdb
           echo "commit=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "branch=$(git branch |grep ^*|cut -d ' ' -f 2|sed "s:/:-:")" >> $GITHUB_OUTPUT
+          echo "branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo master)" >> $GITHUB_OUTPUT
           echo "version=$(cat pom.xml | grep -e '^    <version>' | sed 's# ##g' | sed 's#<version>##g' | sed 's#</version>##g')" >> $GITHUB_OUTPUT
-          # To distinguish master and rel/1.0 branches, add temporary variables
-          echo "matrix_version=$(echo ${{ matrix.iotdb_version }} | sed "s:/::")" >> $GITHUB_OUTPUT
-          
-          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
-            echo "client_jdbc_module=iotdb-client/jdbc" >> "$GITHUB_OUTPUT"
-            echo "client_py_module=iotdb-client/client-py" >> "$GITHUB_OUTPUT"
-            echo "client_cpp_module=iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
-          # elif [ "${{ matrix.iotdb_version }}" = "rel/1.2" ]; then
-            # echo "client_jdbc_module=iotdb-client/jdbc" >> "$GITHUB_OUTPUT"
-            # echo "client_py_module=iotdb-client/client-py" >> "$GITHUB_OUTPUT"
-            # echo "client_cpp_module=iotdb-client/client-cpp" >> "$GITHUB_OUTPUT"
-          # else
-            # echo "client_jdbc_module=jdbc" >> "$GITHUB_OUTPUT"
-            # echo "client_py_module=client-py" >> "$GITHUB_OUTPUT"
-            # echo "client_cpp_module=client-cpp" >> "$GITHUB_OUTPUT"
-          fi
-            echo "client_cpp_example_module=example/client-cpp-example" >> "$GITHUB_OUTPUT"
 #
 #build-iotdb
-      - name: Only build iotdb-client-cpp in ${{ matrix.iotdb_version }} on ${{ matrix.os }}
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Only build iotdb-client-cpp in master on ubuntu-latest
         shell: bash
         run: |
           cd ${{ github.workspace }}/iotdb
-          echo "mvn clean package -P with-cpp -pl iotdb-client/client-cpp -am -Diotdb-tools-thrift.version=0.14.1.1-old-glibc-SNAPSHOT"
-          mvn clean package -P with-cpp -pl iotdb-client/client-cpp -am -Diotdb-tools-thrift.version=0.14.1.1-old-glibc-SNAPSHOT
+          ./mvnw clean package -P with-cpp -pl iotdb-client/client-cpp -am -DskipTests -Dspotless.skip=true
 
-          mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_cpp_module }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-linux-x86_64.zip ${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-
-          ls -l ${{ github.workspace }}
-           
-          du -sh ${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          pwd ${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-
-      - name: Build iotdb in ${{ matrix.iotdb_version }} on ${{ matrix.os }}
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        shell: bash
-        run: |
-          cd ${{ github.workspace }}/iotdb
-          mvn clean
-          mvn install -pl iotdb-api/udf-api -DskipTests -P get-jar-with-dependencies
-
-          if [ "${{ matrix.iotdb_version }}" = "master" ]; then
-            echo "mvn package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},${{ steps.iotdb-info.outputs.client_cpp_module }},${{ steps.iotdb-info.outputs.client_cpp_example_module }},distribution -P get-jar-with-dependencies,with-cpp"
-            mvn package -DskipTests -am -pl library-udf,${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},${{ steps.iotdb-info.outputs.client_cpp_module }},${{ steps.iotdb-info.outputs.client_cpp_example_module }},distribution -P get-jar-with-dependencies,with-cpp
-          # else
-            # mvn package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},${{ steps.iotdb-info.outputs.client_cpp_module }},${{ steps.iotdb-info.outputs.client_cpp_example_module }},distribution -P get-jar-with-dependencies,compile-grafana-plugin,compile-cpp
-            # mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-grafana-plugin-bin.zip ${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
-            # ls -l ${{ github.workspace }}
-            # pwd ${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
-            # du -s ${{ github.workspace }}/apache-iotdb-grafana-plugin-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}.zip
+          shopt -s nullglob
+          cpp_zips=(iotdb-client/client-cpp/target/iotdb-session-cpp-*-linux-x86_64-glibc2.28.zip)
+          if [ "${#cpp_zips[@]}" -ne 1 ]; then
+            echo "expected exactly one client-cpp zip, got: ${cpp_zips[*]:-(none)}"
+            exit 1
           fi
-          
-          cd ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}
-          bash release.sh
-          # rm -rf dist
-          # python3 setup.py bdist_wheel --universal
+          base="apache-iotdb-session-cpp-x86_64-ubuntu-latest-master-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17"
+          mv "${cpp_zips[0]}" "${{ github.workspace }}/${base}.zip"
+          if [ -f "${cpp_zips[0]}.sha512" ]; then
+            mv "${cpp_zips[0]}.sha512" "${{ github.workspace }}/${base}.zip.sha512"
+          fi
+          ls -l ${{ github.workspace }}
+
+      - name: Build iotdb in master on ubuntu-latest
+        shell: bash
+        run: |
+          cd ${{ github.workspace }}/iotdb
+          ./mvnw clean
+          ./mvnw install -pl iotdb-api/udf-api -DskipTests -Dspotless.skip=true -P get-jar-with-dependencies
+
+          ./mvnw package -DskipTests -Dspotless.skip=true -am -pl library-udf,iotdb-client/jdbc,iotdb-client/client-py,distribution -P get-jar-with-dependencies
+
+          cd ${{ github.workspace }}/iotdb/iotdb-client/client-py
+          # 等价于 release.sh，但使用 ./mvnw（master 需要 maven 3.9，runner 自带版本过旧）
+          rm -Rf build
+          rm -Rf dist
+          rm -Rf iotdb_session.egg_info
+          rm -f pyproject.toml
+          # (Re-)build generated code
+          (cd ../.. && ./mvnw clean package -pl iotdb-client/client-py -am -DskipTests -Dspotless.skip=true)
+          python3 -m build
           cd dist
           export client_py_whl_name=$(ls apache_iotdb-*.whl)
-          
-          cd ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_cpp_example_module }}/target/
-          echo $(pwd)
-          echo "7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-${{ matrix.os }}-x86_64.zip *"
-          7z a client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-${{ matrix.os }}-x86_64.zip *
-          cd ${{ github.workspace }}
 
-          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-library-udf-bin.zip ${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${{ steps.iotdb-info.outputs.version }}-all-bin.zip ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_jdbc_module }}/target/iotdb-jdbc-${{ steps.iotdb-info.outputs.version }}-jar-with-dependencies.jar ${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.jar
-          mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_py_module }}/dist/${client_py_whl_name} ${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.whl
-          mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_cpp_module }}/target/client-cpp-${{ steps.iotdb-info.outputs.version }}-cpp-linux-x86_64.zip ${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          mv ${{ github.workspace }}/iotdb/${{ steps.iotdb-info.outputs.client_cpp_example_module }}/target/client-cpp-example-${{ steps.iotdb-info.outputs.version }}-cpp-${{ matrix.os }}-x86_64.zip ${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
+          cd ${{ github.workspace }}
+          base="apache-iotdb"
+          branch=${{ steps.iotdb-info.outputs.branch }}
+          version=${{ steps.iotdb-info.outputs.version }}
+          commit=${{ steps.iotdb-info.outputs.commit }}
+
+          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${version}-library-udf-bin.zip ${{ github.workspace }}/${base}-library-udf-bin-${branch}-${version}-${commit}-java17.zip
+          mv ${{ github.workspace }}/iotdb/distribution/target/apache-iotdb-${version}-all-bin.zip ${{ github.workspace }}/${base}-all-bin-${branch}-${version}-${commit}-java17.zip
+          mv ${{ github.workspace }}/iotdb/iotdb-client/jdbc/target/iotdb-jdbc-${version}-jar-with-dependencies.jar ${{ github.workspace }}/${base}-jdbc-jar-with-dependencies-${branch}-${version}-${commit}-java17.jar
+          mv ${{ github.workspace }}/iotdb/iotdb-client/client-py/dist/${client_py_whl_name} ${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${branch}-${version}-${commit}-java17.whl
 
           ls -l ${{ github.workspace }}
-          
-          pwd ${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          du -sh ${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          
-          pwd ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          du -s ${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          
-          pwd ${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.jar
-          du -s ${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.jar
-          
-          pwd ${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.whl
-          du -s ${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.whl
-          
-          du -sh ${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          pwd ${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          pwd ${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-          du -sh ${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-# 20231219,compile grafana module will fail, so it will no longer be compiled
-# mvn clean package -DskipTests -am -pl ${{ steps.iotdb-info.outputs.client_jdbc_module }},${{ steps.iotdb-info.outputs.client_py_module }},distribution -P get-jar-with-dependencies,with-grafana-plugin
 #
 #upload on master
-      - name: Upload distribution on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }}
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.iotdb_version == 'master' }}
+      - name: Upload distribution on master using 17
         uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -332,9 +337,8 @@ jobs:
           name: ${{ needs.collect.outputs.date }} apache iotdb
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: "${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.jar,${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.whl,${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-client-cpp-example-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip,${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
-      - name: Only upload iotdb-client-cpp on ${{ steps.iotdb-info.outputs.branch }} using ${{ matrix.java_version }}
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.iotdb_version == 'master' }}
+          artifacts: "${{ github.workspace }}/apache-iotdb-all-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.zip,${{ github.workspace }}/apache-iotdb-jdbc-jar-with-dependencies-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.jar,${{ github.workspace }}/apache_iotdb-py2.py3-none-any-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.whl,${{ github.workspace }}/apache-iotdb-library-udf-bin-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.zip"
+      - name: Only upload iotdb-client-cpp on master using 17
         uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -345,30 +349,24 @@ jobs:
           name: ${{ needs.collect.outputs.date }} apache iotdb
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: "${{ github.workspace }}/apache-iotdb-client-cpp-x86_64-${{ matrix.os }}-${{ steps.iotdb-info.outputs.branch }}-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java${{ matrix.java_version }}.zip"
+          artifacts: "${{ github.workspace }}/apache-iotdb-session-cpp-x86_64-ubuntu-latest-master-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.zip,${{ github.workspace }}/apache-iotdb-session-cpp-x86_64-ubuntu-latest-master-${{ steps.iotdb-info.outputs.version }}-${{ steps.iotdb-info.outputs.commit }}-java17.zip.sha512"
 
 #----end----
 
 #----start----
   build-benchmark:
     needs: [ collect,create-release ]
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        java_version: [ 11 ]
-#        release_db: [ iotdb-1.3,influxdb,influxdb-2.0,timescaledb,timescaledb-cluster,tdengine-3.0,iotdb-2.0 ]
     runs-on: ubuntu-latest
     steps:
 # set java
-      - name: Set java ${{ matrix.java_version }}
-        uses: actions/setup-java@v3
+      - name: Set java 17
+        uses: actions/setup-java@v5
         with:
-          java-version: ${{ matrix.java_version }}
+          java-version: 17
           distribution: 'zulu'
 # clone iot-benchmark
       - name: Checkout iot-benchmark
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: iot-benchmark
           repository: 'thulab/iot-benchmark'
@@ -387,14 +385,11 @@ jobs:
       - name: Build benchmark
         run: |
           cd ${{ github.workspace }}/iot-benchmark
-          mvn clean package -DskipTests -am -pl core,${{ steps.benchmark-info.outputs.release_db_comma }}
-          for i in ${{ steps.benchmark-info.outputs.release_db_space }}; do mv ${{ github.workspace }}/iot-benchmark/${i}/target/iot-benchmark-$i.zip ${{ github.workspace }}/iot-benchmark-$i-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip; done
+          mvn clean package -DskipTests -Dspotless.skip=true -am -pl core,${{ steps.benchmark-info.outputs.release_db_comma }}
+          for i in ${{ steps.benchmark-info.outputs.release_db_space }}; do mv ${{ github.workspace }}/iot-benchmark/${i}/target/iot-benchmark-$i.zip ${{ github.workspace }}/iot-benchmark-$i-${{ steps.benchmark-info.outputs.commit }}-java17.zip; done
           ls -l ${{ github.workspace }}
-#          mv ${{ github.workspace }}/iot-benchmark/${{ matrix.release_db }}/target/iot-benchmark-${{ matrix.release_db }}.zip ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-#          pwd ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip
-#          du -s ${{ github.workspace }}/iot-benchmark-${{ matrix.release_db }}-${{ steps.benchmark-info.outputs.commit }}-java${{ matrix.java_version }}.zip
 #---upload
-      - name: Upload iot-benchmark-*.zip using ${{ matrix.java_version }}
+      - name: Upload iot-benchmark-*.zip using 17
         uses: ncipollo/release-action@v1.20.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -405,6 +400,5 @@ jobs:
           name: ${{ needs.collect.outputs.date }} apache iotdb
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: "${{ github.workspace }}/iot-benchmark-*-java${{ matrix.java_version }}.zip"
+          artifacts: "${{ github.workspace }}/iot-benchmark-*-java17.zip"
 #----end----
-
